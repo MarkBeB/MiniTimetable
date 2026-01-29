@@ -1,0 +1,28 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.tud.minitimetable</groupId>
+	<artifactId>org.tud.minitimetable</artifactId>
+	<version>0.0.1</version>
+	<properties>
+		<java.version>21</java.version>
+		<maven.compiler.target>21</maven.compiler.target>
+		<maven.compiler.source>21</maven.compiler.source>
+		<fastjson.version>2.0.60</fastjson.version>
+		<maven.compiler.proc>full</maven.compiler.proc>
+	</properties>
+	<dependencies>
+		<dependency>
+    		<groupId>com.alibaba.fastjson2</groupId>
+    		<artifactId>fastjson2</artifactId>
+    		<version>${fastjson.version}</version>
+		</dependency>
+	</dependencies>
+	<name>Mini Timetable</name>
+	<url>https://github.com/MarkBeB/MiniTimetable</url>
+	<description>Thesis project</description>
+	<organization>
+		<name>TU Darmstadt</name>
+	</organization>
+</project>
