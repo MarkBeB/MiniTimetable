@@ -1,17 +1,9 @@
 package org.tud.minitimetable;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 
-import org.tud.minitimetable.model.IhtcModel;
-import org.tud.minitimetable.util.FileWriter;
-import org.tud.minitimetable.util.Ihtc2DznModelWriter;
-import org.tud.minitimetable.util.Json2IhtcModelParser;
-
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
+import org.tud.minitimetable.util.ModelManager;
 
 public class Main {
 
@@ -37,41 +29,31 @@ public class Main {
 		return filePath;
 	}
 
-	public static void mainX(String[] args) throws IOException {
-		IhtcFromJsonReader inputReader = new IhtcFromJsonReader(FileConfig.getResourceFolder().resolve("ihtc"));
-		var model = inputReader.readModel("i01");
-		// DO preprocessing here
-
-		MiniZincGenerator miniGenerator = new MiniZincGenerator();
-	}
-
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		var userDirectory = getUserDirectory();
 		var miniZincExe = userDirectory.resolve(miniZincLocation).normalize();
 		var resourceDirectory = userDirectory.resolve(resourceFolder).normalize();
-		var dataFile = resourceDirectory.resolve("ihtc").resolve("i01.json");
+//		var modelFile = resourceDirectory.resolve("ihtc").resolve("i01.json");
+//
+//		InputModelReader modelReader = new InputModelReader();
+//		IhtcModel model = modelReader.read(modelFile);
+//
+//		var dznFile = changeFileExtension(modelFile, ".dzn");
+//		OutputModelWriter modelWriter = new OutputModelWriter();
+//		modelWriter.write(model, dznFile);
+//
+//		System.out.println("DONE");
+//		System.out.println("File created: " + dznFile);
 
-//		Jsonb jsonb = Jsonb.instance();
-//		JsonType<IhtcModel> customerType = jsonb.type(IhtcModel.class);
+		Path modelFolder = resourceDirectory.resolve("ihtc");
+		Path outputFolder = resourceDirectory.resolve("out");
 
-		try {
-			Json2IhtcModelParser modelReader = new Json2IhtcModelParser();
-			Ihtc2DznModelWriter modelWriter = new Ihtc2DznModelWriter();
+		ModelManager manager = new ModelManager(modelFolder, outputFolder);
+		manager.loadModel("i01");
+		manager.writeDZN();
 
-			var data = Files.readAllBytes(dataFile);
-			IhtcModel model = modelReader.read((JSONObject) JSON.parse(data));
-
-			var newDatafile = changeFileExtension(dataFile, ".dzn");
-			try (var buffer = Files.newBufferedWriter(newDatafile, StandardOpenOption.CREATE,
-					StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
-					var writer = new FileWriter(buffer)) {
-
-				modelWriter.write(model, writer);
-			}
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		System.out.println("DONE");
+		System.out.println("File created: " + manager.getModelOutputPath());
 	}
 
 }

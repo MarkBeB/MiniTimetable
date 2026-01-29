@@ -7,6 +7,9 @@ public final class Room {
 	public String id;
 	public int capacity;
 
+	public Occupant[] _assignedOccupants;
+	public int _maxStayOccupant;
+
 	public int[] getAvailableCapacity() {
 		var availableCapacity = new int[root.days];
 		Arrays.fill(availableCapacity, capacity);

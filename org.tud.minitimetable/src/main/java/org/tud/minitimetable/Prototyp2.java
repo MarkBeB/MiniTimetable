@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.tud.minitimetable.model.IhtcModel;
 import org.tud.minitimetable.util.FileWriter;
+import org.tud.minitimetable.util.ModelManager;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
@@ -36,7 +37,7 @@ public class Prototyp2 {
 		private InputStream input;
 
 		public MZOutputParser(InputStream mzOutput) {
-			this.input = Objects.requireNonNull(mzOutput);
+			input = Objects.requireNonNull(mzOutput);
 		}
 
 		@Override
@@ -80,9 +81,13 @@ public class Prototyp2 {
 		return getResourceDirectory().resolve("IHTP_Validator_win.exe");
 	}
 
-	private static void transformInput() {
+	private static void transformInput() throws IOException {
 		Path modelFolder = getResourceDirectory().resolve("ihtc");
 		Path outputFolder = getResourceDirectory().resolve("out");
+
+		ModelManager manager = new ModelManager(modelFolder, outputFolder);
+		manager.loadModel("i01");
+		manager.writeDZN();
 
 	}
 

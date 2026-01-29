@@ -15,10 +15,13 @@ import org.tud.minitimetable.model.WorkShift;
 
 public class Ihtc2DznModelWriter {
 
-	private IhtcModel model;
+	private static String nullable(Object nullable) {
+		if (nullable == null)
+			return "<>";
+		return nullable.toString();
+	}
 
 	public synchronized void write(IhtcModel model, Writer writer) throws IOException {
-		this.model = model;
 
 		{
 			writer.indentation().write("Weights").write(" = ").write("(").newLine().increaseIndentation();
@@ -197,6 +200,10 @@ public class Ihtc2DznModelWriter {
 				.write("availableCapacity").write(": ").write("[0:") //
 				.write(obj.getAvailableCapacity(), (value, hasMore) -> {
 					writer.write(value).write(", ", hasMore);
+				}).write("]").write(", ") //
+				.write("fixGenderAssignment").write(": ").write("[0:") //
+				.write(obj.getGenderAssignment(), (value, hasMore) -> {
+					writer.write(nullable(value)).write(", ", hasMore);
 				}).write("]") //
 				.write(")");
 	}
