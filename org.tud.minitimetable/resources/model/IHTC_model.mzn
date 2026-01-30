@@ -24,6 +24,16 @@ type PenalityType = record(
   var 0..maxPenalityValue: unscheduledOptional,
 );
 
+var int: score = 
+    Penalties.roomMixedAge
+  + Penalties.roomNurseSkill
+  + Penalties.continuityOfCare
+  + Penalties.nurseEccessiveWorkload
+  + Penalties.openOperatingTheater
+  + Penalties.surgeonTransfer
+  + Penalties.patientDelay
+  + Penalties.unscheduledOptional;
+
 
 type WorkShift = record(
   Day: day,
@@ -74,12 +84,14 @@ type RoomFixData = record(
   RoomId: id,
   int: capacity,
   array[Day] of int: availableCapacity,
+  array[Day] of opt Gender: fixGenderAssignment,
 );
-type RoomVarData = record(  
-  array[Day] of var 0..100: assignedPatients,
+type RoomVarData = record(
+  array[Day] of var 0..100: assignedPatients,  
   array[Day] of var opt Gender: assignedGender,
-  array[Day] of var set of PatientId: accommodatedPatientsPerDay,
   array[Day] of var int: agePenalty,
+  array[Day] of var opt AgeGroup: maxAgeGroup,
+  array[Day] of var opt AgeGroup: minAgeGroup,
 );
 type Room = RoomFixData ++ RoomVarData;
 
@@ -102,8 +114,8 @@ type PatientFixData = record (
   Gender: gender,
   AgeGroup: ageGroup,
   int: lengthOfStay,
-  Day: surgeryReleaseDay,
-  Day: surgeryDueDay,
+  Day: earliestPossibleAdmission,
+  Day: latestPossibleAdmission,
   int: surgeryDuration,
   SurgeonId: surgeonId,
   array[_] of RoomId: incompatibleRooms,
@@ -112,9 +124,13 @@ type PatientFixData = record (
 );
 type PatientVarData = record (
   var 0..maxDay: admissionDay,
+  var bool: isPostponed,
+  var bool: isAdmitted,
   var opt RoomId: assignedToRoom,
   var opt OperatingTheaterId: assignedOT,
+
   array[Day] of var opt RoomId: assignedRoom,
+  var 0..maxDay: admissionDelay,
 );
 type Patient = PatientFixData ++ PatientVarData;
 
@@ -134,14 +150,16 @@ enum OccupantId;
 
 int: skillLevels;
 set of int: SkillLevel = 0..skillLevels-1;
+% enum SkillLevel = _(0..skillLevels-1);
 % int: days;
 int: firstDay = 0;
 int: lastDay;
 int: maxDay;
 set of int: Day = 0..lastDay;
+% enum Day = _(firstDay..lastDay);
 
-enum RoomIdOrNotAssigned = C_room(RoomId) ++ {RoomNotAssigned};
-enum GenderOrNotAssigned = C_gender(Gender) ++ {GenderNotAssigned};
+enum RoomIdOrNotAssigned = {RoomNotAssigned} ++ C_room(RoomId);
+enum GenderOrNotAssigned = {GenderNotAssigned} ++ C_gender(Gender);
 
 
 
@@ -167,9 +185,10 @@ array[_] of Occupant: occupants ::output = array1d(OccupantId, occupantData);% [
 array[OperatingTheaterId] of OperatingTheater: operatingTheaters ::output = [operatingTheaterData[id] ++ operatingTheaterVar[id] | id in index_set(OperatingTheaterId)];
 array[RoomId] of Room: rooms ::output = [roomData[id] ++ roomVar[id] | id in index_set(RoomId)];
 
-var PenalityType: Penalties;
+int: NumberOfPatients = length(patientData);
+int: NumberOfOccupants = length(occupantData);
 
-var int: score = Penalties.unscheduledOptional + Penalties.roomMixedAge;
+var PenalityType: Penalties;
 
 output
 [ "score = \(score);\n\n"] ++
@@ -179,7 +198,13 @@ output
 [ "];\n\n" ] ++
 
 [ "rooms = [\n"] ++
-[ "\t\(r) \n" | r in rooms] ++
+[ "\t(\n" ++ 
+  "\t\tmaxAgeGroup: \(r.maxAgeGroup)\n" ++
+  "\t\tminAgeGroup: \(r.minAgeGroup)\n" ++
+  "\t\tassignedPatients: \(r.assignedPatients)\n" ++
+  "\t)\n" | r in rooms] ++
+
+%[ "\t\(r) \n" | r in rooms] ++
 [ "];\n\n" ] ++ 
 
 [ "nurses = [\n" ] ++

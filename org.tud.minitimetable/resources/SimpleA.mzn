@@ -1,4 +1,4 @@
-include "IHTC_model.mzn"; 
+include "model/IHTC_model.mzn";
 
 %PAS
 
@@ -55,9 +55,9 @@ constraint forall(room in rooms, day in Day)(
 % surgeryDueDay is the latest day a patient must be admissed to a room, not all patients have a must day.
 constraint forall(patient in patients)(
   if patient.mandatory then
-    patient.surgeryReleaseDay <= patient.admissionDay /\ patient.admissionDay <= patient.surgeryDueDay
+    patient.earliestPossibleAdmission <= patient.admissionDay /\ patient.admissionDay <= patient.latestPossibleAdmission
   else
-    patient.surgeryReleaseDay <= patient.admissionDay /\ patient.admissionDay <= lastDay + 1
+    patient.earliestPossibleAdmission <= patient.admissionDay /\ patient.admissionDay <= lastDay + 1
   endif
 );
 

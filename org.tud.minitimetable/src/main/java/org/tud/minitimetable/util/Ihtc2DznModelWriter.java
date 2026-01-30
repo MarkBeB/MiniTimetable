@@ -154,8 +154,10 @@ public class Ihtc2DznModelWriter {
 					writer.write(value).write(", ", hasMore);
 				}).write("]").write(",").newLine();
 		writer.indentation().write("mandatory").write(": ").write(obj.mandatory).write(", ").newLine();
-		writer.indentation().write("surgeryReleaseDay").write(": ").write(obj.surgeryReleaseDay).write(", ").newLine();
-		writer.indentation().write("surgeryDueDay").write(": ").write(obj.surgeryDueDay).write(", ").newLine();
+		writer.indentation().write("earliestPossibleAdmission").write(": ").write(obj.surgeryReleaseDay).write(", ")
+				.newLine();
+		writer.indentation().write("latestPossibleAdmission").write(": ").write(obj.surgeryDueDay).write(", ")
+				.newLine();
 		writer.indentation().write("surgeryDuration").write(": ").write(obj.surgeryDuration).write(", ").newLine();
 		writer.indentation().write("surgeonId").write(": ").write(obj.surgeonId).write(", ").newLine();
 		writer.indentation().write("incompatibleRooms").write(": ").write("[") //
