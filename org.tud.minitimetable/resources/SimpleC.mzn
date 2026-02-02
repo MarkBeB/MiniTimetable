@@ -16,10 +16,28 @@ include "model/constraints/H2.mzn";
 % PAS
 % H7 Room capacity: The number of patients that occupy a room per day cannot exceed the capacity of the room.
 %
-constraint forall(room in rooms, day in Day)(
-  room.assignedPatients[day] == sum(patient in patients where occurs(patient.assignedRoom[day]) /\ patient.assignedRoom[day] == room.id)(1) /\
-  room.assignedPatients[day] <= room.availableCapacity[day]
+
+function bool: isRoom(var Patient: patient) = true;
+constraint forall(patient in patients)(
+  trace("patient \(patient)", isRoom(patient))
 );
+
+%constraint forall(room in rooms, day in Day)(
+%  room.assignedPatients[day] == sum(patient in patients where isAdmittedToRoom(patient))(1) 
+%  /\ room.assignedPatients[day] <= room.availableCapacity[day]
+%);
+
+function int: calc(int: a, int: b) = a + b;
+function bool: notSame(int: a, int: b) = a != b;
+constraint forall(a in 0..5)(100 >= sum(b in 0..5 where notSame(a,b))(calc(a,b)));
+
+/*
+constraint forall(room in rooms, day in Day)(
+  room.assignedPatients[day] == sum(patient in patients where occurs(patient.assignedRoom[day]) /\ patient.assignedRoom[day] == room.id)(1) 
+%  /\ room.assignedPatients[day] <= room.availableCapacity[day]
+);
+*/
+
 
 % PAS
 % S1 Age groups: For each day of the decision horizon and for each room, the maximum difference between age groups of patients sharing the room should be minimized.
@@ -70,12 +88,7 @@ include "model/constraints/S1.mzn";
 % S6 Surgeon transfer: The number of different OTs a surgeon is as-signed to per working day should be minimized.
 %
 
-% Derived from competition rules.
-% H8 Room assignment: An admitted patient needs to be assigned to a room
-%
-constraint forall(patient in patients)(
-  patient.isAdmitted <-> patient.assignedToRoom != <>
-);
+
 
 % Global
 % H5 Mandatory versus optional patients: All mandatory patients must be admitted within the decision horizon, whereas optional pa-tients may be postponed to future periods.
@@ -92,6 +105,15 @@ include "model/constraints/H5-H6.mzn";
 %
 include "model/constraints/S7.mzn";
 
+% Derived from competition rules.
+% H8 Room assignment: An admitted patient needs to be assigned to a room
+%
+
+constraint forall(patient in patients)(
+  patient.isAdmitted <-> patient.assignedToRoom != <>
+);
+
+
 % Global
 % S8 Unscheduled patients: The number of optional patients who are not admitted within the current decision horizon should be minimized.
 %
@@ -100,6 +122,8 @@ include "model/constraints/S8.mzn";
 % Derived from competition rules.
 % H9 No Room Transfer: Each patient must remain in the same room for the entire duration of their stay
 %
+
+
 constraint forall(patient in patients where patient.isAdmitted)(
     forall(day in Day where patient.admissionDay <= day /\ day <= patient.admissionDay + patient.lengthOfStay)(
       patient.assignedRoom[day] == patient.assignedToRoom
@@ -107,8 +131,24 @@ constraint forall(patient in patients where patient.isAdmitted)(
 );
 
 
+/*
+constraint forall(patient in patients where patient.isAdmitted)(
+  forall(day in Day where patient.admissionDay <= day /\ day < patient.admissionDay + patient.lengthOfStay)(
+    if day == max(Day) then
+      patient.assignedRoom[day] != <>
+    else
+      patient.assignedRoom[day] != <> /\ patient.assignedRoom[day] == patient.assignedRoom[enum_next(day)]
+    endif
+  )
+);
+*/
+
+
 % Derived from competition rules.
 % H10 Surgery on admission day: Patients undergo surgery on the day of their admission
 %
 
 solve minimize score;
+
+include "model/OutConsoleFormat.mzn";
+% include "model/OutJsonFormat.mzn";

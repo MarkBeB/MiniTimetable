@@ -6,15 +6,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.ProcessBuilder.Redirect;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import org.tud.minitimetable.model.IhtcModel;
-import org.tud.minitimetable.util.FileWriter;
 import org.tud.minitimetable.util.ModelManager;
 
 import com.alibaba.fastjson2.JSON;
@@ -86,23 +82,20 @@ public class Prototyp2 {
 		Path outputFolder = getResourceDirectory().resolve("out");
 
 		ModelManager manager = new ModelManager(modelFolder, outputFolder);
-		manager.loadModel("i01");
-		manager.writeDZN();
+		manager.loadDataModel("i01");
+		manager.writeModelAsDZN();
 
 	}
 
 	public static void main(String[] args) throws IOException, InterruptedException {
-		Path constraintModel = getResourceDirectory().resolve("IHTC_model.mzn");
+		Path constraintModel = getResourceDirectory().resolve("model").resolve("IHTC_model.mzn");
 
-		String modelName = "i01";
-		Path modelFile = getResourceDirectory().resolve("ihtc").resolve(modelName + ".json");
-		IhtcModel model = null;// loadInputModel(modelFile);
+		Path modelFolder = getResourceDirectory().resolve("ihtc");
+		Path outputFolder = getResourceDirectory().resolve("out");
 
-		var miniZincDataFile = changeFileExtension(modelFile, ".dzn");
-		try (var buffer = Files.newBufferedWriter(miniZincDataFile, StandardOpenOption.CREATE, StandardOpenOption.WRITE,
-				StandardOpenOption.TRUNCATE_EXISTING); var writer = new FileWriter(buffer)) {
-			// model.toMiniZinc(writer);
-		}
+		ModelManager manager = new ModelManager(modelFolder, outputFolder);
+		manager.loadDataModel("i01");
+		manager.writeModelAsDZN();
 
 		ProcessBuilder processBuilder = new ProcessBuilder();
 		processBuilder.directory(getUserDirectory().resolve("mini").toFile());
@@ -124,7 +117,7 @@ public class Prototyp2 {
 
 //		System.out.println("--model \"" + ".\\" + sM + "\"");
 		processBuilder.command().add("\"" + constraintModel.toString() + "\"");
-		processBuilder.command().add("\"" + miniZincDataFile.toString() + "\"");
+		processBuilder.command().add("\"" + manager.getModelOutputPath().toString() + "\"");
 //		processBuilder.command().add("--help");
 		processBuilder.command().add("--json-stream");
 
@@ -145,6 +138,7 @@ public class Prototyp2 {
 				// json output
 
 				var json = (JSONObject) JSON.parse(lastLine);
+				System.out.println(json);
 				if ("solution".equals(json.getString("type"))) {
 					var output = ((JSONObject) json.get("output")).getString("default");
 					var solution = new MZSolution(System.currentTimeMillis(), output);

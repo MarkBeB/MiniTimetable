@@ -49,8 +49,8 @@ public class Main {
 		Path outputFolder = resourceDirectory.resolve("out");
 
 		ModelManager manager = new ModelManager(modelFolder, outputFolder);
-		manager.loadModel("i01");
-		manager.writeDZN();
+		manager.loadDataModel("i01");
+		manager.writeModelAsDZN();
 
 		System.out.println("DONE");
 		System.out.println("File created: " + manager.getModelOutputPath());

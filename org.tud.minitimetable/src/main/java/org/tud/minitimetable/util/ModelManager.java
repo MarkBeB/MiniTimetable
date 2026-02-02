@@ -22,7 +22,7 @@ public class ModelManager {
 		_generalOutputFolder = Objects.requireNonNull(generalOutputFolder, "generalOutputFolder");
 	}
 
-	public void loadModel(String fileName) throws IOException {
+	public void loadDataModel(String fileName) throws IOException {
 		this.loadModel(Path.of(fileName));
 	}
 
@@ -48,7 +48,7 @@ public class ModelManager {
 		_model = reader.read(_inputModelPath);
 	}
 
-	public void writeDZN() throws IOException {
+	public void writeModelAsDZN() throws IOException {
 		var fullOutputPath = _generalOutputFolder.resolve(_generalInputFolder.relativize(_inputModelPath));
 		_outputModelPath = changeFileExtension(fullOutputPath, ".dzn");
 

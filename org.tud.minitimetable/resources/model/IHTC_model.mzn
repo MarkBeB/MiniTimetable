@@ -190,24 +190,10 @@ int: NumberOfOccupants = length(occupantData);
 
 var PenalityType: Penalties;
 
-output
-[ "score = \(score);\n\n"] ++
+% Always valid constraints
+constraint forall(patient in patients)(
+  patient.isPostponed <-> not patient.isAdmitted
+);
 
-[ "patients = [\n" ] ++
-[ "\t\(p) \n" | p in patientVar] ++
-[ "];\n\n" ] ++
-
-[ "rooms = [\n"] ++
-[ "\t(\n" ++ 
-  "\t\tmaxAgeGroup: \(r.maxAgeGroup)\n" ++
-  "\t\tminAgeGroup: \(r.minAgeGroup)\n" ++
-  "\t\tassignedPatients: \(r.assignedPatients)\n" ++
-  "\t)\n" | r in rooms] ++
-
-%[ "\t\(r) \n" | r in rooms] ++
-[ "];\n\n" ] ++ 
-
-[ "nurses = [\n" ] ++
-[ "\t(\n \(n) \n" | n in nurseVar] ++
-[ "];\n\n" ] ++
-[ "\(Penalties)"]
+% include "OutConsoleFormat.mzn";
+% include "OutJsonFormat.mzn";

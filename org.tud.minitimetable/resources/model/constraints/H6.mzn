@@ -9,6 +9,6 @@ constraint forall(patient in patients)(
   if patient.mandatory then
     patient.earliestPossibleAdmission <= patient.admissionDay /\ patient.admissionDay <= patient.latestPossibleAdmission
   else
-    (patient.earliestPossibleAdmission <= patient.admissionDay /\ patient.admissionDay <= lastDay) \/ patient.admissionDay == lastDay+1
+    patient.earliestPossibleAdmission <= patient.admissionDay /\ patient.admissionDay <= lastDay + 1
   endif
 );
