@@ -1,4 +1,4 @@
-include "../IHTC_model.mzn";
+include "../data/IHTC_model.mzn";
 
 % Global
 % H5 Mandatory versus optional patients: All mandatory patients must be admitted within the decision horizon, whereas optional patients may be postponed to future periods.
