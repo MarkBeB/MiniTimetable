@@ -1,6 +1,7 @@
 package org.tud.minitimetable.util;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -21,6 +22,18 @@ public class Ihtc2DznModelWriter {
 		return nullable.toString();
 	}
 
+	private static boolean notEmpty(int[] arr) {
+		return arr.length > 0;
+	}
+
+	private static <T> boolean notEmpty(T[] arr) {
+		return arr.length > 0;
+	}
+
+	private static int[] copy(int[] arr, int length) {
+		return Arrays.copyOf(arr, length);
+	}
+
 	public synchronized void write(IhtcModel model, Writer writer) throws IOException {
 
 		{
@@ -34,61 +47,63 @@ public class Ihtc2DznModelWriter {
 			writer.decreaseIndentation().indentation().write(");").newLine().newLine();
 		}
 
-		writer.indentation().write("Gender").write(" = ").write("{") //
+		writer.indentation().write("Genders").write(" = ").write("{") //
 				.write("A").write(", ").write("B") //
 				.write("};").newLine();
 
-		writer.indentation().write("ShiftType").write(" = ").write("{") //
+		writer.indentation().write("ShiftTypes").write(" = ").write("{") //
 				.write(model.shiftTypes, (value, hasMore) -> {
 					writer.write(value).write(", ", hasMore);
 				}).write("};").newLine();
 
-		writer.indentation().write("AgeGroup").write(" = ").write("{") //
+		writer.indentation().write("AgeGroups").write(" = ").write("{") //
 				.write(model.ageGroups, (value, hasMore) -> {
 					writer.write(value).write(", ", hasMore);
 				}).write("};").newLine();
 
-		writer.indentation().write("NurseId").write(" = ").write("{") //
+		writer.indentation().write("NurseIds").write(" = ").write("{") //
 				.write(model.nurses, (value, hasMore) -> {
 					writer.write(value.id).write(", ", hasMore);
 				}).write("};").newLine();
 
-		writer.indentation().write("SurgeonId").write(" = ").write("{") //
+		writer.indentation().write("SurgeonIds").write(" = ").write("{") //
 				.write(model.surgeons, (value, hasMore) -> {
 					writer.write(value.id).write(", ", hasMore);
 				}).write("};").newLine();
 
-		writer.indentation().write("OperatingTheaterId").write(" = ").write("{") //
+		writer.indentation().write("OperatingTheaterIds").write(" = ").write("{") //
 				.write(model.operatingTheaters, (value, hasMore) -> {
 					writer.write(value.id).write(", ", hasMore);
 				}).write("};").newLine();
 
-		writer.indentation().write("RoomId").write(" = ").write("{") //
+		writer.indentation().write("RoomIds").write(" = ").write("{") //
 				.write(model.rooms, (value, hasMore) -> {
 					writer.write(value.id).write(", ", hasMore);
 				}).write("};").newLine();
 
-		writer.indentation().write("PatientId").write(" = ").write("{") //
+		writer.indentation().write("PatientIds").write(" = ").write("{") //
 				.write(model.patients, (value, hasMore) -> {
 					writer.write(value.id).write(", ", hasMore);
 				}).write("};").newLine();
 
-		writer.indentation().write("OccupantId").write(" = ").write("{") //
+		writer.indentation().write("OccupantIds").write(" = ").write("{") //
 				.write(model.occupants, (value, hasMore) -> {
 					writer.write(value.id).write(", ", hasMore);
 				}).write("};").newLine();
 
 		var lastDay = model.days - 1;
-		var maxDay = Stream.of(model.patients)
-				.mapToInt(p -> p.mandatory ? p.surgeryDueDay + p.lengthOfStay : lastDay + p.lengthOfStay).max()
-				.orElse(lastDay);
+		var maxDay = Stream.of(model.patients) //
+				.mapToInt(p -> p.mandatory ? p.surgeryDueDay + p.lengthOfStay : lastDay + p.lengthOfStay) //
+				.max().orElse(lastDay);
 
 		writer.newLine();
 //		writer.indentation().write("days").write(" = ").write(model.days).write(";").newLine();
 //		writer.indentation().write("firstDay").write(" = ").write(firstDay).write(";").newLine();
 		writer.indentation().write("lastDay").write(" = ").write(lastDay).write(";").newLine();
 		writer.indentation().write("maxDay").write(" = ").write(maxDay).write(";").newLine();
-		writer.indentation().write("skillLevels").write(" = ").write(model.skillLevels).write(";").newLine();
+		writer.indentation().write("maxSkillLevel").write(" = ").write(model.skillLevels - 1).write(";").newLine();
+//		writer.indentation().write("SkillLevels").write(" = ") //
+//				.write("0.." + (model.skillLevels - 1)).write(";").newLine();
 		writer.newLine();
 
 		writer.write("nurseData").write(" = ").write("[").newLine().increaseIndentation()
@@ -132,7 +147,7 @@ public class Ihtc2DznModelWriter {
 	private void write(Surgeon obj, Writer writer) throws IOException {
 		writer.indentation().write("(") //
 				.write("id").write(": ").write(obj.id).write(", ") //
-				.write("maxSurgeryTime").write(": ").write("[0:") //
+				.write("maxSurgeryTime").write(": ").write("[").write("0:", notEmpty(obj.maxSurgeryTime)) //
 				.write(obj.maxSurgeryTime, (value, hasMore) -> {
 					writer.write(value).write(", ", hasMore);
 				}).write("]") //
@@ -145,22 +160,25 @@ public class Ihtc2DznModelWriter {
 		writer.indentation().write("gender").write(": ").write(obj.gender).write(", ").newLine();
 		writer.indentation().write("ageGroup").write(": ").write(obj.ageGroup).write(", ").newLine();
 		writer.indentation().write("lengthOfStay").write(": ").write(obj.lengthOfStay).write(", ").newLine();
-		writer.indentation().write("workloadProduced").write(": ").write("[0:") //
+		writer.indentation().write("workloadProduced").write(": ") //
+				.write("[").write("0:", notEmpty(obj.workloadProduced)) //
 				.write(obj.workloadProduced, (value, hasMore) -> {
 					writer.write(value).write(", ", hasMore);
 				}).write("]").write(",").newLine();
-		writer.indentation().write("skillLevelRequired").write(": ").write("[0:") //
+		writer.indentation().write("skillLevelRequired").write(": ") //
+				.write("[").write("0:", notEmpty(obj.skillLevelRequired)) //
 				.write(obj.skillLevelRequired, (value, hasMore) -> {
 					writer.write(value).write(", ", hasMore);
 				}).write("]").write(",").newLine();
 		writer.indentation().write("mandatory").write(": ").write(obj.mandatory).write(", ").newLine();
-		writer.indentation().write("earliestPossibleAdmission").write(": ").write(obj.surgeryReleaseDay).write(", ")
-				.newLine();
-		writer.indentation().write("latestPossibleAdmission").write(": ").write(obj.surgeryDueDay).write(", ")
-				.newLine();
+		writer.indentation().write("earliestPossibleAdmission").write(": ") //
+				.write(obj.surgeryReleaseDay).write(", ").newLine();
+		writer.indentation().write("latestPossibleAdmission").write(": ") //
+				.write(obj.surgeryDueDay).write(", ").newLine();
 		writer.indentation().write("surgeryDuration").write(": ").write(obj.surgeryDuration).write(", ").newLine();
-		writer.indentation().write("surgeonId").write(": ").write(obj.surgeonId).write(", ").newLine();
-		writer.indentation().write("incompatibleRooms").write(": ").write("[") //
+		writer.indentation().write("assignedSurgeon").write(": ").write(obj.surgeonId).write(", ").newLine();
+		writer.indentation().write("incompatibleRooms").write(": ") //
+				.write("[") //
 				.write(obj.incompatibleRooms, (value, hasMore) -> {
 					writer.write(value).write(", ", hasMore);
 				}).write("]").write(",").newLine();
@@ -173,22 +191,25 @@ public class Ihtc2DznModelWriter {
 		writer.indentation().write("gender").write(": ").write(obj.gender).write(", ").newLine();
 		writer.indentation().write("ageGroup").write(": ").write(obj.ageGroup).write(", ").newLine();
 		writer.indentation().write("lengthOfStay").write(": ").write(obj.lengthOfStay).write(", ").newLine();
-		writer.indentation().write("workloadProduced").write(": ").write("[0:") //
+		writer.indentation().write("workloadProduced").write(": ") //
+				.write("[").write("0:", notEmpty(obj.workloadProduced)) //
 				.write(obj.workloadProduced, (value, hasMore) -> {
 					writer.write(value).write(", ", hasMore);
 				}).write("]").write(",").newLine();
-		writer.indentation().write("skillLevelRequired").write(": ").write("[0:") //
+		writer.indentation().write("skillLevelRequired").write(": ") //
+				.write("[").write("0:", notEmpty(obj.skillLevelRequired)) //
 				.write(obj.skillLevelRequired, (value, hasMore) -> {
 					writer.write(value).write(", ", hasMore);
 				}).write("]").write(",").newLine();
-		writer.indentation().write("assignedToRoom").write(": ").write(obj.assignedToRoom).write(", ").newLine();
+		writer.indentation().write("assignedRoom").write(": ").write(obj.assignedToRoom).write(", ").newLine();
 		writer.decreaseIndentation().indentation().write(")");
 	}
 
 	private void write(OperatingTheater obj, Writer writer) throws IOException {
 		writer.indentation().write("(") //
 				.write("id").write(": ").write(obj.id).write(", ") //
-				.write("availability").write(": ").write("[0:") //
+				.write("availability").write(": ")//
+				.write("[").write("0:", notEmpty(obj.availability)) //
 				.write(obj.availability, (value, hasMore) -> {
 					writer.write(value).write(", ", hasMore);
 				}).write("]") //
@@ -196,15 +217,20 @@ public class Ihtc2DznModelWriter {
 	}
 
 	private void write(Room obj, Writer writer) throws IOException {
+		var availableCapacity = obj.getAvailableCapacity();
+		var genderAssignment = obj.getGenderAssignment();
+
 		writer.indentation().write("(") //
 				.write("id").write(": ").write(obj.id).write(", ") //
 				.write("capacity").write(": ").write(obj.capacity).write(", ") //
-				.write("availableCapacity").write(": ").write("[0:") //
-				.write(obj.getAvailableCapacity(), (value, hasMore) -> {
+				.write("availableCapacity").write(": ") //
+				.write("[").write("0:", notEmpty(availableCapacity)) //
+				.write(availableCapacity, (value, hasMore) -> {
 					writer.write(value).write(", ", hasMore);
 				}).write("]").write(", ") //
-				.write("fixGenderAssignment").write(": ").write("[0:") //
-				.write(obj.getGenderAssignment(), (value, hasMore) -> {
+				.write("predefinedGenderAssignment").write(": ") //
+				.write("[").write("0:", notEmpty(genderAssignment)) //
+				.write(genderAssignment, (value, hasMore) -> {
 					writer.write(nullable(value)).write(", ", hasMore);
 				}).write("]") //
 				.write(")");
