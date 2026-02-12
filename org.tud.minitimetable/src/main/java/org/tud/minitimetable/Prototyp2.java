@@ -7,11 +7,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.ProcessBuilder.Redirect;
 import java.nio.file.Path;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import org.tud.minitimetable.util.ModelManager;
+import org.tud.minitimetable.util.DataModelManager;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
@@ -25,6 +27,11 @@ public class Prototyp2 {
 		public MZSolution(long timestamp, Object result) {
 			this.timestamp = timestamp;
 			this.result = Objects.requireNonNull(result);
+		}
+
+		@Override
+		public String toString() {
+			return "Solution: " + result.toString();
 		}
 
 	}
@@ -43,7 +50,7 @@ public class Prototyp2 {
 		}
 	}
 
-	private static final Path miniZincLocation = Path.of("..", "..", "..", "MiniZinc", "minizinc.exe");
+	private static final Path miniZincLocation = Path.of("..", "..", "MiniZinc", "minizinc.exe");
 	private static final Path resourceFolder = Path.of("./", "resources");
 
 	private static Path changeFileExtension(Path filePath, String newExtension) {
@@ -81,45 +88,66 @@ public class Prototyp2 {
 		Path modelFolder = getResourceDirectory().resolve("ihtc");
 		Path outputFolder = getResourceDirectory().resolve("out");
 
-		ModelManager manager = new ModelManager(modelFolder, outputFolder);
+		DataModelManager manager = new DataModelManager(modelFolder, outputFolder);
 		manager.loadDataModel("i01");
-		manager.writeModelAsDZN();
+		manager.writeDataModelAsDZN();
 
 	}
 
 	public static void main(String[] args) throws IOException, InterruptedException {
+		var jsonOutputEnabled = false;
+
 		Path constraintModel = getResourceDirectory().resolve("model").resolve("IHTC_model.mzn");
 
 		Path modelFolder = getResourceDirectory().resolve("ihtc");
 		Path outputFolder = getResourceDirectory().resolve("out");
 
-		ModelManager manager = new ModelManager(modelFolder, outputFolder);
+		DataModelManager manager = new DataModelManager(modelFolder, outputFolder);
 		manager.loadDataModel("i01");
-		manager.writeModelAsDZN();
+		manager.writeDataModelAsDZN();
 
-		ProcessBuilder processBuilder = new ProcessBuilder();
+		List<String> commands = new LinkedList<>();
+//		commands.add(getMiniZinc().toAbsolutePath().toString());
+//		commands.add("--solver");
+//		commands.add("Gurobi");
+
+		ProcessBuilder processBuilder = new ProcessBuilder(commands);
 		processBuilder.directory(getUserDirectory().resolve("mini").toFile());
 		processBuilder.redirectError(Redirect.INHERIT);
 		processBuilder.redirectInput(Redirect.INHERIT);
-//		processBuilder.redirectOutput(Redirect.INHERIT);
+		if (!jsonOutputEnabled) {
+			processBuilder.redirectOutput(Redirect.INHERIT);
+		}
 
-//		processBuilder.inheritIO();
-//		processBuilder.redirectOutput(getUserDirectory().resolve("mini").resolve("miniout.dzn").toFile());
-//		processBuilder.redirectOutput().
-		processBuilder.command().add("\"" + getMiniZinc().toAbsolutePath().toString() + "\"");
-//		System.out.println(getMiniZinc().toAbsolutePath().toString());
-//		processBuilder.command().add("\"" + constraintModel.toString() + "\"");
+		// path to minizinc exe
+		processBuilder.command().add(getMiniZinc().toAbsolutePath().toString());
 
-//		Path sM = Path.of("F:").resolve("Test").resolve("IHTC_model.mzn");
-//		Path sD = Path.of("F:").resolve("Test").resolve("i01.dzn");
-//
-//		processBuilder.command().add("--param-file F:/Test/model.mpc");
+		// solver argument
+		processBuilder.command().add("--solver");
+		processBuilder.command().add("Gurobi");
 
-//		System.out.println("--model \"" + ".\\" + sM + "\"");
-		processBuilder.command().add("\"" + constraintModel.toString() + "\"");
-		processBuilder.command().add("\"" + manager.getModelOutputPath().toString() + "\"");
+		// constraint model
+		processBuilder.command().add("--model");
+		processBuilder.command().add(constraintModel.toString());
+
+		// data model
+		processBuilder.command().add("--data");
+		processBuilder.command().add(manager.getPathOfOutput().toString());
+
+		processBuilder.command().add("--time-limit");
+		processBuilder.command().add(Integer.toString(2 * 60 * 1000));
+
+		if (jsonOutputEnabled) {
+			processBuilder.command().add("--json-stream");
+		}
+
 //		processBuilder.command().add("--help");
-		processBuilder.command().add("--json-stream");
+
+		processBuilder.command().add("--writeModel");
+		processBuilder.command().add("./out.lp");
+
+		processBuilder.command().add("-p");
+		processBuilder.command().add("4");
 
 //		var processCmd = "\"" + getMiniZinc().toAbsolutePath().toString() + "\"";
 //		processBuilder.command(processCmd, getResourceDirectory().resolve("model.mpc").toString());
@@ -129,23 +157,29 @@ public class Prototyp2 {
 			var miniZincProcess = processBuilder.start();
 			isDone = miniZincProcess.onExit();
 
-			var outStream = miniZincProcess.getInputStream();
-			System.out.println("Found  stream: " + outStream);
-			final BufferedReader outReader = new BufferedReader(new InputStreamReader(outStream));
+			if (jsonOutputEnabled) {
+				var outStream = miniZincProcess.getInputStream();
+				System.out.println("Found  stream: " + outStream);
+				final BufferedReader outReader = new BufferedReader(new InputStreamReader(outStream));
 
-			String lastLine = outReader.readLine();
-			while (lastLine != null) {
-				// json output
+				String lastLine = outReader.readLine();
+				while (lastLine != null) {
+					// json output
 
-				var json = (JSONObject) JSON.parse(lastLine);
-				System.out.println(json);
-				if ("solution".equals(json.getString("type"))) {
-					var output = ((JSONObject) json.get("output")).getString("default");
-					var solution = new MZSolution(System.currentTimeMillis(), output);
-					System.out.println(solution);
+					var json = (JSONObject) JSON.parse(lastLine);
+					System.out.println(json);
+					if ("solution".equals(json.getString("type"))) {
+						var output = ((JSONObject) json.get("output")).getString("dzn");
+						if (output != null) {
+							var solution = new MZSolution(System.currentTimeMillis(), output);
+							System.out.println(solution);
+						} else {
+							System.out.println("Error? A");
+						}
+					}
+
+					lastLine = outReader.readLine();
 				}
-
-				lastLine = outReader.readLine();
 			}
 
 		} catch (IOException e) {
@@ -174,7 +208,7 @@ public class Prototyp2 {
 				}
 			}
 		} else {
-			System.err.println("Error?");
+			System.err.println("Error? B");
 		}
 
 	}
