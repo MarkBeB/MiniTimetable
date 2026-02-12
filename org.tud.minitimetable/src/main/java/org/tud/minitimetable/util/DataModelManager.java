@@ -8,7 +8,7 @@ import java.util.Objects;
 
 import org.tud.minitimetable.model.IhtcModel;
 
-public class ModelManager {
+public class DataModelManager {
 
 	private final Path _generalInputFolder;
 	private final Path _generalOutputFolder;
@@ -17,16 +17,16 @@ public class ModelManager {
 	private Path _outputModelPath;
 	private IhtcModel _model;
 
-	public ModelManager(Path generalInputFolder, Path generalOutputFolder) {
+	public DataModelManager(Path generalInputFolder, Path generalOutputFolder) {
 		_generalInputFolder = Objects.requireNonNull(generalInputFolder, "generalInputFolder");
 		_generalOutputFolder = Objects.requireNonNull(generalOutputFolder, "generalOutputFolder");
 	}
 
-	public void loadDataModel(String fileName) throws IOException {
-		this.loadModel(Path.of(fileName));
+	public IhtcModel loadDataModel(String fileName) throws IOException {
+		return loadModel(Path.of(fileName));
 	}
 
-	public void loadModel(Path filePath) throws IOException {
+	public IhtcModel loadModel(Path filePath) throws IOException {
 		if (filePath.isAbsolute())
 			throw new IllegalArgumentException();
 
@@ -46,9 +46,11 @@ public class ModelManager {
 
 		InputModelReader reader = new InputModelReader();
 		_model = reader.read(_inputModelPath);
+
+		return _model;
 	}
 
-	public void writeModelAsDZN() throws IOException {
+	public Path writeDataModelAsDZN(IhtcModel model) throws IOException {
 		var fullOutputPath = _generalOutputFolder.resolve(_generalInputFolder.relativize(_inputModelPath));
 		_outputModelPath = changeFileExtension(fullOutputPath, ".dzn");
 
@@ -57,18 +59,24 @@ public class ModelManager {
 		}
 
 		OutputModelWriter writer = new OutputModelWriter();
-		writer.write(_model, _outputModelPath);
-	}
+		writer.write(model, _outputModelPath);
 
-	public Path getModelInputPath() {
-		return _inputModelPath;
-	}
-
-	public Path getModelOutputPath() {
 		return _outputModelPath;
 	}
 
-	public IhtcModel getModel() {
+	public Path writeDataModelAsDZN() throws IOException {
+		return writeDataModelAsDZN(_model);
+	}
+
+	public Path getPathOfDataModel() {
+		return _inputModelPath;
+	}
+
+	public Path getPathOfOutput() {
+		return _outputModelPath;
+	}
+
+	public IhtcModel getDataModel() {
 		return _model;
 	}
 

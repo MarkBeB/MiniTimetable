@@ -3,7 +3,7 @@ package org.tud.minitimetable;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import org.tud.minitimetable.util.ModelManager;
+import org.tud.minitimetable.util.DataModelManager;
 
 public class Main {
 
@@ -48,12 +48,12 @@ public class Main {
 		Path modelFolder = resourceDirectory.resolve("ihtc");
 		Path outputFolder = resourceDirectory.resolve("out");
 
-		ModelManager manager = new ModelManager(modelFolder, outputFolder);
+		DataModelManager manager = new DataModelManager(modelFolder, outputFolder);
 		manager.loadDataModel("i01");
-		manager.writeModelAsDZN();
+		manager.writeDataModelAsDZN();
 
 		System.out.println("DONE");
-		System.out.println("File created: " + manager.getModelOutputPath());
+		System.out.println("File created: " + manager.getPathOfOutput());
 	}
 
 }
