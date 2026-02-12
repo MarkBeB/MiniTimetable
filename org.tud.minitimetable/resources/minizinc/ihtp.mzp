@@ -1,0 +1,23 @@
+{
+    "openFiles": [
+        "SimpleC.mzn"
+    ],
+    "openTab": 0,
+    "projectFiles": [
+        "../intermediate/i01.dzn",
+        "SimpleC.mzn",
+        "constraints/H1.mzn",
+        "constraints/H2.mzn",
+        "constraints/H5-H6.mzn",
+        "constraints/H5.mzn",
+        "constraints/H6.mzn",
+        "constraints/H7.mzn",
+        "constraints/S1.mzn",
+        "constraints/S7.mzn",
+        "constraints/S8.mzn",
+        "data/IHTC_model.mzn"
+    ],
+    "selectedBuiltinConfigId": "org.minizinc.mip.gurobi",
+    "selectedBuiltinConfigVersion": "13.0.0",
+    "version": 106
+}
