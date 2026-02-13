@@ -1,13 +1,20 @@
 {
     "openFiles": [
-        "SimpleC.mzn"
+        "SimpleC.mzn",
+        "data/IHTC_model.mzn",
+        "OutConsoleFormat.mzn",
+        "../intermediate/i01.dzn"
     ],
     "openTab": 0,
     "projectFiles": [
         "../intermediate/i01.dzn",
+        "OutConsoleFormat.mzn",
+        "OutJsonFormat.mzn",
         "SimpleC.mzn",
         "constraints/H1.mzn",
         "constraints/H2.mzn",
+        "constraints/H3.mzn",
+        "constraints/H4.mzn",
         "constraints/H5-H6.mzn",
         "constraints/H5.mzn",
         "constraints/H6.mzn",
