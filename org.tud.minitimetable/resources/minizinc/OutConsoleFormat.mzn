@@ -39,4 +39,4 @@ output
 [ "   openOperatingTheater = "++show_int(-6, Penalties.openOperatingTheater)++"   surgeonTransfer        = "++show_int(-6, Penalties.surgeonTransfer)++ "\n"] ++
 [ "   patientDelay         = "++show_int(-6, Penalties.patientDelay)        ++"   unscheduledOptional    = "++show_int(-6, Penalties.unscheduledOptional)++ "\n"] ++
 [ "\n" ] ++
-[ "score = \(score)\n"]
+[ "total score = \(score)\n"]
