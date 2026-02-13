@@ -34,6 +34,17 @@ public class Ihtc2DznModelWriter {
 		return Arrays.copyOf(arr, length);
 	}
 
+	private static String toString(int[] arr) {
+		StringBuilder sb = new StringBuilder();
+		for (var i = 0; i < arr.length; ++i) {
+			sb.append(Integer.toString(arr[i]));
+			if (i < arr.length - 1) {
+				sb.append(", ");
+			}
+		}
+		return sb.toString();
+	}
+
 	public synchronized void write(IhtcModel model, Writer writer) throws IOException {
 
 		{
@@ -242,14 +253,24 @@ public class Ihtc2DznModelWriter {
 	}
 
 	private void write(Nurse obj, Writer writer) throws IOException {
+		var loadPerWorkdayShift = obj.getLoadPerWorkdayShift();
+
 		writer.indentation().write("(").newLine().increaseIndentation();
 		writer.indentation().write("id").write(": ").write(obj.id).write(",").newLine();
 		writer.indentation().write("skillLevel").write(": ").write(obj.skillLevel).write(",").newLine();
-		writer.indentation().write("workingShifts").write(": ").write("[").newLine().increaseIndentation()
-				.write(obj.workingShifts, (value, hasMore) -> {
-					write(value, writer);
-					writer.write(", ", hasMore).newLine();
-				}).decreaseIndentation().indentation().write("]").newLine();
+
+//		writer.indentation().write("workingShifts").write(": ").write("[").newLine().increaseIndentation()
+//				.write(obj.workingShifts, (value, hasMore) -> {
+//					write(value, writer);
+//					writer.write(", ", hasMore).newLine();
+//				}).decreaseIndentation().indentation().write("]").write(",").newLine();
+
+		writer.indentation().write("shifts").write(": ") //
+				.write("array2d(Days, ShiftTypes, [").newLine().increaseIndentation() //
+				.write(loadPerWorkdayShift, (value, hasMore) -> {
+					writer.indentation().write(toString(value)).write(", ", hasMore).newLine();
+				}).decreaseIndentation().indentation().write("])").write(",").newLine();
+
 		writer.decreaseIndentation().indentation().write(")");
 	}
 

@@ -57,10 +57,10 @@ type NurseFixData = record(
   NurseIds: id,
   SkillLevels: skillLevel,
   array[int] of WorkShift: workingShifts,
+  array[Days, ShiftTypes] of int: shifts,
 );
 type NurseVarData = record(
   array[Days, ShiftTypes] of var bool: isWorking,
-  array[Days, ShiftTypes] of var 0..1000: maxLoad,
   array[Days, ShiftTypes, RoomIds] of var bool: assignedRooms,
 
   array[Days] of 0..maxPenalityValue: penaltySkillLevel,
@@ -255,6 +255,11 @@ constraint forall(roomId in RoomIds, day in Days)(
 );
 
 constraint forall(nurseId in NurseIds, day in Days, shift in ShiftTypes)(
+  nurseVar[nurseId].isWorking[day, shift] <-> nurseData[nurseId].shifts[day, shift] > 0
+);
+
+/*
+constraint forall(nurseId in NurseIds, day in Days, shift in ShiftTypes)(
   nurseVar[nurseId].isWorking[day, shift] = exists(workingShift in nurseData[nurseId].workingShifts)(
       workingShift.day == day /\ workingShift.shift == shift)
 );
@@ -265,6 +270,7 @@ constraint forall(nurseId in NurseIds, day in Days, shift in ShiftTypes)(
       /\ nurseVar[nurseId].maxLoad[day, shift] = workingShift.maxLoad
     )
 );
+*/
 
 
 % include "OutConsoleFormat.mzn";
