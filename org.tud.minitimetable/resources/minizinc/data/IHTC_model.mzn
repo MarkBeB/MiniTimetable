@@ -59,7 +59,16 @@ type NurseFixData = record(
   array[int] of WorkShift: workingShifts,
 );
 type NurseVarData = record(
-  array[Days] of var NurseAssignment: assignments,
+  array[Days, ShiftTypes] of var bool: isWorking,
+  array[Days, ShiftTypes] of var 0..1000: maxLoad,
+  array[Days, ShiftTypes, RoomIds] of var bool: assignedRooms,
+
+  array[Days] of 0..maxPenalityValue: penaltySkillLevel,
+  array[Days] of 0..maxPenalityValue: penaltyCare,
+  array[Days] of 0..maxPenalityValue: penaltyWorkload,
+
+%  array[Days] of var NurseAssignment: assignments,
+%  array[Days, RoomIds] of var bool: assignedRooms,
 );
 type Nurse = NurseFixData ++ NurseVarData;
 
@@ -69,7 +78,8 @@ type SurgeonFixData = record(
   array[Days] of DayTime: maxSurgeryTime,
 );
 type SurgeonVarData = record(
-  array[Days] of var DayTime: usedTime
+  array[Days] of var DayTime: usedTime,
+  array[Days, OperatingTheaterIds] of var bool: worksInOT,
 );
 type Surgeon = SurgeonFixData ++ SurgeonVarData;
 
@@ -77,9 +87,9 @@ type Surgeon = SurgeonFixData ++ SurgeonVarData;
 type OperatingTheaterFixData = record(
   OperatingTheaterIds: id,
   array[Days] of DayTime: availability,
+  array[Days] of bool: isAvailable,
 );
-type OperatingTheaterVarData = record(
-  array[Days] of var bool: isAvailable,
+type OperatingTheaterVarData = record(  
   array[Days] of var DayTime: usedTime,
 );
 type OperatingTheater = OperatingTheaterFixData ++ OperatingTheaterVarData;
@@ -89,12 +99,15 @@ type RoomFixData = record(
   RoomIds: id,
   int: capacity,
   array[Days] of int: availableCapacity,
-  array[Days] of opt Genders: fixGenderAssignment,
+  array[Days] of opt Genders: predefinedGenderAssignment,
 );
 type RoomVarData = record(
+  array[Days] of var bool: isOccupied,
   array[Days] of var 0..100: assignedPatients,  
   array[Days] of var Genders: assignedGender,
+  array[Days, ShiftTypes] of var int: workload,
   array[Days] of var 0..length(AgeGroups): penaltyAgeMixing,
+
 
   array[Days] of var opt AgeGroups: maxAgeGroup,
   array[Days] of var opt AgeGroups: minAgeGroup,
@@ -137,10 +150,9 @@ type PatientVarData = record (
   var 0..maxDay: admittedUntil,
   var bool: isPostponed, 
   var bool: isAdmitted, % isPostponed <-> !isAdmited
-  var opt RoomIds: assignedRoom,
-  var opt OperatingTheaterIds: assignedOT,
 
-  array[Days] of var opt RoomIds: assignedRoomAt,
+  var opt OperatingTheaterIds: assignedOT,
+  array[Days] of var opt RoomIds: assignedRoom,
   var 0..maxDay: penaltyAdmissionDelay,
 );
 type Patient = PatientFixData ++ PatientVarData;
@@ -168,8 +180,10 @@ set of int: SkillLevels = 0..maxSkillLevel;
 
 int: firstDay = 0;
 int: lastDay;
+int: postponedDay = lastDay + 1; 
 int: maxDay;
 set of int: Days = 0..lastDay;
+set of int: ExtendedDays = 0..postponedDay;
 set of int: MaxDays = 0..maxDay;
 % enum Days = _(0..lastDay);
 
@@ -232,6 +246,24 @@ constraint forall(patient in patientVar)(
 
 constraint forall(id in PatientIds)(
   patientVar[id].admittedUntil = patientVar[id].admissionDay + patientData[id].lengthOfStay - 1
+);
+
+constraint forall(roomId in RoomIds, day in Days)(
+  roomVar[roomId].isOccupied[day] <-> 
+  exists(occupant in occupantData)(occupant.assignedRoom == roomId /\ day < occupant.lengthOfStay)
+  \/ exists(patient in patientVar)(patient.assignedRoom[day] == roomId)
+);
+
+constraint forall(nurseId in NurseIds, day in Days, shift in ShiftTypes)(
+  nurseVar[nurseId].isWorking[day, shift] = exists(workingShift in nurseData[nurseId].workingShifts)(
+      workingShift.day == day /\ workingShift.shift == shift)
+);
+
+constraint forall(nurseId in NurseIds, day in Days, shift in ShiftTypes)(
+  nurseVar[nurseId].isWorking[day, shift] -> exists(workingShift in nurseData[nurseId].workingShifts)(
+      workingShift.day == day /\ workingShift.shift == shift 
+      /\ nurseVar[nurseId].maxLoad[day, shift] = workingShift.maxLoad
+    )
 );
 
 
