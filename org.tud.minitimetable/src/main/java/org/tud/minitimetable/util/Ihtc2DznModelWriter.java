@@ -253,7 +253,7 @@ public class Ihtc2DznModelWriter {
 	}
 
 	private void write(Nurse obj, Writer writer) throws IOException {
-		var loadPerWorkdayShift = obj.getLoadPerWorkdayShift();
+		var maxWorkloadPerShift = obj.getMaxWorkloadPerShift();
 
 		writer.indentation().write("(").newLine().increaseIndentation();
 		writer.indentation().write("id").write(": ").write(obj.id).write(",").newLine();
@@ -265,9 +265,9 @@ public class Ihtc2DznModelWriter {
 //					writer.write(", ", hasMore).newLine();
 //				}).decreaseIndentation().indentation().write("]").write(",").newLine();
 
-		writer.indentation().write("shifts").write(": ") //
+		writer.indentation().write("maxWorkloadPerShift").write(": ") //
 				.write("array2d(Days, ShiftTypes, [").newLine().increaseIndentation() //
-				.write(loadPerWorkdayShift, (value, hasMore) -> {
+				.write(maxWorkloadPerShift, (value, hasMore) -> {
 					writer.indentation().write(toString(value)).write(", ", hasMore).newLine();
 				}).decreaseIndentation().indentation().write("])").write(",").newLine();
 

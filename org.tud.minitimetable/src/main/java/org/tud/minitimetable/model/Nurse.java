@@ -14,7 +14,7 @@ public final class Nurse {
 		return -1;
 	}
 
-	public int[][] getLoadPerWorkdayShift() {
+	public int[][] getMaxWorkloadPerShift() {
 		var workShiftPerDay = new int[root.days][root.shiftTypes.length];
 		for (var workshift : workingShifts) {
 			workShiftPerDay[workshift.day][indexOf(root.shiftTypes, workshift.shift)] = workshift.maxLoad;

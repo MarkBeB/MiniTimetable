@@ -56,19 +56,16 @@ type NurseAssignment = record(
 type NurseFixData = record(
   NurseIds: id,
   SkillLevels: skillLevel,
-  array[int] of WorkShift: workingShifts,
-  array[Days, ShiftTypes] of int: shifts,
+  array[Days, ShiftTypes] of int: maxWorkloadPerShift,
 );
 type NurseVarData = record(
   array[Days, ShiftTypes] of var bool: isWorking,
   array[Days, ShiftTypes, RoomIds] of var bool: assignedRooms,
+  array[Days, ShiftTypes] of var int: expectedWorkload,
 
   array[Days] of 0..maxPenalityValue: penaltySkillLevel,
   array[Days] of 0..maxPenalityValue: penaltyCare,
   array[Days] of 0..maxPenalityValue: penaltyWorkload,
-
-%  array[Days] of var NurseAssignment: assignments,
-%  array[Days, RoomIds] of var bool: assignedRooms,
 );
 type Nurse = NurseFixData ++ NurseVarData;
 
@@ -99,6 +96,8 @@ type RoomFixData = record(
   RoomIds: id,
   int: capacity,
   array[Days] of int: availableCapacity,
+
+  %deprecated
   array[Days] of opt Genders: predefinedGenderAssignment,
 );
 type RoomVarData = record(
@@ -106,6 +105,7 @@ type RoomVarData = record(
   array[Days] of var 0..100: assignedPatients,  
   array[Days] of var Genders: assignedGender,
   array[Days, ShiftTypes] of var int: workload,
+
   array[Days] of var 0..length(AgeGroups): penaltyAgeMixing,
 
 
@@ -249,13 +249,15 @@ constraint forall(id in PatientIds)(
 );
 
 constraint forall(roomId in RoomIds, day in Days)(
-  roomVar[roomId].isOccupied[day] <-> 
-  exists(occupant in occupantData)(occupant.assignedRoom == roomId /\ day < occupant.lengthOfStay)
-  \/ exists(patient in patientVar)(patient.assignedRoom[day] == roomId)
+  let {
+    bool: hasOccupants = exists(occupant in occupantData)(occupant.assignedRoom == roomId /\ day < occupant.lengthOfStay);
+    var bool: hasPatients = exists(patient in patientVar)(patient.assignedRoom[day] == roomId);
+  } in
+  roomVar[roomId].isOccupied[day] <-> hasOccupants \/ hasPatients
 );
 
 constraint forall(nurseId in NurseIds, day in Days, shift in ShiftTypes)(
-  nurseVar[nurseId].isWorking[day, shift] <-> nurseData[nurseId].shifts[day, shift] > 0
+  nurseVar[nurseId].isWorking[day, shift] <-> nurseData[nurseId].maxWorkloadPerShift[day, shift] > 0
 );
 
 /*
