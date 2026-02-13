@@ -25,28 +25,7 @@ include "constraints/H7.mzn";
 % NRA
 % H8 For each shift, each occupied room must be allocated to a nurse who is on duty during this shift.
 %
-%include "constraints/H8.mzn";
-constraint forall(roomId in RoomIds, day in Days, shift in ShiftTypes)(
-  bool2int(roomVar[roomId].isOccupied[day]) == count(nurseId in NurseIds)( nurseVar[nurseId].assignedRooms[day, shift, roomId] ) 
-);
-
-constraint forall(nurseId in NurseIds, day in Days, shift in ShiftTypes, roomId in RoomIds)(
-  nurseVar[nurseId].assignedRooms[day, shift, roomId] -> nurseVar[nurseId].isWorking[day, shift]
-);
-
-/*
-constraint forall(day in Days, shift in ShiftTypes)(
-  all_disjoint([ nurseVar[nurseId].assignedRooms2[day, shift] | nurseId in NurseIds])
-);
-
-constraint forall(day in Days, shift in ShiftTypes)(
-  array_union([ nurseVar[nurseId].assignedRooms2[day, shift] | nurseId in NurseIds]) == { roomId | roomId in RoomIds where roomVar[roomId].isOccupied[day] }
-);
-
-constraint forall(nurseId in NurseIds, day in Days, shift in ShiftTypes, roomId in RoomIds)(
-  not nurseVar[nurseId].isWorking[day, shift] -> nurseVar[nurseId].assignedRooms2[day, shift] == {}
-);
-*/
+include "constraints/H8.mzn";
 
 
 % NRA
