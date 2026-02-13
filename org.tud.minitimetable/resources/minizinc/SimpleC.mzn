@@ -42,7 +42,8 @@ include "constraints/H8.mzn";
 % The given rosters assume maximum one shift per day for each nurse, hence the number of different nurses who take care of a patient is at least 3,
 % thus resulting in a minimum cost for this component of 3 times the number of admitted patients.
 %
-%include "constraints/S3.mzn";
+include "constraints/S3.mzn";
+
 
 % NRA
 % S4 Maximum workload: For each shift, the total workload induced by patients staying in rooms assigned to a nurse

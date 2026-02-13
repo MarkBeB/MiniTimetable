@@ -153,6 +153,8 @@ type PatientVarData = record (
 
   var opt OperatingTheaterIds: assignedOT,
   array[Days] of var opt RoomIds: assignedRoom,
+  array[NurseIds] of var bool: caredByNurse,
+  
   var 0..maxDay: penaltyAdmissionDelay,
 );
 type Patient = PatientFixData ++ PatientVarData;
@@ -244,7 +246,7 @@ constraint forall(patient in patientVar)(
   patient.isPostponed <-> not patient.isAdmitted
 );
 
-constraint forall(id in PatientIds)(
+constraint forall(id in PatientIds)( 
   patientVar[id].admittedUntil = patientVar[id].admissionDay + patientData[id].lengthOfStay - 1
 );
 

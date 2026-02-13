@@ -18,6 +18,7 @@ output
 [ "  \("patients"): [\n" ] ++
 [ "    {\("id"): \("\(id)"), " ++
       "\("admission_day"): "++show_int(3, p.admissionDay)++", " ++ 
+      "\("room"): \(format(p.assignedRoom[p.admissionDay]))), " ++
       "\("operating_theater"): \("\(p.assignedOT)")},\n" | id in PatientIds, p = patientVar[id] where fix(p.isAdmitted) ] ++
 [ "  ],\n" ] ++
 
