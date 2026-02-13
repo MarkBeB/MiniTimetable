@@ -3,9 +3,11 @@
         "SimpleC.mzn",
         "data/IHTC_model.mzn",
         "OutConsoleFormat.mzn",
-        "../intermediate/i01.dzn"
+        "../intermediate/i01.dzn",
+        "constraints/H8.mzn",
+        "constraints/H4.mzn"
     ],
-    "openTab": 0,
+    "openTab": 4,
     "projectFiles": [
         "../intermediate/i01.dzn",
         "OutConsoleFormat.mzn",
@@ -19,7 +21,10 @@
         "constraints/H5.mzn",
         "constraints/H6.mzn",
         "constraints/H7.mzn",
+        "constraints/H8.mzn",
         "constraints/S1.mzn",
+        "constraints/S5.mzn",
+        "constraints/S6.mzn",
         "constraints/S7.mzn",
         "constraints/S8.mzn",
         "data/IHTC_model.mzn"
