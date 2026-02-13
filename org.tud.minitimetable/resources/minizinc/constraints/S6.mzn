@@ -5,9 +5,10 @@ include "../data/IHTC_model.mzn";
 %
 
 constraint forall(patientId in PatientIds where patientVar[patientId].isAdmitted)(
+  let { SurgeonIds: surgeonId = patientData[patientId].assignedSurgeon } in
   forall(otId in OperatingTheaterIds, day in Days)(
     (patientVar[patientId].assignedOT == otId /\ patientVar[patientId].admissionDay == day)
-      -> surgeonVar[patientData[patientId].assignedSurgeon].worksInOT[day, otId]
+      -> surgeonVar[surgeonId].worksInOT[day, otId]
   )
 );
 
