@@ -3,11 +3,12 @@
         "SimpleC.mzn",
         "data/IHTC_model.mzn",
         "OutConsoleFormat.mzn",
+        "OutJsonFormat.mzn",
         "../intermediate/i01.dzn",
         "constraints/H8.mzn",
         "constraints/H4.mzn"
     ],
-    "openTab": 4,
+    "openTab": 2,
     "projectFiles": [
         "../intermediate/i01.dzn",
         "OutConsoleFormat.mzn",
