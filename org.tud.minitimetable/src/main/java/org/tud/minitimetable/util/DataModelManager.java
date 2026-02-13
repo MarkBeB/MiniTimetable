@@ -15,7 +15,6 @@ public class DataModelManager {
 
 	private Path _inputModelPath;
 	private Path _outputModelPath;
-	private IhtcModel _model;
 
 	public DataModelManager(Path generalInputFolder, Path generalOutputFolder) {
 		_generalInputFolder = Objects.requireNonNull(generalInputFolder, "generalInputFolder");
@@ -45,9 +44,9 @@ public class DataModelManager {
 		_inputModelPath = fullInputPath.normalize();
 
 		InputModelReader reader = new InputModelReader();
-		_model = reader.read(_inputModelPath);
+		var model = reader.read(_inputModelPath);
 
-		return _model;
+		return model;
 	}
 
 	public Path writeDataModelAsDZN(IhtcModel model) throws IOException {
@@ -64,20 +63,12 @@ public class DataModelManager {
 		return _outputModelPath;
 	}
 
-	public Path writeDataModelAsDZN() throws IOException {
-		return writeDataModelAsDZN(_model);
-	}
-
 	public Path getPathOfDataModel() {
 		return _inputModelPath;
 	}
 
-	public Path getPathOfOutput() {
+	public Path getPathOfWrite() {
 		return _outputModelPath;
-	}
-
-	public IhtcModel getDataModel() {
-		return _model;
 	}
 
 	private static Path changeFileExtension(Path filePath, String newExtension) {

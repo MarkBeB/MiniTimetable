@@ -49,11 +49,11 @@ public class Main {
 		Path outputFolder = resourceDirectory.resolve("intermediate");
 
 		DataModelManager manager = new DataModelManager(modelFolder, outputFolder);
-		manager.loadDataModel("i01");
-		manager.writeDataModelAsDZN();
+		var m = manager.loadDataModel("i01");
+		manager.writeDataModelAsDZN(m);
 
 		System.out.println("DONE");
-		System.out.println("File created: " + manager.getPathOfOutput());
+		System.out.println("File created: " + manager.getPathOfWrite());
 	}
 
 }

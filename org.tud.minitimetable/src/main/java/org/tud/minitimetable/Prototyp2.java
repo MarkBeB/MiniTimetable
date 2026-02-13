@@ -14,6 +14,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import org.tud.minitimetable.util.DataModelManager;
+import org.tud.minitimetable.util.MiniZincLocator;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
@@ -89,12 +90,39 @@ public class Prototyp2 {
 		Path outputFolder = getResourceDirectory().resolve("out");
 
 		DataModelManager manager = new DataModelManager(modelFolder, outputFolder);
-		manager.loadDataModel("i01");
-		manager.writeDataModelAsDZN();
+		var m = manager.loadDataModel("i01");
+		manager.writeDataModelAsDZN(m);
 
 	}
 
-	public static void main(String[] args) throws IOException, InterruptedException {
+	public static void main(String[] args) throws IOException {
+		Path dataFolder = getResourceDirectory().resolve("input");
+		Path intermediateFolder = getResourceDirectory().resolve("intermediate");
+		Path outputFolder = getResourceDirectory().resolve("out");
+
+		Path constraintModel = getResourceDirectory().resolve("minizinc").resolve("SimpleC.mzn");
+
+		Path workingDirectory = outputFolder;
+
+		MiniZincLocator minizincLocator = new MiniZincLocator();
+		minizincLocator.addFolder(Path.of("..", "..", "MiniZinc", "minizinc.exe"));
+		Path minizincExe = minizincLocator.searchMiniZinc().stream().findFirst().get();
+
+		DataModelManager dataManager = new DataModelManager(dataFolder, intermediateFolder);
+		var dataModel = dataManager.loadModel(Path.of("ihtc", "i01"));
+		dataManager.writeDataModelAsDZN(dataModel);
+
+		MiniZincRunner mzRunner = new MiniZincRunner(workingDirectory, minizincExe);
+		mzRunner.config().setConstraintModel(constraintModel);
+		mzRunner.config().setDataModel(dataManager.getPathOfWrite());
+		mzRunner.config().setNumberOfThreads(4);
+		mzRunner.config().setTimeLimit(10 * 60 * 1000);
+		mzRunner.config().setWriteModel(outputFolder.resolve("model.lp"));
+		mzRunner.parseOutput(false);
+		mzRunner.runMiniZinc();
+	}
+
+	public static void main2(String[] args) throws IOException, InterruptedException {
 		var jsonOutputEnabled = false;
 
 		Path constraintModel = getResourceDirectory().resolve("minizinc").resolve("SimpleC.mzn");
@@ -103,8 +131,8 @@ public class Prototyp2 {
 		Path intermediateFolder = getResourceDirectory().resolve("intermediate");
 
 		DataModelManager manager = new DataModelManager(dataModelFolder, intermediateFolder);
-		manager.loadDataModel("i01");
-		manager.writeDataModelAsDZN();
+		var dataModel = manager.loadDataModel("i01");
+		manager.writeDataModelAsDZN(dataModel);
 
 		List<String> commands = new LinkedList<>();
 //		commands.add(getMiniZinc().toAbsolutePath().toString());
@@ -132,7 +160,7 @@ public class Prototyp2 {
 
 		// data model
 		processBuilder.command().add("--data");
-		processBuilder.command().add(manager.getPathOfOutput().toString());
+		processBuilder.command().add(manager.getPathOfWrite().toString());
 
 		processBuilder.command().add("--time-limit");
 		processBuilder.command().add(Integer.toString(2 * 60 * 1000));
