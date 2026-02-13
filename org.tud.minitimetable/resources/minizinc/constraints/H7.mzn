@@ -12,7 +12,7 @@ constraint forall(room in rooms, day in Day)(
 */
 
 constraint forall(roomId in RoomIds, day in Days)(
-  roomVar[roomId].assignedPatients[day] == sum(patient in patientVar)(patient.assignedRoomAt[day] = roomId)
+  roomVar[roomId].assignedPatients[day] = count(patient in patientVar)(patient.assignedRoom[day] == roomId)
 );
 
 constraint forall(roomId in RoomIds, day in Days)(

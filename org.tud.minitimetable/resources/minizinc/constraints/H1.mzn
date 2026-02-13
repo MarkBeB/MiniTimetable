@@ -14,8 +14,8 @@ constraint forall(roomId in RoomIds)(
 
 constraint forall(roomId in RoomIds)(
   forall(patientId in PatientIds)(
-    forall(day in Days where patientVar[patientId].assignedRoomAt[day] == roomId)(
-      roomVar[roomId].assignedGender[day] = patientData[patientId].gender
+    forall(day in Days where patientVar[patientId].assignedRoom[day] == roomId)(
+      roomVar[roomId].assignedGender[day] == patientData[patientId].gender
     )
   )
 );

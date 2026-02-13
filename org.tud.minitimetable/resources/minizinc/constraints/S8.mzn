@@ -4,4 +4,4 @@ include "../data/IHTC_model.mzn";
 % S8 Unscheduled patients: The number of optional patients who are not admitted within the current decision horizon should be minimized.
 %
 
-constraint Penalties.unscheduledOptional == Weights.unscheduledOptional * sum(id in PatientIds where not patientData[id].mandatory)(patientVar[id].isPostponed);
+constraint Penalties.unscheduledOptional = Weights.unscheduledOptional * count(id in PatientIds where not patientData[id].mandatory)(patientVar[id].isPostponed);
