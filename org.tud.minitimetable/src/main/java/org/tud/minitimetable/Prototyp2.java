@@ -97,12 +97,12 @@ public class Prototyp2 {
 	public static void main(String[] args) throws IOException, InterruptedException {
 		var jsonOutputEnabled = false;
 
-		Path constraintModel = getResourceDirectory().resolve("model").resolve("IHTC_model.mzn");
+		Path constraintModel = getResourceDirectory().resolve("minizinc").resolve("SimpleC.mzn");
 
-		Path modelFolder = getResourceDirectory().resolve("ihtc");
-		Path outputFolder = getResourceDirectory().resolve("out");
+		Path dataModelFolder = getResourceDirectory().resolve("input").resolve("ihtc");
+		Path intermediateFolder = getResourceDirectory().resolve("intermediate");
 
-		DataModelManager manager = new DataModelManager(modelFolder, outputFolder);
+		DataModelManager manager = new DataModelManager(dataModelFolder, intermediateFolder);
 		manager.loadDataModel("i01");
 		manager.writeDataModelAsDZN();
 
@@ -112,7 +112,7 @@ public class Prototyp2 {
 //		commands.add("Gurobi");
 
 		ProcessBuilder processBuilder = new ProcessBuilder(commands);
-		processBuilder.directory(getUserDirectory().resolve("mini").toFile());
+		processBuilder.directory(getResourceDirectory().resolve("out").toFile());
 		processBuilder.redirectError(Redirect.INHERIT);
 		processBuilder.redirectInput(Redirect.INHERIT);
 		if (!jsonOutputEnabled) {

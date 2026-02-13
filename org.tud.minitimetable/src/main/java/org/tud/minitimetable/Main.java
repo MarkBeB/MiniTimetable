@@ -45,8 +45,8 @@ public class Main {
 //		System.out.println("DONE");
 //		System.out.println("File created: " + dznFile);
 
-		Path modelFolder = resourceDirectory.resolve("ihtc");
-		Path outputFolder = resourceDirectory.resolve("out");
+		Path modelFolder = resourceDirectory.resolve("input").resolve("ihtc");
+		Path outputFolder = resourceDirectory.resolve("intermediate");
 
 		DataModelManager manager = new DataModelManager(modelFolder, outputFolder);
 		manager.loadDataModel("i01");

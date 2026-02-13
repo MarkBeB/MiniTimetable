@@ -206,14 +206,19 @@ public class Ihtc2DznModelWriter {
 	}
 
 	private void write(OperatingTheater obj, Writer writer) throws IOException {
-		writer.indentation().write("(") //
-				.write("id").write(": ").write(obj.id).write(", ") //
-				.write("availability").write(": ")//
+		writer.indentation().write("(").increaseIndentation().newLine();
+		writer.indentation().write("id").write(": ").write(obj.id).write(", ").newLine();
+		writer.indentation().write("availability").write(": ")//
 				.write("[").write("0:", notEmpty(obj.availability)) //
 				.write(obj.availability, (value, hasMore) -> {
 					writer.write(value).write(", ", hasMore);
-				}).write("]") //
-				.write(")");
+				}).write("]").write(",").newLine();
+		writer.indentation().write("isAvailable").write(": ")//
+				.write("[").write("0:", notEmpty(obj.availability)) //
+				.write(obj.availability, (value, hasMore) -> {
+					writer.write(value > 0).write(", ", hasMore);
+				}).write("]").write(",").newLine();
+		writer.decreaseIndentation().indentation().write(")");
 	}
 
 	private void write(Room obj, Writer writer) throws IOException {
