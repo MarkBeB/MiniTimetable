@@ -2,13 +2,14 @@
     "openFiles": [
         "SimpleC.mzn",
         "data/IHTC_model.mzn",
-        "OutConsoleFormat.mzn",
-        "OutJsonFormat.mzn",
         "../intermediate/i01.dzn",
         "constraints/H8.mzn",
-        "constraints/H4.mzn"
+        "constraints/H4.mzn",
+        "constraints/S8.mzn",
+        "constraints/S6.mzn",
+        "OutJsonFormat.mzn"
     ],
-    "openTab": 2,
+    "openTab": 0,
     "projectFiles": [
         "../intermediate/i01.dzn",
         "OutConsoleFormat.mzn",
@@ -24,6 +25,8 @@
         "constraints/H7.mzn",
         "constraints/H8.mzn",
         "constraints/S1.mzn",
+        "constraints/S3.mzn",
+        "constraints/S4.mzn",
         "constraints/S5.mzn",
         "constraints/S6.mzn",
         "constraints/S7.mzn",

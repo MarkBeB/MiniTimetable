@@ -50,16 +50,7 @@ include "constraints/S3.mzn";
 % should not exceed the maximum workload of the nurse for this shift. 
 % The penalty is the amount by which the total workload exceeds the limit, or 0 if it does not exceed the maximum workload of the nurse.
 %
-%include "constraints/S4.mzn";
-/*
-constraint forall(roomId in RoomIds, day in Days, shift in ShiftTypes)(
-  roomVar[roomId].workload[day, shift] = 
-    sum(occupant in occupantData where occupant.assignedRoom == roomId /\ day < occupant.lengthOfStay)
-      (occupant.workloadProduced[enum2int(shift) - 1 + enum2int(day) * length(ShiftTypes)])
-  + sum(patientId in PatientIds where patientVar[patientId].assignedRoom[day] == roomId)
-      (patientData[patientId].workloadProduced[enum2int(shift) - 1 + (enum2int(day)-patientVar[patientId].admissionDay) * length(ShiftTypes)])   
-);
-*/
+include "constraints/S4.mzn";
 
 
 % SCP
