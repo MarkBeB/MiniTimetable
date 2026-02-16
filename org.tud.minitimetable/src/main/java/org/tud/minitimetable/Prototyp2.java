@@ -112,7 +112,7 @@ public class Prototyp2 {
 		var dataModel = dataManager.loadModel(Path.of("ihtc", "i01"));
 		dataManager.writeDataModelAsDZN(dataModel);
 
-		MiniZincRunner mzRunner = new MiniZincRunner(workingDirectory, minizincExe);
+		MiniZincRunner mzRunner = new MiniZincRunner(minizincExe, workingDirectory);
 		mzRunner.config().setConstraintModel(constraintModel);
 		mzRunner.config().setDataModel(dataManager.getPathOfWrite());
 		mzRunner.config().setNumberOfThreads(4);

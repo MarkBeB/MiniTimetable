@@ -72,13 +72,13 @@ public class MiniZincRunner {
 	private final List<Path> _parameterFiles = new ArrayList<>(5);
 	private final MiniZincConfig _config = new MiniZincConfig();
 
-	private final Path _miniZincExe;
+	private final Path _executable;
 	private final Path _workingDirectory;
 	private boolean _parseOutput = true;
 
-	public MiniZincRunner(Path workingDirectory, Path miniZincLocation) {
+	public MiniZincRunner(Path executable, Path workingDirectory) {
+		_executable = Objects.requireNonNull(executable, "executable");
 		_workingDirectory = Objects.requireNonNull(workingDirectory, "workingDirectory");
-		_miniZincExe = Objects.requireNonNull(miniZincLocation, "miniZincLocation");
 	}
 
 	public void parseOutput(boolean value) {
@@ -109,7 +109,7 @@ public class MiniZincRunner {
 		}
 
 		// path to minizinc exe
-		processBuilder.command().add(_miniZincExe.toAbsolutePath().toString());
+		processBuilder.command().add(_executable.toAbsolutePath().toString());
 
 		// set solver to Gurobi
 		processBuilder.command().add("--solver");
