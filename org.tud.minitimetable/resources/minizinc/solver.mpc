@@ -1,0 +1,7 @@
+{
+    "intermediate-solutions": true,
+    "output-objective": true,
+    "parallel": 4,
+    "solver": "org.minizinc.mip.gurobi@13.0.0",
+    "time-limit": 600000
+}
