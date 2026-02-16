@@ -8,10 +8,8 @@ include "../data/IHTC_model.mzn";
 
 constraint forall(patient in patientVar, day in Days where patient.isAdmitted)(
   let{ var opt RoomIds: roomId = patient.assignedRoom[day] } in
-  forall(shift in ShiftTypes)(
-    forall(nurseId in NurseIds)(
-      nurseVar[nurseId].assignedRooms[day, shift, roomId] -> patient.caredByNurse[nurseId]
-    )
+  forall(shift in ShiftTypes, nurseId in NurseIds)(
+    nurseVar[nurseId].assignedRooms[day, shift, roomId] -> patient.caredByNurse[nurseId]
   )
 );
 
