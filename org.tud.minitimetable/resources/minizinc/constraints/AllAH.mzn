@@ -51,7 +51,7 @@ constraint forall(patient in patientVar)(
 
 %  The assigned OT should be available on the day of admission.
 constraint forall(patient in patientVar where patient.isAdmitted)(
-  exists(otId in OperatingTheaterIds where operatingTheaterData[otId].isAvailable[patient.admissionDay])(
-    patient.assignedOT = otId
+  exists(ot in operatingTheaterData where ot.isAvailable[patient.admissionDay])(
+    patient.assignedOT = ot.id
   )
 );

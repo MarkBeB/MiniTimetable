@@ -10,5 +10,8 @@ include "constraints/H6.mzn";
 include "constraints/H7.mzn";
 include "constraints/H8.mzn";
 
+include "constraints/S7.mzn";
+include "constraints/S8.mzn";
+
 solve minimize score;
 include "OutJsonFormat.mzn";

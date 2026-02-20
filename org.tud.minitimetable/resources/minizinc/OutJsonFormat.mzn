@@ -5,14 +5,14 @@ output
 
 [ "  \("score"): \(score),\n" ] ++
 [ "  \("penalties"): {\n" ] ++
-[ "    \("roomMixedAge"): \(Penalties.roomMixedAge),\n" ] ++
-[ "    \("roomNurseSkill"): \(Penalties.roomNurseSkill),\n" ] ++
-[ "    \("continuityOfCare"): \(Penalties.continuityOfCare),\n" ] ++
-[ "    \("nurseEccessiveWorkload"): \(Penalties.nurseEccessiveWorkload),\n" ] ++
-[ "    \("openOperatingTheater"): \(Penalties.openOperatingTheater),\n" ] ++
-[ "    \("surgeonTransfer"): \(Penalties.surgeonTransfer),\n" ] ++
-[ "    \("patientDelay"): \(Penalties.patientDelay),\n" ] ++
-[ "    \("unscheduledOptional"): \(Penalties.unscheduledOptional)\n" ] ++
+[ "    \("RoomAgeMix"): \(Penalties.roomMixedAge),\n" ] ++
+[ "    \("RoomSkillLevel"): \(Penalties.roomNurseSkill),\n" ] ++
+[ "    \("ContinuityOfCare"): \(Penalties.continuityOfCare),\n" ] ++
+[ "    \("ExcessiveNurseWorkload"): \(Penalties.nurseEccessiveWorkload),\n" ] ++
+[ "    \("OpenOperatingTheater"): \(Penalties.openOperatingTheater),\n" ] ++
+[ "    \("SurgeonTransfer"): \(Penalties.surgeonTransfer),\n" ] ++
+[ "    \("PatientDelay"): \(Penalties.patientDelay),\n" ] ++
+[ "    \("ElectiveUnscheduledPatients"): \(Penalties.unscheduledOptional)\n" ] ++
 [ "  },\n" ] ++
 
 [ "  \("patients"): [\n" ] ++
@@ -20,7 +20,6 @@ output
       "\("admission_day"): "++show_int(3, p.admissionDay)++", " ++ 
       "\("room"): \(format(p.assignedRoom[p.admissionDay])), " ++
       "\("operating_theater"): \("\(p.assignedOT)")},\n" | id in PatientIds, p = patientVar[id] where fix(p.isAdmitted) ] ++
-%[ "    {\("id"): \("\(id)"), \("postponed"): true},\n" | id in PatientIds, p = patientVar[id] where not fix(p.isAdmitted) ] ++
 [ "  ],\n" ] ++
 
 [ " \("postponedPatients"): [" ] ++

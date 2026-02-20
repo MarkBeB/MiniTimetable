@@ -13,4 +13,4 @@ constraint forall(id in PatientIds)(
   patientVar[id].penaltyAdmissionDelay = patientVar[id].admissionDay - patientData[id].earliestPossibleAdmission
 );
 
-constraint Penalties.patientDelay = Weights.patientDelay * sum(patient in patientVar)(patient.penaltyAdmissionDelay);
+constraint Penalties.patientDelay = Weights.patientDelay * sum(patient in patientVar where patient.isAdmitted)(patient.penaltyAdmissionDelay);
