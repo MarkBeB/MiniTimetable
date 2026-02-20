@@ -23,6 +23,18 @@ public final class Room {
 		return availableCapacity;
 	}
 
+	public int[] getOccupantsPerDay() {
+		var occupantsPerDay = new int[root.days];
+		for (var occupant : root.occupants) {
+			if (id.equals(occupant.assignedToRoom)) {
+				for (var day = 0; day < occupant.lengthOfStay; ++day) {
+					occupantsPerDay[day] += 1;
+				}
+			}
+		}
+		return occupantsPerDay;
+	}
+
 	public String[] getGenderAssignment() {
 		var assignments = new String[root.days];
 

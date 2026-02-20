@@ -1,8 +1,10 @@
-package org.tud.minitimetable.util;
+package org.tud.minitimetable.model.util;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Objects;
+
+import org.tud.minitimetable.model.util.Writer.WriteFunction;
 
 public class FileWriter implements Writer {
 

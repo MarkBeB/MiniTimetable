@@ -1,58 +1,21 @@
 package org.tud.minitimetable;
 
-import java.io.BufferedReader;
-import java.io.Closeable;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.ProcessBuilder.Redirect;
 import java.nio.file.Path;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
-import org.tud.minitimetable.util.DataModelManager;
+import org.tud.minitimetable.extern.ValidatorRunner;
+import org.tud.minitimetable.extern.solver.MiniZincRunner;
+import org.tud.minitimetable.extern.solver.SolutionStatus;
+import org.tud.minitimetable.extern.solver.SolverResult;
+import org.tud.minitimetable.model.util.InputModelReader;
+import org.tud.minitimetable.model.util.OutputModelWriter;
 import org.tud.minitimetable.util.MiniZincLocator;
-
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
+import org.tud.minitimetable.util.PathUtils;
 
 public class Prototyp2 {
 
-	private static class MZSolution {
-		public final long timestamp;
-		public final Object result;
-
-		public MZSolution(long timestamp, Object result) {
-			this.timestamp = timestamp;
-			this.result = Objects.requireNonNull(result);
-		}
-
-		@Override
-		public String toString() {
-			return "Solution: " + result.toString();
-		}
-
-	}
-
-	private static class MZOutputParser implements Closeable {
-		private InputStream input;
-
-		public MZOutputParser(InputStream mzOutput) {
-			input = Objects.requireNonNull(mzOutput);
-		}
-
-		@Override
-		public void close() throws IOException {
-			// TODO Auto-generated method stub
-
-		}
-	}
-
-	private static final Path miniZincLocation = Path.of("..", "..", "MiniZinc", "minizinc.exe");
-	private static final Path resourceFolder = Path.of("./", "resources");
+	private static final Path userDirectory = Path.of(System.getProperty("user.dir"));
+	private static final Path resourceDirectory = Path.of("./", "resources");
 
 	private static Path changeFileExtension(Path filePath, String newExtension) {
 		String fileName = filePath.getFileName().toString();
@@ -69,176 +32,129 @@ public class Prototyp2 {
 	}
 
 	private static Path getUserDirectory() {
-		String currentDir = System.getProperty("user.dir");
-		return Path.of(currentDir);
+		return userDirectory;
 	}
 
 	private static Path getResourceDirectory() {
-		return getUserDirectory().resolve(resourceFolder).normalize();
+		return getUserDirectory().resolve(resourceDirectory).normalize();
 	}
 
-	private static Path getMiniZinc() {
-		return getUserDirectory().resolve(miniZincLocation).normalize();
-	}
-
-	private static Path getValidator() {
-		return getResourceDirectory().resolve("IHTP_Validator_win.exe");
-	}
-
-	private static void transformInput() throws IOException {
-		Path modelFolder = getResourceDirectory().resolve("ihtc");
+	public static void main3(String[] args) throws IOException, InterruptedException {
 		Path outputFolder = getResourceDirectory().resolve("out");
-
-		DataModelManager manager = new DataModelManager(modelFolder, outputFolder);
-		var m = manager.loadDataModel("i01");
-		manager.writeDataModelAsDZN(m);
-
-	}
-
-	public static void main(String[] args) throws IOException {
-		Path dataFolder = getResourceDirectory().resolve("input");
-		Path intermediateFolder = getResourceDirectory().resolve("intermediate");
-		Path outputFolder = getResourceDirectory().resolve("out");
-
-		Path constraintModel = getResourceDirectory().resolve("minizinc").resolve("SimpleC.mzn");
-
+		Path validatorFile = getResourceDirectory().resolve("IHTP_Validator_Win11.exe");
 		Path workingDirectory = outputFolder;
 
-		MiniZincLocator minizincLocator = new MiniZincLocator();
-		minizincLocator.addFolder(Path.of("..", "..", "MiniZinc", "minizinc.exe"));
-		Path minizincExe = minizincLocator.searchMiniZinc().stream().findFirst().get();
+		ValidatorRunner validator = new ValidatorRunner(validatorFile, workingDirectory);
+		var result = validator.run(Path.of("./../i01.json"), Path.of("./../sol_i01.json"));
 
-		DataModelManager dataManager = new DataModelManager(dataFolder, intermediateFolder);
-		var dataModel = dataManager.loadModel(Path.of("ihtc", "i01"));
-		dataManager.writeDataModelAsDZN(dataModel);
-
-		MiniZincRunner mzRunner = new MiniZincRunner(minizincExe, workingDirectory);
-		mzRunner.config().setConstraintModel(constraintModel);
-		mzRunner.config().setDataModel(dataManager.getPathOfWrite());
-		mzRunner.config().setNumberOfThreads(4);
-		mzRunner.config().setTimeLimit(10 * 60 * 1000);
-		mzRunner.config().setWriteModel(outputFolder.resolve("model.lp"));
-		mzRunner.parseOutput(false);
-		mzRunner.runMiniZinc();
+		if (result.getTotalViolations() > 0) {
+			System.err.println("Found " + result.violations + " violations!");
+			for (var violation : result.violations) {
+				if (violation.violations > 0) {
+					System.err.println(violation);
+				}
+			}
+		}
 	}
 
-	public static void main2(String[] args) throws IOException, InterruptedException {
-		var jsonOutputEnabled = false;
+	public static void main(String[] args) throws IOException, InterruptedException {
+		Path constraintModelFile = getResourceDirectory().resolve("minizinc").resolve("OnlyHardConstraints.mzn");
 
-		Path constraintModel = getResourceDirectory().resolve("minizinc").resolve("SimpleC.mzn");
+		Path inputModelName = Path.of("ihtc", "i01");
 
-		Path dataModelFolder = getResourceDirectory().resolve("input").resolve("ihtc");
-		Path intermediateFolder = getResourceDirectory().resolve("intermediate");
+		Path inputFolder = getResourceDirectory().resolve("input");
+		Path outputFolder = getResourceDirectory().resolve("out");
+		Path workingDirectory = outputFolder;
 
-		DataModelManager manager = new DataModelManager(dataModelFolder, intermediateFolder);
-		var dataModel = manager.loadDataModel("i01");
-		manager.writeDataModelAsDZN(dataModel);
+		Path miniZincExe = getMiniZincExe();
+		Path validatorExe = getResourceDirectory().resolve("IHTP_Validator_Win11.exe");
 
-		List<String> commands = new LinkedList<>();
-//		commands.add(getMiniZinc().toAbsolutePath().toString());
-//		commands.add("--solver");
-//		commands.add("Gurobi");
+		// ============================================================================================================
 
-		ProcessBuilder processBuilder = new ProcessBuilder(commands);
-		processBuilder.directory(getResourceDirectory().resolve("out").toFile());
-		processBuilder.redirectError(Redirect.INHERIT);
-		processBuilder.redirectInput(Redirect.INHERIT);
-		if (!jsonOutputEnabled) {
-			processBuilder.redirectOutput(Redirect.INHERIT);
-		}
+		inputFolder = inputFolder.normalize();
+		System.out.println("Model Input Folder: " + inputFolder);
+		if (!inputFolder.isAbsolute())
+			throw new IllegalArgumentException("Input folder needs to be an absolute path");
 
-		// path to minizinc exe
-		processBuilder.command().add(getMiniZinc().toAbsolutePath().toString());
+		outputFolder = outputFolder.normalize();
+		System.out.println("Data Output Folder: " + outputFolder);
+		if (!outputFolder.isAbsolute())
+			throw new IllegalArgumentException("Output folder needs to be an absolute path");
 
-		// solver argument
-		processBuilder.command().add("--solver");
-		processBuilder.command().add("Gurobi");
-
-		// constraint model
-		processBuilder.command().add("--model");
-		processBuilder.command().add(constraintModel.toString());
-
-		// data model
-		processBuilder.command().add("--data");
-		processBuilder.command().add(manager.getPathOfWrite().toString());
-
-		processBuilder.command().add("--time-limit");
-		processBuilder.command().add(Integer.toString(2 * 60 * 1000));
-
-		if (jsonOutputEnabled) {
-			processBuilder.command().add("--json-stream");
-		}
-
-//		processBuilder.command().add("--help");
-
-		processBuilder.command().add("--writeModel");
-		processBuilder.command().add("./out.lp");
-
-		processBuilder.command().add("-p");
-		processBuilder.command().add("4");
-
-//		var processCmd = "\"" + getMiniZinc().toAbsolutePath().toString() + "\"";
-//		processBuilder.command(processCmd, getResourceDirectory().resolve("model.mpc").toString());
-
-		CompletableFuture<Process> isDone = null;
-		try {
-			var miniZincProcess = processBuilder.start();
-			isDone = miniZincProcess.onExit();
-
-			if (jsonOutputEnabled) {
-				var outStream = miniZincProcess.getInputStream();
-				System.out.println("Found  stream: " + outStream);
-				final BufferedReader outReader = new BufferedReader(new InputStreamReader(outStream));
-
-				String lastLine = outReader.readLine();
-				while (lastLine != null) {
-					// json output
-
-					var json = (JSONObject) JSON.parse(lastLine);
-					System.out.println(json);
-					if ("solution".equals(json.getString("type"))) {
-						var output = ((JSONObject) json.get("output")).getString("dzn");
-						if (output != null) {
-							var solution = new MZSolution(System.currentTimeMillis(), output);
-							System.out.println(solution);
-						} else {
-							System.out.println("Error? A");
-						}
-					}
-
-					lastLine = outReader.readLine();
-				}
-			}
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		if (isDone != null) {
-			long maxTime = 5000;
-			long sleepTime = 250;
-			while (!isDone.isDone() && maxTime > 0) {
-				try {
-					maxTime -= sleepTime;
-					Thread.sleep(sleepTime);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-
-			if (!isDone.isDone()) {
-				try {
-					System.out.println("Process did not terminate: " + isDone.get().pid());
-				} catch (InterruptedException | ExecutionException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
+		Path internalDataModelPath = null;
+		if (!inputModelName.isAbsolute()) {
+			internalDataModelPath = inputModelName.normalize();
 		} else {
-			System.err.println("Error? B");
+			internalDataModelPath = inputFolder.relativize(inputModelName).normalize();
+			if (internalDataModelPath.isAbsolute()) {
+				// means inputFolder is no parent of inputModelName
+				internalDataModelPath = inputModelName.getFileName();
+			}
 		}
 
+		Path inputModelFile = inputModelName.isAbsolute() ? inputModelName.normalize()
+				: inputFolder.resolve(internalDataModelPath);
+		inputModelFile = PathUtils.changeFileExtension(inputModelFile, ".json");
+
+		Path dataModelFile = outputFolder.resolve(internalDataModelPath);
+		dataModelFile = PathUtils.changeFileExtension(dataModelFile, ".dzn");
+
+		Path lpFile = PathUtils.changeFileExtension(dataModelFile, ".lp");
+
+		System.out.println("Load data model: " + inputModelFile);
+		InputModelReader reader = new InputModelReader();
+		var dataModel = reader.read(inputModelFile);
+		// do any preprocessing here
+
+		System.out.println("Write data model to dzn file: " + dataModelFile);
+		OutputModelWriter writer = new OutputModelWriter();
+		writer.write(dataModel, dataModelFile);
+
+//		DataModelManager dataManager = new DataModelManager(inputFolder, outputFolder);
+//		var dataModel = dataManager.loadModel(internalFolder.resolve("i01"));
+//		dataManager.writeDataModelAsDZN(dataModel);
+
+		System.out.println("Run MiniZinc with constraint: " + constraintModelFile);
+		System.out.println("Run MiniZinc with data: " + dataModelFile);
+
+		MiniZincRunner mzRunner = new MiniZincRunner(miniZincExe, workingDirectory);
+		mzRunner.config().setConstraintModel(constraintModelFile);
+		mzRunner.config().setDataModel(dataModelFile);
+		mzRunner.config().setNumberOfThreads(4);
+		mzRunner.config().setTimeLimit(10 * 60 * 1000);
+		mzRunner.config().setWriteModel(lpFile);
+
+		mzRunner.setSolutionOutputFolder(dataModelFile.getParent());
+		mzRunner.parseOutput(true);
+		SolverResult result = mzRunner.runMiniZinc();
+
+		if (result.status == SolutionStatus.ERROR) {
+			System.err.println("MiniZinc Error");
+			return;
+		}
+		if (result.status == SolutionStatus.INFEASABLE) {
+			System.out.println("SOLUTION: " + SolutionStatus.INFEASABLE);
+			return;
+		}
+
+		System.out.println("SOLUTION: " + result.status + " found " + result.solutions.size() + " solution(s)");
+
+		System.out.println("Start validation");
+		ValidatorRunner validator = new ValidatorRunner(validatorExe, workingDirectory);
+
+		for (var solution : result.solutions) {
+			validator.run(inputModelFile, solution.outputFile);
+			if (true) {
+				break;
+			}
+		}
+
+	}
+
+	private static Path getMiniZincExe() {
+		MiniZincLocator minizincLocator = new MiniZincLocator();
+		minizincLocator.addFolder(Path.of("..", "..", "MiniZinc", "minizinc.exe"));
+		return minizincLocator.searchMiniZinc().stream().findFirst().get();
 	}
 
 }

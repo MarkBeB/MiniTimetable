@@ -2,6 +2,7 @@ package org.tud.minitimetable;
 
 import java.nio.file.Path;
 
+@Deprecated
 public class FileConfig {
 
 	private static final Path miniZincLocation = Path.of("..", "..", "..", "MiniZinc", "minizinc.exe");

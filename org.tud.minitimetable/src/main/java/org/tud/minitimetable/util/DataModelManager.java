@@ -7,6 +7,8 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 import org.tud.minitimetable.model.IhtcModel;
+import org.tud.minitimetable.model.util.InputModelReader;
+import org.tud.minitimetable.model.util.OutputModelWriter;
 
 public class DataModelManager {
 
@@ -51,7 +53,7 @@ public class DataModelManager {
 
 	public Path writeDataModelAsDZN(IhtcModel model) throws IOException {
 		var fullOutputPath = _generalOutputFolder.resolve(_generalInputFolder.relativize(_inputModelPath));
-		_outputModelPath = changeFileExtension(fullOutputPath, ".dzn");
+		_outputModelPath = PathUtils.changeFileExtension(fullOutputPath, ".dzn");
 
 		if (!Files.isDirectory(_outputModelPath.getParent())) {
 			Files.createDirectories(_outputModelPath.getParent());
@@ -69,17 +71,6 @@ public class DataModelManager {
 
 	public Path getPathOfWrite() {
 		return _outputModelPath;
-	}
-
-	private static Path changeFileExtension(Path filePath, String newExtension) {
-		String fileName = filePath.getFileName().toString();
-		int delimiterPosition = fileName.lastIndexOf('.');
-
-		int fileNameLength = delimiterPosition < 0 ? fileName.length() : delimiterPosition;
-		String newFileName = fileName.substring(0, fileNameLength)
-				+ (newExtension.startsWith(".") ? newExtension : "." + newExtension);
-
-		return filePath.resolveSibling(newFileName);
 	}
 
 }

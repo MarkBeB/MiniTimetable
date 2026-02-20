@@ -1,4 +1,4 @@
-package org.tud.minitimetable.util;
+package org.tud.minitimetable.model.util;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -233,15 +233,21 @@ public class Ihtc2DznModelWriter {
 	}
 
 	private void write(Room obj, Writer writer) throws IOException {
-		var availableCapacity = obj.getAvailableCapacity();
+//		var availableCapacity = obj.getAvailableCapacity();
 		var genderAssignment = obj.getGenderAssignment();
-
+		var occupantsPerDay = obj.getOccupantsPerDay();
+//
 		writer.indentation().write("(") //
 				.write("id").write(": ").write(obj.id).write(", ") //
 				.write("capacity").write(": ").write(obj.capacity).write(", ") //
-				.write("availableCapacity").write(": ") //
-				.write("[").write("0:", notEmpty(availableCapacity)) //
-				.write(availableCapacity, (value, hasMore) -> {
+//				.write("availableCapacity").write(": ") //
+//				.write("[").write("0:", notEmpty(availableCapacity)) //
+//				.write(availableCapacity, (value, hasMore) -> {
+//					writer.write(value).write(", ", hasMore);
+//				}).write("]").write(", ") //
+				.write("assignedOccupants").write(": ") //
+				.write("[").write("0:", notEmpty(occupantsPerDay)) //
+				.write(occupantsPerDay, (value, hasMore) -> {
 					writer.write(value).write(", ", hasMore);
 				}).write("]").write(", ") //
 				.write("predefinedGenderAssignment").write(": ") //

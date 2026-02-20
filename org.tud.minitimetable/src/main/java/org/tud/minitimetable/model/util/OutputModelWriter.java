@@ -1,4 +1,4 @@
-package org.tud.minitimetable.util;
+package org.tud.minitimetable.model.util;
 
 import java.io.IOException;
 import java.nio.file.Files;

@@ -1,4 +1,4 @@
-package org.tud.minitimetable.util;
+package org.tud.minitimetable.model.util;
 
 import java.util.Map.Entry;
 import java.util.function.Function;
