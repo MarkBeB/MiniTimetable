@@ -15,6 +15,10 @@ constraint forall(roomId in RoomIds, day in Days)(
   roomVar[roomId].assignedPatients[day] = count(patient in patientVar)(patient.assignedRoom[day] == roomId)
 );
 
-constraint forall(roomId in RoomIds, day in Days)(
-  roomVar[roomId].assignedPatients[day] <= roomData[roomId].availableCapacity[day]
+constraint forall(roomId in RoomIds, day in Days)(  
+  roomVar[roomId].assignedPatients[day] + roomData[roomId].assignedOccupants[day] <= roomData[roomId].capacity
 );
+
+%constraint forall(roomId in RoomIds, day in Days)(
+%  roomVar[roomId].assignedPatients[day] <= roomData[roomId].availableCapacity[day]
+%);

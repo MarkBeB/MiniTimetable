@@ -95,7 +95,7 @@ type OperatingTheater = OperatingTheaterFixData ++ OperatingTheaterVarData;
 type RoomFixData = record(
   RoomIds: id,
   int: capacity,
-  array[Days] of int: availableCapacity,
+  array[Days] of int: assignedOccupants,
 
   %deprecated
   array[Days] of opt Genders: predefinedGenderAssignment,
@@ -201,8 +201,9 @@ var 0..10000000: score =
   + Penalties.unscheduledOptional;
 
 
-% Can be removed
+%deprecated
 enum RoomIdOrNotAssigned = {RoomNotAssigned} ++ C_room(RoomIds);
+%deprecated
 enum GenderOrNotAssigned = {GenderNotAssigned} ++ C_gender(Genders);
 
 
@@ -221,7 +222,9 @@ array[PatientIds] of PatientVarData: patientVar;
 array[OperatingTheaterIds] of OperatingTheaterVarData: operatingTheaterVar;
 array[RoomIds] of RoomVarData: roomVar;
 
+%deprecated
 int: numberOfPatients = length(patientData);
+%deprecated
 int: numberOfOccupants = length(occupantData);
 
 % Usage may cause memory segmentation fault since version 2.9.5, was fine before. Seems to happen when a combined Type has 'too many' fields.
