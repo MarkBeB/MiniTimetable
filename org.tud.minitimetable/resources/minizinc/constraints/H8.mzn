@@ -11,3 +11,7 @@ constraint forall(roomId in RoomIds, day in Days, shift in ShiftTypes)(
 constraint forall(nurseId in NurseIds, day in Days, shift in ShiftTypes, roomId in RoomIds)(
   nurseVar[nurseId].assignedRooms[day, shift, roomId] -> nurseVar[nurseId].isWorking[day, shift]
 );
+
+constraint forall(nurseId in NurseIds, day in Days, shift in ShiftTypes, roomId in RoomIds)(
+  nurseVar[nurseId].assignedRooms[day, shift, roomId] <-> roomVar[roomId].assignedNurse[day, shift] == nurseId
+);
