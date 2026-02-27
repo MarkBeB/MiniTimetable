@@ -4,50 +4,24 @@ include "../data/IHTC_model.mzn";
 % S1 Age groups: For each day of the decision horizon and for each room, the maximum difference between age groups of patients sharing the room should be minimized.
 %
 
-/*
-constraint forall(room in rooms, day in Day)(
+constraint forall(roomId in RoomIds, day in Days)(
   let {
-    array[int] of var AgeGroup: assignedOccupants = [occupant.ageGroup | occupant in occupants 
-      where occupant.assignedToRoom == room.id /\ day <= occupant.lengthOfStay];
-    array[int] of var opt AgeGroup: assignedPatients = [patient.ageGroup | patient in patients 
-      where patient.assignedRoom[day] == room.id];
+    array[int] of AgeGroups: occupantAges = [ occupant.ageGroup | occupant in occupantData 
+      where occupant.assignedRoom == roomId /\ day < occupant.lengthOfStay ];
+    
+    array[int] of var opt AgeGroups: patientAges = [ patientData[id].ageGroup | id in PatientIds 
+      where patientVar[id].assignedRoom[day] == roomId ];
+    
+    var opt AgeGroups: maxAge = max_weak(occupantAges ++ patientAges);
+    var opt AgeGroups: minAge = min_weak(occupantAges ++ patientAges);  
+  } in
+  
+  if roomVar[roomId].isOccupied[day] then
+    roomVar[roomId].penaltyAgeMixing[day] = enum2int(maxAge) - enum2int(minAge)
+  else
+    roomVar[roomId].penaltyAgeMixing[day] = 0
+  endif
 
-    var opt AgeGroup: maxOccupantAge = max_weak(assignedOccupants);
-    var opt AgeGroup: minOccupantAge = min_weak(assignedOccupants);    
-    var opt AgeGroup: maxPatientAge = max_weak(assignedPatients);
-    var opt AgeGroup: minPatientAge = min_weak(assignedPatients);
-
-  } in room.maxAgeGroup[day] = max_weak([maxOccupantAge, maxPatientAge])
-    /\ room.minAgeGroup[day] = min_weak([minOccupantAge, minPatientAge])
-);
-*/
-
-constraint forall(room in rooms, day in Day)(
-  room.maxAgeGroupOccupants[day] = max_weak(occupant in occupants where occupant.assignedToRoom == room.id /\ day <= occupant.lengthOfStay)(occupant.ageGroup)
-);
-
-constraint forall(room in rooms, day in Day)(
-  room.minAgeGroupOccupants[day] = min_weak(occupant in occupants where occupant.assignedToRoom == room.id /\ day <= occupant.lengthOfStay)(occupant.ageGroup)
 );
 
-constraint forall(room in rooms, day in Day)(
-  room.maxAgeGroupPatients[day] = max_weak(patient in patients where patient.assignedRoom[day] == room.id)(patient.ageGroup)
-);
-
-constraint forall(room in rooms, day in Day)(
-  room.minAgeGroupPatients[day] = min_weak(patient in patients where patient.assignedRoom[day] == room.id)(patient.ageGroup)
-);
-
-constraint forall(room in rooms, day in Day)(
-  room.maxAgeGroup[day] = max_weak([room.maxAgeGroupOccupants[day], room.maxAgeGroupPatients[day]])
-);
-
-constraint forall(room in rooms, day in Day)(
-  room.minAgeGroup[day] = min_weak([room.minAgeGroupOccupants[day], room.minAgeGroupPatients[day]])
-);
-
-constraint forall(room in rooms, day in Day)(
-  room.agePenalty[day] = enum2int(room.maxAgeGroup[day]) - enum2int(room.minAgeGroup[day])
-);
-
-constraint Penalties.roomMixedAge == Weights.roomMixedAge * sum(room in rooms, day in Day)(enum2int(room.maxAgeGroup[day]) - enum2int(room.minAgeGroup[day]));
+constraint Penalties.roomMixedAge == Weights.roomMixedAge * sum(room in roomVar, day in Days)(room.penaltyAgeMixing[day]);
