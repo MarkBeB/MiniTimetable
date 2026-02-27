@@ -17,9 +17,16 @@ output
 
 [ "  \("patients"): [\n" ] ++
 [ "    {\("id"): \("\(id)"), " ++
+      "\("no_nurses"): \(count(nurseId in NurseIds)(p.caredByNurse[nurseId])), " ++
       "\("admission_day"): "++show_int(3, p.admissionDay)++", " ++ 
       "\("room"): \(format(p.assignedRoom[p.admissionDay])), " ++
       "\("operating_theater"): \("\(p.assignedOT)")},\n" | id in PatientIds, p = patientVar[id] where fix(p.isAdmitted) ] ++
+[ "  ],\n" ] ++
+
+[ "  \("occupants"): [\n" ] ++
+[ "    {\("id"): \("\(id)"), "  ++
+      "\("no_nurses"): \(count(nurseId in NurseIds)(o.caredByNurse[nurseId])), " ++ 
+      "\("room"): \(format(occupantData[id].assignedRoom))},\n" | id in OccupantIds, o = occupantVar[id] ] ++
 [ "  ],\n" ] ++
 
 [ " \("postponedPatients"): [" ] ++
@@ -32,7 +39,7 @@ output
   "      \("id"): \(format(id)),\n" ++
   "      \("assignments"): [\n" ++
   join(",\n",[
-  "        {\("day"): "++show_int(3,day)++", \("shift"): \(format(shift)), \("rooms"): ["++join(", ",[ "\(format(room))" |room in RoomIds where fix(n.assignedRooms[day, shift,room])])++"]}"
+  "        {\("day"): "++show_int(3,day)++", \("shift"): \(format(shift)), \("rooms"): ["++join(", ",[ "\(format(room))" |room in RoomIds where fix(n.assignedRooms[day, shift, room])])++"]}"
     | day in Days, shift in ShiftTypes where fix(n.isWorking[day, shift])]) ++ "\n" ++
   "      ]\n" ++
   "    },\n" 

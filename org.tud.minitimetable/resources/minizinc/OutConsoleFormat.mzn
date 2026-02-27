@@ -1,5 +1,8 @@
 include "data/IHTC_model.mzn" ;
 
+%array[int] of var opt int: test2 = [0,1,2,<>,4,5];
+%var int: test3 = sum(x in test2)(max(0, -2 + x));
+
 output
 [ "nurses = [\n" ] ++
 [ "\t(\n \(n) \n" | n in nurseVar] ++
@@ -10,14 +13,13 @@ output
   "\t\tagePenalty: \(rV.penaltyAgeMixing)\n" ++
   "\t\tisOccupied: \(rV.isOccupied)\n" ++
   "\t\tworkload: \(rV.workload)\n" ++
-  "\t\tmaxAgeGroup: \(rV.maxAgeGroup)\n" ++
-  "\t\tminAgeGroup: \(rV.minAgeGroup)\n" ++
   "\t\tassignedPatients: \(rV.assignedPatients)\n" ++
   "\t\tassignedGender: \(rV.assignedGender)\n" ++
-  "\t\tmaxAgeGroupOccupants: \(rV.maxAgeGroupOccupants)\n" ++
-  "\t\tminAgeGroupOccupants: \(rV.minAgeGroupOccupants)\n" ++
-  "\t\tmaxAgeGroupPatients: \(rV.maxAgeGroupPatients)\n" ++
-  "\t\tminAgeGroupPatients: \(rV.minAgeGroupPatients)\n" ++
+%  "\t\tmaxAgeGroupOccupants: \(rV.maxO)\n" ++
+%  "\t\tminAgeGroupOccupants: \(rV.minO)\n" ++
+%  "\t\tmaxAgeGroupPatients: \(rV.maxP)\n" ++
+%  "\t\tminAgeGroupPatients: \(rV.minP)\n" ++
+  "\t\tpenaltyAgeMixing: \(rV.penaltyAgeMixing)\n" ++
   "\t)\n" | id in RoomIds, rV = roomVar[id], rF = roomData[id]] ++
 [ "];\n\n" ] ++ 
 
@@ -39,4 +41,5 @@ output
 [ "   openOperatingTheater = "++show_int(-6, Penalties.openOperatingTheater)++"   surgeonTransfer        = "++show_int(-6, Penalties.surgeonTransfer)++ "\n"] ++
 [ "   patientDelay         = "++show_int(-6, Penalties.patientDelay)        ++"   unscheduledOptional    = "++show_int(-6, Penalties.unscheduledOptional)++ "\n"] ++
 [ "\n" ] ++
+[ "TEST: \(test3)\n"] ++
 [ "total score = \(score)\n"]
