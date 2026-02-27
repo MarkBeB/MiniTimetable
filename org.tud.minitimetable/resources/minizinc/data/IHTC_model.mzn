@@ -63,9 +63,7 @@ type NurseVarData = record(
   array[Days, ShiftTypes, RoomIds] of var bool: assignedRooms,
   array[Days, ShiftTypes] of var int: expectedWorkload,
 
-  array[Days] of 0..maxPenalityValue: penaltySkillLevel,
-  array[Days] of 0..maxPenalityValue: penaltyCare,
-  array[Days] of 0..maxPenalityValue: penaltyWorkload,
+  array[Days, ShiftTypes] of var 0..maxPenalityValue: penaltySkillLevel,
 );
 type Nurse = NurseFixData ++ NurseVarData;
 
@@ -105,16 +103,9 @@ type RoomVarData = record(
   array[Days] of var 0..100: assignedPatients,  
   array[Days] of var Genders: assignedGender,
   array[Days, ShiftTypes] of var int: workload,
+  array[Days, ShiftTypes] of var opt NurseIds: assignedNurse,
 
   array[Days] of var 0..length(AgeGroups): penaltyAgeMixing,
-
-
-  array[Days] of var opt AgeGroups: maxAgeGroup,
-  array[Days] of var opt AgeGroups: minAgeGroup,
-  array[Days] of var opt AgeGroups: maxAgeGroupOccupants,
-  array[Days] of var opt AgeGroups: minAgeGroupOccupants,
-  array[Days] of var opt AgeGroups: maxAgeGroupPatients,
-  array[Days] of var opt AgeGroups: minAgeGroupPatients,
 );
 type Room = RoomFixData ++ RoomVarData;
 
@@ -128,7 +119,10 @@ type OccupantFixData = record (
   array[int] of SkillLevels: skillLevelRequired, %length = lengthOfStay * length(ShiftType)
   RoomIds: assignedRoom,
 );
-type Occupant = OccupantFixData;
+type OccupantVarData = record (
+  array[NurseIds] of var bool: caredByNurse
+);
+type Occupant = OccupantFixData ++ OccupantVarData;
 
 
 type PatientFixData = record (
@@ -218,7 +212,7 @@ array[RoomIds] of RoomFixData: roomData;
 array[NurseIds] of NurseVarData: nurseVar;
 array[SurgeonIds] of SurgeonVarData: surgeonVar;
 array[PatientIds] of PatientVarData: patientVar;
-%array[OccupantIds] of OccupantVarData: occupantVar;
+array[OccupantIds] of OccupantVarData: occupantVar;
 array[OperatingTheaterIds] of OperatingTheaterVarData: operatingTheaterVar;
 array[RoomIds] of RoomVarData: roomVar;
 
@@ -236,7 +230,23 @@ int: numberOfOccupants = length(occupantData);
 %array[OperatingTheaterIds] of OperatingTheater: operatingTheaters ::output = [id: operatingTheaterData[id] ++ operatingTheaterVar[id] | id in OperatingTheaterIds];
 %array[RoomIds] of Room: rooms ::output = [id: roomData[id] ++ roomVar[id] | id in RoomIds];
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% UTILITY FUNCTIONS
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+function bool: occupantIsInRoom(OccupantIds: id, Days: day, RoomIds: roomId) = 
+  (occupantData[id].assignedRoom == roomId) /\ (day < occupantData[id].lengthOfStay);
+
+function var bool: patientIsInRoom(PatientIds: id, Days: day, RoomIds: roomId) = 
+  patientVar[id].assignedRoom[day] == roomId;
+
+function var bool: occupantIsPresent(OccupantIds: id, Days: day) = 
+  day < occupantData[id].lengthOfStay;
+
+function var bool: patientIsPresent(PatientIds: id, Days: day) = 
+  patientVar[id].admissionDay <= day /\ day <= patientVar[id].admittedUntil;
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -279,6 +289,11 @@ constraint forall(nurseId in NurseIds, day in Days, shift in ShiftTypes)(
 );
 */
 
+function var int: indexOf(PatientIds: id, Days: day, ShiftTypes: shift) =
+  enum2int(shift) - 1 + (enum2int(day) - patientVar[id].admissionDay) * length(ShiftTypes);
+
+function int: indexOf(Days: day, ShiftTypes: shift) =
+  enum2int(shift) - 1 + enum2int(day) * length(ShiftTypes);
 
 % include "OutConsoleFormat.mzn";
 % include "OutJsonFormat.mzn";
