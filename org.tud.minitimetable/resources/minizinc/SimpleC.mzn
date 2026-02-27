@@ -19,7 +19,7 @@ include "constraints/H7.mzn";
 % PAS
 % S1 Age groups: For each day of the decision horizon and for each room, the maximum difference between age groups of patients sharing the room should be minimized.
 %
-%include "constraints/S1.mzn";
+include "constraints/S1.mzn";
 
 
 % NRA
