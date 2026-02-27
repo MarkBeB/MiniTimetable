@@ -13,4 +13,19 @@ constraint forall(patient in patientVar, day in Days where patient.isAdmitted)(
   )
 );
 
-constraint Penalties.continuityOfCare = Weights.continuityOfCare * sum(patient in patientVar)(max(0, sum(nurseId in NurseIds)(patient.caredByNurse[nurseId]) - length(ShiftTypes)));
+constraint forall(occupantId in OccupantIds, day in Days where occupantIsPresent(occupantId, day))(
+  let{ RoomIds: roomId = occupantData[occupantId].assignedRoom } in
+  forall(shift in ShiftTypes, nurseId in NurseIds)(
+    nurseVar[nurseId].assignedRooms[day, shift, roomId] -> occupantVar[occupantId].caredByNurse[nurseId]
+  )
+);
+
+%constraint Penalties.continuityOfCare = Weights.continuityOfCare * sum(patient in patientVar)
+%  (max(0, sum(nurseId in NurseIds)(patient.caredByNurse[nurseId]) - length(ShiftTypes)));
+
+constraint Penalties.continuityOfCare = Weights.continuityOfCare * (
+    count(patient in patientVar, nurseId in NurseIds)(patient.caredByNurse[nurseId])
+  + count(occupant in occupantVar, nurseId in NurseIds)(occupant.caredByNurse[nurseId])
+  );
+
+constraint Penalties.continuityOfCare >= Weights.continuityOfCare * length(ShiftTypes) * (count(patient in patientVar)(patient.isAdmitted) + length(OccupantIds));
