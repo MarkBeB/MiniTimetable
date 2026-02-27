@@ -24,8 +24,23 @@ public class PathUtils {
 	}
 
 	public static Path changeFileExtension(Path filePath, String newExtension) {
-		String newFileName = getFileNameWithoutExtension(filePath)
-				+ (newExtension.startsWith(".") ? newExtension : "." + newExtension);
+		String fileName = filePath.getFileName().toString();
+		int delimiterPosition = fileName.lastIndexOf('.');
+		boolean hasExtension = delimiterPosition > 0;
+
+		if (hasExtension) {
+			if (newExtension != null && fileName.endsWith(newExtension))
+				return filePath;
+
+			fileName = fileName.substring(0, delimiterPosition);
+
+			if (newExtension == null || newExtension.isBlank())
+				return filePath.resolveSibling(fileName);
+
+		} else if (newExtension == null || newExtension.isBlank())
+			return filePath;
+
+		String newFileName = fileName + (newExtension.startsWith(".") ? newExtension : "." + newExtension);
 		return filePath.resolveSibling(newFileName);
 	}
 
@@ -33,5 +48,9 @@ public class PathUtils {
 		if (second == null)
 			return first;
 		return first.resolve(second);
+	}
+
+	public static Path removeFileExtension(Path filePath) {
+		return changeFileExtension(filePath, null);
 	}
 }

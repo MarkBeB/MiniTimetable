@@ -1,7 +1,12 @@
 package org.tud.minitimetable;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
+import java.util.Comparator;
+import java.util.stream.Stream;
 
 import org.tud.minitimetable.extern.ValidatorRunner;
 import org.tud.minitimetable.extern.solver.MiniZincRunner;
@@ -58,9 +63,9 @@ public class Prototyp2 {
 	}
 
 	public static void main(String[] args) throws IOException, InterruptedException {
-		Path constraintModelFile = getResourceDirectory().resolve("minizinc").resolve("OnlyHardConstraints.mzn");
+		Path constraintModelFile = getResourceDirectory().resolve("minizinc").resolve("AllConstraints.mzn");
 
-		Path inputModelName = Path.of("ihtc", "i01");
+		Path inputDataModelFile = Path.of("ihtc", "i01");
 
 		Path inputFolder = getResourceDirectory().resolve("input");
 		Path outputFolder = getResourceDirectory().resolve("out");
@@ -70,6 +75,9 @@ public class Prototyp2 {
 		Path validatorExe = getResourceDirectory().resolve("IHTP_Validator_Win11.exe");
 
 		// ============================================================================================================
+		Instant startTime = java.time.Instant.now();
+
+		System.out.println("Start Time: " + startTime);
 
 		inputFolder = inputFolder.normalize();
 		System.out.println("Model Input Folder: " + inputFolder);
@@ -81,25 +89,37 @@ public class Prototyp2 {
 		if (!outputFolder.isAbsolute())
 			throw new IllegalArgumentException("Output folder needs to be an absolute path");
 
-		Path internalDataModelPath = null;
-		if (!inputModelName.isAbsolute()) {
-			internalDataModelPath = inputModelName.normalize();
-		} else {
-			internalDataModelPath = inputFolder.relativize(inputModelName).normalize();
-			if (internalDataModelPath.isAbsolute()) {
-				// means inputFolder is no parent of inputModelName
-				internalDataModelPath = inputModelName.getFileName();
+		Path relativeOutputFolder = null;
+		if (inputDataModelFile.isAbsolute()) {
+			if (inputDataModelFile.startsWith(inputFolder)) {
+				relativeOutputFolder = inputFolder.relativize(inputDataModelFile).normalize();
+			} else {
+				relativeOutputFolder = inputDataModelFile.getFileName();
 			}
+		} else {
+			relativeOutputFolder = inputDataModelFile.normalize();
+		}
+		relativeOutputFolder = PathUtils.removeFileExtension(relativeOutputFolder);
+
+		if (!inputDataModelFile.isAbsolute()) {
+			inputDataModelFile = inputFolder.resolve(inputDataModelFile);
 		}
 
-		Path inputModelFile = inputModelName.isAbsolute() ? inputModelName.normalize()
-				: inputFolder.resolve(internalDataModelPath);
+		Path inputModelFile = inputDataModelFile;
 		inputModelFile = PathUtils.changeFileExtension(inputModelFile, ".json");
 
-		Path dataModelFile = outputFolder.resolve(internalDataModelPath);
+		Path dataModelFile = outputFolder.resolve(relativeOutputFolder).resolve(inputDataModelFile.getFileName());
 		dataModelFile = PathUtils.changeFileExtension(dataModelFile, ".dzn");
 
 		Path lpFile = PathUtils.changeFileExtension(dataModelFile, ".lp");
+
+		System.out.println("Clear previously generated files");
+		if (Files.exists(dataModelFile.getParent())) {
+			try (Stream<Path> walk = Files.walk(dataModelFile.getParent())) {
+				walk.sorted(Comparator.reverseOrder()).map(Path::toFile).peek(System.out::println)
+						.forEach(File::delete);
+			}
+		}
 
 		System.out.println("Load data model: " + inputModelFile);
 		InputModelReader reader = new InputModelReader();
@@ -120,9 +140,9 @@ public class Prototyp2 {
 		MiniZincRunner mzRunner = new MiniZincRunner(miniZincExe, workingDirectory);
 		mzRunner.config().setConstraintModel(constraintModelFile);
 		mzRunner.config().setDataModel(dataModelFile);
-		mzRunner.config().setNumberOfThreads(4);
-		mzRunner.config().setTimeLimit(10 * 60 * 1000);
-		mzRunner.config().setWriteModel(lpFile);
+		mzRunner.config().setNumberOfThreads(1);
+		mzRunner.config().setTimeLimit(30 * 60 * 1000);
+//		mzRunner.config().setWriteModel(lpFile);
 
 		mzRunner.setSolutionOutputFolder(dataModelFile.getParent());
 		mzRunner.parseOutput(true);
@@ -138,6 +158,9 @@ public class Prototyp2 {
 		}
 
 		System.out.println("SOLUTION: " + result.status + " found " + result.solutions.size() + " solution(s)");
+
+		if (result.solutions.isEmpty())
+			return;
 
 		System.out.println("Start validation");
 		ValidatorRunner validator = new ValidatorRunner(validatorExe, workingDirectory);

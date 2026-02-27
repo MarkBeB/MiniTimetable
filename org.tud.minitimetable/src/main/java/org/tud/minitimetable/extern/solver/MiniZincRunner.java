@@ -265,7 +265,9 @@ public class MiniZincRunner {
 				} else if ("status".equals(parseType)) {
 					String solverStatus = json.getString("status");
 					status = switch (solverStatus) {
+					case "UNKNOWN" -> SolutionStatus.UNKNOWN;
 					case "OPTIMAL_SOLUTION" -> SolutionStatus.OPTIMAL;
+					case "UNSATISFIABLE" -> SolutionStatus.INFEASABLE;
 					default -> {
 						System.out.println("Unknown Status: " + solverStatus);
 						yield SolutionStatus.UNKNOWN;
@@ -291,6 +293,10 @@ public class MiniZincRunner {
 
 		while (!isDone.isDone()) {
 			Thread.sleep(100);
+		}
+
+		if (solutions.size() > 0 && status == SolutionStatus.UNKNOWN) {
+			status = SolutionStatus.FEASABLE;
 		}
 
 		return new SolverResult(status, solutions);
