@@ -44,6 +44,11 @@ public class PathUtils {
 		return filePath.resolveSibling(newFileName);
 	}
 
+	public static Path appendFileName(Path filePath, String append) {
+		String fileName = filePath.getFileName().toString();
+		return filePath.resolveSibling(fileName + append);
+	}
+
 	public static Path resolve(Path first, Path second) {
 		if (second == null)
 			return first;
