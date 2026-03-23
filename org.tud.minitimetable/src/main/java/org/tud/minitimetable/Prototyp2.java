@@ -8,12 +8,13 @@ import java.time.Instant;
 import java.util.Comparator;
 import java.util.stream.Stream;
 
-import org.tud.minitimetable.extern.ValidatorRunner;
-import org.tud.minitimetable.extern.solver.MiniZincRunner;
-import org.tud.minitimetable.extern.solver.SolutionStatus;
-import org.tud.minitimetable.extern.solver.SolverResult;
+import org.tud.minitimetable.extern.solver.old.MiniZincRunner;
+import org.tud.minitimetable.extern.solver.old.SolverResult;
+import org.tud.minitimetable.extern.solver.old.MiniZincRunner.MiniZincConfig.Flag;
+import org.tud.minitimetable.extern.validator.ValidatorRunner;
 import org.tud.minitimetable.model.util.InputModelReader;
 import org.tud.minitimetable.model.util.OutputModelWriter;
+import org.tud.minitimetable.util.LpAnalyser;
 import org.tud.minitimetable.util.MiniZincLocator;
 import org.tud.minitimetable.util.PathUtils;
 
@@ -63,9 +64,14 @@ public class Prototyp2 {
 	}
 
 	public static void main(String[] args) throws IOException, InterruptedException {
-		Path constraintModelFile = getResourceDirectory().resolve("minizinc").resolve("AllConstraints.mzn");
+//		Path constraintModelFile = getResourceDirectory().resolve("minizinc").resolve("AllConstraints.mzn");
+		Path constraintModelFile = getResourceDirectory().resolve("minizinc").resolve("HardAndSomeSoft.mzn");
+		Path gurobiParamFiles = getResourceDirectory().resolve("minizinc").resolve("Gurobi.prm");
+		if (!Files.exists(gurobiParamFiles))
+			throw new IllegalArgumentException();
 
 		Path inputDataModelFile = Path.of("ihtc", "i01");
+		boolean generateLp = true;
 
 		Path inputFolder = getResourceDirectory().resolve("input");
 		Path outputFolder = getResourceDirectory().resolve("out");
@@ -78,6 +84,9 @@ public class Prototyp2 {
 		Instant startTime = java.time.Instant.now();
 
 		System.out.println("Start Time: " + startTime);
+
+		System.out.println();
+		System.out.println("---- Setup Files ----");
 
 		inputFolder = inputFolder.normalize();
 		System.out.println("Model Input Folder: " + inputFolder);
@@ -112,14 +121,16 @@ public class Prototyp2 {
 		dataModelFile = PathUtils.changeFileExtension(dataModelFile, ".dzn");
 
 		Path lpFile = PathUtils.changeFileExtension(dataModelFile, ".lp");
+		Path logFile = PathUtils.changeFileExtension(dataModelFile, ".log");
 
-		System.out.println("Clear previously generated files");
+		System.out.println("Clear previously generated files:");
 		if (Files.exists(dataModelFile.getParent())) {
 			try (Stream<Path> walk = Files.walk(dataModelFile.getParent())) {
-				walk.sorted(Comparator.reverseOrder()).map(Path::toFile).peek(System.out::println)
+				walk.sorted(Comparator.reverseOrder()).map(Path::toFile).peek(s -> System.out.println("- " + s))
 						.forEach(File::delete);
 			}
 		}
+		System.out.println();
 
 		System.out.println("Load data model: " + inputModelFile);
 		InputModelReader reader = new InputModelReader();
@@ -140,36 +151,58 @@ public class Prototyp2 {
 		MiniZincRunner mzRunner = new MiniZincRunner(miniZincExe, workingDirectory);
 		mzRunner.config().setConstraintModel(constraintModelFile);
 		mzRunner.config().setDataModel(dataModelFile);
-		mzRunner.config().setNumberOfThreads(1);
-		mzRunner.config().setTimeLimit(30 * 60 * 1000);
-//		mzRunner.config().setWriteModel(lpFile);
+		mzRunner.config().setNumberOfThreads(4);
+		mzRunner.config().setTimeLimit(10 * 60 * 1000);
+		mzRunner.config().setVerbose(true);
+		mzRunner.config().otherFlags().add(new Flag("--readParam", gurobiParamFiles.toAbsolutePath().toString()));
+//		mzRunner.config().otherFlags().add(new Flag("--help", "Gurobi"));
+
+//		mzRunner.config().setWriteFlatZinc(PathUtils.changeFileExtension(lpFile, "fzn"));
+//		mzRunner.config().otherFlags().add(new Flag("--fzn-flags", "-logFile " + logFile.toAbsolutePath().toString()));
+		if (generateLp) {
+			mzRunner.config().setWriteModel(lpFile);
+		}
 
 		mzRunner.setSolutionOutputFolder(dataModelFile.getParent());
 		mzRunner.parseOutput(true);
-		SolverResult result = mzRunner.runMiniZinc();
 
-		if (result.status == SolutionStatus.ERROR) {
-			System.err.println("MiniZinc Error");
-			return;
-		}
-		if (result.status == SolutionStatus.INFEASABLE) {
-			System.out.println("SOLUTION: " + SolutionStatus.INFEASABLE);
-			return;
-		}
+		System.out.println();
+		System.out.println("---- Run Solver ----");
+		SolverResult solverResult = mzRunner.runMiniZinc();
 
-		System.out.println("SOLUTION: " + result.status + " found " + result.solutions.size() + " solution(s)");
+		System.out.println("Found " + solverResult.solutions.size() + " solution(s)");
+		System.out.println("Solution Status: " + solverResult.status);
 
-		if (result.solutions.isEmpty())
-			return;
+//		if (solverResult.status == SolutionStatus.ERROR || solverResult.status == SolutionStatus.INFEASABLE)
+//			return;
+//
+//		if (solverResult.solutions.isEmpty())
+//			return;
 
-		System.out.println("Start validation");
+		System.out.println();
+		System.out.println("---- Validation ----");
 		ValidatorRunner validator = new ValidatorRunner(validatorExe, workingDirectory);
 
-		for (var solution : result.solutions) {
+		for (var solution : solverResult.solutions) {
+			System.out.println(
+					String.format("Validating file '%s' with solution '%s'", inputModelFile, solution.outputFile));
+			System.out.println();
 			validator.run(inputModelFile, solution.outputFile);
 			if (true) {
 				break;
 			}
+		}
+
+		if (generateLp && Files.exists(lpFile)) {
+			System.out.println();
+			System.out.println("---- LP Analysis ----");
+			var analyser = new LpAnalyser();
+			var result = analyser.analyze(lpFile);
+			System.out.println("Number of lines: " + result.lineCount());
+			System.out.println("Number of constraints: " + result.constraintCount());
+			System.out.println("Number of variables: " + result.totalVariableCount());
+			System.out.println(" - binary: " + result.binaryVariableCount());
+			System.out.println(" - not binary: " + (result.totalVariableCount() - result.binaryVariableCount()));
 		}
 
 	}

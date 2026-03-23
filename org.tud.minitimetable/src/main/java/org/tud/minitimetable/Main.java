@@ -3,57 +3,154 @@ package org.tud.minitimetable;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import org.tud.minitimetable.util.DataModelManager;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.help.HelpFormatter;
+import org.tud.minitimetable.extern.solver.MiniZinc;
 
 public class Main {
 
-	private static final Path miniZincLocation = Path.of("..", "..", "..", "MiniZinc", "minizinc.exe");
-	private static final Path resourceFolder = Path.of("./", "resources");
-
-	private static Path getUserDirectory() {
-		String currentDir = System.getProperty("user.dir");
-		return Path.of(currentDir);
-	}
-
-	private static Path changeFileExtension(Path filePath, String newExtension) {
-		String fileName = filePath.getFileName().toString();
-		int extensionDelimiter = fileName.lastIndexOf('.');
-
-		if (extensionDelimiter > 0) {
-			int newExtensionStart = newExtension.startsWith(".") ? 1 : 0;
-			String newfileName = fileName.substring(0, extensionDelimiter + 1)
-					+ newExtension.substring(newExtensionStart);
-			return filePath.resolveSibling(newfileName);
-		}
-
-		return filePath;
-	}
+	private static final String OPTION_SHORT_HELP = "h";
+	private static final String OPTION_SHORT_OUTPUT_FOLDER = "o";
+	private static final String OPTION_SHORT_MODEL_FILE = "m";
+	private static final String OPTION_SHORT_DATA_FILE = "d";
+	private static final String OPTION_SHORT_MINIZINC_FILE = "e";
+	private static final String OPTION_SHORT_TIMELIMIT_S = "ts";
+	private static final String OPTION_SHORT_TIMELIMIT_M = "tm";
+	private static final String OPTION_SHORT_TIMELIMIT_H = "th";
 
 	public static void main(String[] args) throws IOException {
-		var userDirectory = getUserDirectory();
-		var miniZincExe = userDirectory.resolve(miniZincLocation).normalize();
-		var resourceDirectory = userDirectory.resolve(resourceFolder).normalize();
-//		var modelFile = resourceDirectory.resolve("ihtc").resolve("i01.json");
-//
-//		InputModelReader modelReader = new InputModelReader();
-//		IhtcModel model = modelReader.read(modelFile);
-//
-//		var dznFile = changeFileExtension(modelFile, ".dzn");
-//		OutputModelWriter modelWriter = new OutputModelWriter();
-//		modelWriter.write(model, dznFile);
-//
-//		System.out.println("DONE");
-//		System.out.println("File created: " + dznFile);
+		CommandLine commandLine = parseArguments(args);
+		if (commandLine == null)
+			return;
 
-		Path modelFolder = resourceDirectory.resolve("input").resolve("ihtc");
-		Path outputFolder = resourceDirectory.resolve("intermediate");
+		Path modelFile = getModelFile(commandLine);
+		Path dataFile = getDataFile(commandLine);
+		Path outputFolder = getOutputFolder(commandLine);
 
-		DataModelManager manager = new DataModelManager(modelFolder, outputFolder);
-		var m = manager.loadDataModel("i01");
-		manager.writeDataModelAsDZN(m);
+		MiniZinc minizinc = new MiniZinc();
+		DefaultSettings.applyDefaultMiniZincConfiguration(minizinc);
 
-		System.out.println("DONE");
-		System.out.println("File created: " + manager.getPathOfWrite());
+		applyArguments(minizinc, commandLine);
+
+		minizinc.setup(modelFile, dataFile, outputFolder);
+		minizinc.run().join();
+	}
+
+	private static Path getModelFile(CommandLine commandLine) {
+		var str = commandLine.getOptionValue(OPTION_SHORT_MODEL_FILE);
+		return Path.of(str);
+	}
+
+	private static Path getDataFile(CommandLine commandLine) {
+		var str = commandLine.getOptionValue(OPTION_SHORT_DATA_FILE);
+		return Path.of(str);
+	}
+
+	private static Path getOutputFolder(CommandLine commandLine) {
+		if (commandLine.hasOption(OPTION_SHORT_OUTPUT_FOLDER)) {
+			var str = commandLine.getOptionValue(OPTION_SHORT_OUTPUT_FOLDER);
+			try {
+				var path = Path.of(str);
+				return path;
+			} catch (Exception e) {
+				throw new IllegalArgumentException("Invalid output folder: '" + str + "'", e);
+			}
+		} else {
+			return Path.of("./", "out");
+		}
+	}
+
+	private static CommandLine parseArguments(String[] args) throws IOException {
+		Option help = Option.builder(OPTION_SHORT_HELP).longOpt("help").desc("Prints help message").get();
+
+		Option modelFile = Option.builder(OPTION_SHORT_MODEL_FILE).longOpt("model").required().hasArg().numberOfArgs(1) //
+				.desc("Path to model file (mzn)").get();
+
+		Option dataFolder = Option.builder(OPTION_SHORT_DATA_FILE).longOpt("data").required().hasArg().numberOfArgs(1) //
+				.desc("Path to data folder or file (json/dzn)").get();
+
+		Option outFolder = Option.builder(OPTION_SHORT_OUTPUT_FOLDER).longOpt("out").hasArg().numberOfArgs(1) //
+				.desc("Output folder").get();
+
+		Option miniZincExe = Option.builder(OPTION_SHORT_MINIZINC_FILE).longOpt("minizinc").hasArg().numberOfArgs(1) //
+				.desc("Path to minizinc exe").get();
+
+		Option timelimitSeconds = Option.builder(OPTION_SHORT_TIMELIMIT_S).longOpt("timelimit-seconds").hasArg()
+				.numberOfArgs(1) //
+				.desc("Timelimit in full seconds. The default limit is 10 Minutes.").get();
+
+		Option timelimitMinutes = Option.builder(OPTION_SHORT_TIMELIMIT_M).longOpt("timelimit-minutes").hasArg()
+				.numberOfArgs(1) //
+				.desc("Timelimit in full minutes. The default limit is 10 Minutes.").get();
+
+		Option timelimitHours = Option.builder(OPTION_SHORT_TIMELIMIT_H).longOpt("timelimit-hours").hasArg()
+				.numberOfArgs(1) //
+				.desc("Timelimit in full hours. The default limit is 10 Minutes.").get();
+
+		Options options = new Options();
+		options.addOption(help);
+		options.addOption(dataFolder);
+		options.addOption(outFolder);
+		options.addOption(modelFile);
+		options.addOption(miniZincExe);
+		options.addOption(timelimitSeconds);
+		options.addOption(timelimitMinutes);
+		options.addOption(timelimitHours);
+
+		CommandLine commandLine;
+		try {
+			CommandLineParser parser = new DefaultParser();
+			commandLine = parser.parse(options, args);
+			if (commandLine.hasOption(help)) {
+				String header = "";
+				String footer = "";
+
+				HelpFormatter formatter = HelpFormatter.builder().get();
+				formatter.printHelp("test", header, options, footer, true);
+
+				return null;
+			}
+		} catch (ParseException exp) {
+			System.err.println("Parsing failed.  Reason: " + exp.getMessage());
+			return null;
+		}
+
+		return commandLine;
+	}
+
+	private static void applyArguments(MiniZinc minizinc, CommandLine commandLine) {
+		if (commandLine.hasOption(OPTION_SHORT_MINIZINC_FILE)) {
+			minizinc.getConfig().miniZincLocation = Path.of(commandLine.getOptionValue(OPTION_SHORT_MINIZINC_FILE))
+					.toAbsolutePath();
+		}
+
+		if (commandLine.hasOption(OPTION_SHORT_TIMELIMIT_S)) {
+			var value = parseInteger(commandLine, OPTION_SHORT_TIMELIMIT_S, "Unable to parse time limit");
+			minizinc.getSolverConfig().timeLimitMS = value * 1000;
+
+		} else if (commandLine.hasOption(OPTION_SHORT_TIMELIMIT_M)) {
+			var value = parseInteger(commandLine, OPTION_SHORT_TIMELIMIT_M, "Unable to parse time limit");
+			minizinc.getSolverConfig().timeLimitMS = value * 60 * 1000;
+
+		} else if (commandLine.hasOption(OPTION_SHORT_TIMELIMIT_H)) {
+			var value = parseInteger(commandLine, OPTION_SHORT_TIMELIMIT_H, "Unable to parse time limit");
+			minizinc.getSolverConfig().timeLimitMS = value * 60 * 60 * 1000;
+
+		}
+	}
+
+	private static int parseInteger(CommandLine commandLine, String optionKey, String errorMessage) {
+		var str = commandLine.getOptionValue(optionKey);
+		try {
+			return Integer.parseInt(str);
+		} catch (Exception e) {
+			throw new IllegalArgumentException(errorMessage + ": " + str, e);
+		}
 	}
 
 }
