@@ -1,6 +1,6 @@
-include "data/IHTC_model.mzn" ;
+include "IHTP-model.mzn" ;
 
-output
+output :: "json"
 [ "{\n"] ++
 
 [ "  \("score"): \(score),\n" ] ++

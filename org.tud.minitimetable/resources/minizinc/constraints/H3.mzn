@@ -1,4 +1,4 @@
-include "../data/IHTC_model.mzn";
+include "../IHTP-model.mzn";
 
 % SCP
 % H3 Surgeon overtime: The maximum daily surgery time of a surgeon must not be exceeded.

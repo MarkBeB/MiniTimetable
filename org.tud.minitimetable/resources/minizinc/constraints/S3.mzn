@@ -1,4 +1,4 @@
-include "../data/IHTC_model.mzn";
+include "../IHTP-model.mzn";
 
 % NRA
 % S3 Continuity of care: To ensure continuity of care, the total number of distinct nurses providing care to a patient during their entire stay should be minimized.
@@ -26,6 +26,6 @@ constraint forall(occupantId in OccupantIds, day in Days where occupantIsPresent
 constraint Penalties.continuityOfCare = Weights.continuityOfCare * (
     count(patient in patientVar, nurseId in NurseIds)(patient.caredByNurse[nurseId])
   + count(occupant in occupantVar, nurseId in NurseIds)(occupant.caredByNurse[nurseId])
-  );
+);
 
 constraint Penalties.continuityOfCare >= Weights.continuityOfCare * length(ShiftTypes) * (count(patient in patientVar)(patient.isAdmitted) + length(OccupantIds));

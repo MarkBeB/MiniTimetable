@@ -6,6 +6,7 @@
 
 int: minutesPerDay = 24 * 60;
 int: maxPenalityValue = 1000000;
+int: maxScoreValue = 100000000;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -36,20 +37,6 @@ type PenalityType = record(
   var 0..maxPenalityValue: surgeonTransfer,
   var 0..maxPenalityValue: patientDelay,
   var 0..maxPenalityValue: unscheduledOptional,
-);
-
-
-type WorkShift = record(
-  Days: day,
-  ShiftTypes: shift,
-  int: maxLoad,
-);
-
-
-type NurseAssignment = record(
-  var Days: day,
-  var ShiftTypes: shift,
-  array[RoomIds] of var bool: assignedToRooms,
 );
 
 
@@ -184,7 +171,7 @@ set of int: MaxDays = 0..maxDay;
 % enum Days = _(0..lastDay);
 
 
-var 0..10000000: score = 
+var 0..maxScoreValue: score = 
     Penalties.roomMixedAge
   + Penalties.roomNurseSkill
   + Penalties.continuityOfCare
@@ -255,6 +242,7 @@ function var bool: patientIsPresent(PatientIds: id, Days: day) =
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
 constraint forall(patient in patientVar)(
   patient.isPostponed <-> not patient.isAdmitted
 );
@@ -274,6 +262,7 @@ constraint forall(roomId in RoomIds, day in Days)(
 constraint forall(nurseId in NurseIds, day in Days, shift in ShiftTypes)(
   nurseVar[nurseId].isWorking[day, shift] <-> nurseData[nurseId].maxWorkloadPerShift[day, shift] > 0
 );
+
 
 /*
 constraint forall(nurseId in NurseIds, day in Days, shift in ShiftTypes)(

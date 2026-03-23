@@ -1,6 +1,7 @@
-include "data/IHTC_model.mzn";
+include "IHTP-model.mzn";
 include "constraints/AllAH.mzn";
 include "constraints/Performance.mzn";
+
 include "constraints/H1.mzn";
 include "constraints/H2.mzn";
 include "constraints/H3.mzn";

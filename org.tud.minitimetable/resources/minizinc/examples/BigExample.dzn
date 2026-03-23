@@ -1,0 +1,11 @@
+SurgeonIds = {s01};
+PatientIds = {p01, p02, p03, p04};
+patients = [
+  (id: p01, surgeryDuration: 120, assignedSurgeon: s01),
+  (id: p02, surgeryDuration: 240, assignedSurgeon: s01),
+  (id: p03, surgeryDuration: 160, assignedSurgeon: s01),
+  (id: p04, surgeryDuration: 300, assignedSurgeon: s01),
+];
+surgeons = [
+  (id: s01, maxSurgeryTime: [0, 0, 400, 200, 0, 300, 120])
+];
