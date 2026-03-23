@@ -1,4 +1,4 @@
-package org.tud.minitimetable.extern.solver;
+package org.tud.minitimetable.extern.solver.old;
 
 import java.util.List;
 import java.util.Objects;

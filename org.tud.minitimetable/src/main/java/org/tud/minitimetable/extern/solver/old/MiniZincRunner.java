@@ -1,4 +1,4 @@
-package org.tud.minitimetable.extern.solver;
+package org.tud.minitimetable.extern.solver.old;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -27,11 +27,14 @@ public class MiniZincRunner {
 		protected Path _constraintModel;
 		protected Path _dataModel;
 		protected Path _outputFolder;
+		protected Path _flatzincFile;
 		protected Integer _timeLimit;
 		protected Integer _threads;
 		protected Path _writeModel;
-
-		protected List<Flag> _additionalFlags = new LinkedList<>();
+		protected boolean _verbose;
+		protected boolean _statistics;
+		protected final List<Flag> _additionalFlags = new LinkedList<>();
+		protected final List<Flag> _solverFlags = new LinkedList<>();
 
 		public void setConstraintModel(Path constraintModel) {
 			_constraintModel = constraintModel;
@@ -53,8 +56,24 @@ public class MiniZincRunner {
 			_writeModel = path;
 		}
 
+		public void setWriteFlatZinc(Path path) {
+			_flatzincFile = path;
+		}
+
 		public List<Flag> otherFlags() {
 			return _additionalFlags;
+		}
+
+		public List<Flag> solverFlags() {
+			return _solverFlags;
+		}
+
+		public void setVerbose(boolean value) {
+			_verbose = value;
+		}
+
+		public void setStatistics(boolean value) {
+			_statistics = value;
 		}
 	}
 
@@ -67,6 +86,7 @@ public class MiniZincRunner {
 	private long _shutdownInMS; // TODO
 
 	private boolean _parseOutput = true;
+	private boolean _hasOutput = true;
 	private KeepSolutionData _keepSolutionData = KeepSolutionData.NONE;
 	private SolutionToFile _solutionToFile = SolutionToFile.ALL;
 
@@ -120,6 +140,8 @@ public class MiniZincRunner {
 	}
 
 	public ProcessBuilder setupProcess() {
+		_hasOutput = true;
+
 		ProcessBuilder processBuilder = new ProcessBuilder();
 		processBuilder.directory(_workingDirectory.toFile());
 
@@ -161,6 +183,23 @@ public class MiniZincRunner {
 			processBuilder.command().add(_config._dataModel.toString());
 		}
 
+		if (_config._flatzincFile != null) {
+			processBuilder.command().add("--compile");
+			processBuilder.command().add("--output-to-file");
+			_hasOutput = false;
+
+			processBuilder.command().add(_config._flatzincFile.toString());
+		}
+
+		if (_config._verbose) {
+			processBuilder.command().add("--verbose");
+			// solver writes to System.err of process
+		}
+
+		if (_config._verbose) {
+			processBuilder.command().add("--statistics");
+		}
+
 		if (!_parameterFiles.isEmpty()) {
 			for (var paramFile : parameterFiles()) {
 				processBuilder.command().add("--param-file");
@@ -168,23 +207,49 @@ public class MiniZincRunner {
 			}
 		}
 
-		if (!_config._additionalFlags.isEmpty()) {
-			for (var flag : _config._additionalFlags) {
-				if (flag.flag == null) {
-					continue;
-				}
+		for (var flag : _config._additionalFlags) {
+			if (flag.flag == null) {
+				continue;
+			}
 
-				processBuilder.command().add(flag.flag);
-				if (flag.value != null) {
-					processBuilder.command().add(flag.value);
-				}
+			processBuilder.command().add(flag.flag);
+			if (flag.value != null) {
+				processBuilder.command().add(flag.value);
 			}
 		}
 
-		processBuilder.command().add("--output-time");
+		if (!_config._solverFlags.isEmpty()) {
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.append("\"");
 
-		if (_parseOutput) {
-			processBuilder.command().add("--json-stream");
+			for (var flag : _config._solverFlags) {
+				if (stringBuilder.length() > 1) {
+					stringBuilder.append(" ");
+				}
+
+				if (flag.flag == null || flag.flag.isBlank()) {
+					continue;
+				}
+
+				if (flag.value == null || flag.value.isBlank()) {
+					stringBuilder.append(flag.flag);
+				} else {
+					stringBuilder.append(flag.flag + " " + flag.value);
+				}
+			}
+
+			stringBuilder.append("\"");
+
+			processBuilder.command().add("--fzn-flag");
+			processBuilder.command().add(stringBuilder.toString());
+		}
+
+		if (_hasOutput) {
+			processBuilder.command().add("--output-time");
+
+			if (_parseOutput) {
+				processBuilder.command().add("--json-stream");
+			}
 		}
 
 		return processBuilder;
@@ -202,7 +267,7 @@ public class MiniZincRunner {
 			Solution bestSolution = null;
 
 			var outStream = miniZincProcess.getInputStream();
-			System.out.println("Found  stream: " + outStream);
+			System.out.println("Found  stream: " + miniZincProcess.getErrorStream());
 			final BufferedReader outReader = new BufferedReader(new InputStreamReader(outStream));
 
 			String lastLine = outReader.readLine();
@@ -213,8 +278,7 @@ public class MiniZincRunner {
 				String parseType = json.getString("type");
 				if ("solution".equals(parseType)) {
 					JSONObject solutionOutput = json.getJSONObject("output");
-					String content = solutionOutput.getString("default"); // sometimes
-					// 'dzn'
+					String content = solutionOutput.containsKey("json") ? solutionOutput.getString("json") : null;
 
 					if (content != null) {
 						var result = JSON.parseObject(content);
@@ -262,17 +326,33 @@ public class MiniZincRunner {
 					} else {
 						System.out.println("Error? A");
 					}
+
 				} else if ("status".equals(parseType)) {
 					String solverStatus = json.getString("status");
 					status = switch (solverStatus) {
-					case "UNKNOWN" -> SolutionStatus.UNKNOWN;
 					case "OPTIMAL_SOLUTION" -> SolutionStatus.OPTIMAL;
+					case "ALL_SOLUTIONS" -> SolutionStatus.OPTIMAL;
 					case "UNSATISFIABLE" -> SolutionStatus.INFEASABLE;
+					case "UNBOUNDED" -> SolutionStatus.INFEASABLE;
+					case "UNSAT_OR_UNBOUNDED" -> SolutionStatus.INFEASABLE;
+					case "UNKNOWN" -> SolutionStatus.UNKNOWN;
+					case "ERROR" -> SolutionStatus.ERROR;
 					default -> {
 						System.out.println("Unknown Status: " + solverStatus);
 						yield SolutionStatus.UNKNOWN;
 					}
 					};
+
+				} else if ("trace".equals(parseType)) {
+					System.out.println("MiniZinc (Trace): " + json.getString("message"));
+
+				} else if ("warning".equals(parseType)) {
+					System.err.println("MiniZinc (Warning): " + json.getString("message"));
+					System.err.println("Location: " + json.getString("location"));
+					for (var stacktrace : json.getJSONArray("stack")) {
+						System.err.println(stacktrace);
+					}
+
 				} else if ("error".equals(parseType))
 					// String typeOfError = json.getString("what");
 //					if ("syntax error".equals(typeOfError) || "type error".equals(typeOfError))
@@ -310,7 +390,7 @@ public class MiniZincRunner {
 				solution.score, solution.time);
 		solution.outputFile = _outputFolder.resolve(solution.fileName);
 
-		writeSolutionToFileSystem(solution.outputFile, solution.data.json);
+		writeSolutionToFileSystem(solution.outputFile, solution.data._json);
 	}
 
 	private void writeSolutionToFileSystem(Path newFile, JSONObject content) throws IOException {

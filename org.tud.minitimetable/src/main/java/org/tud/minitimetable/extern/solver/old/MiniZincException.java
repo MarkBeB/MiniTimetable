@@ -1,4 +1,4 @@
-package org.tud.minitimetable.extern.solver;
+package org.tud.minitimetable.extern.solver.old;
 
 public class MiniZincException extends RuntimeException {
 	private static final long serialVersionUID = 3305311052177462975L;

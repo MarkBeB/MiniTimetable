@@ -1,17 +1,17 @@
-package org.tud.minitimetable.extern.solver;
+package org.tud.minitimetable.extern.solver.old;
 
 import java.util.Objects;
 
 import com.alibaba.fastjson2.JSONObject;
 
 public class SolutionData {
-	public final JSONObject json;
+	public final JSONObject _json;
 
 	public SolutionData(JSONObject json) {
-		this.json = Objects.requireNonNull(json, "json");
+		_json = Objects.requireNonNull(json, "json");
 	}
 
 	public int getScore() {
-		return json.getIntValue("score", 0);
+		return _json.getIntValue("score", 0);
 	}
 }
