@@ -1,4 +1,4 @@
-package org.tud.minitimetable.extern;
+package org.tud.minitimetable.extern.validator;
 
 import java.util.Objects;
 
