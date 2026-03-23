@@ -74,9 +74,12 @@ public class MiniZincLocator {
 	}
 
 	private boolean isValidMiniZincLocation(Path path) {
+		if (!Files.isExecutable(path))
+			return false;
+
 		var name = path.getFileName().toString();
 		var validName = "minizinc.exe".equals(name);
-		return Files.isRegularFile(path) && validName;
+		return validName;
 	}
 
 	private void searchRegistry(Collection<Path> results) {
