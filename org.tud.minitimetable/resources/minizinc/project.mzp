@@ -28,9 +28,7 @@
         "constraints/S7.mzn",
         "constraints/S8.mzn",
         "examples/MemoryViolation.mzn",
-        "solver.mpc",
-        "../out/ihtc/i01/i01.dzn",
-        "../out/ihtc/i02/i02.dzn"
+        "solver.mpc"
     ],
     "selectedBuiltinConfigId": "org.minizinc.mip.gurobi",
     "selectedBuiltinConfigVersion": "13.0.0",
