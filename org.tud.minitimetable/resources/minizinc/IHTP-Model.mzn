@@ -81,9 +81,6 @@ type RoomFixData = record(
   RoomIds: id,
   int: capacity,
   array[Days] of int: assignedOccupants,
-
-  %deprecated
-  array[Days] of opt Genders: predefinedGenderAssignment,
 );
 type RoomVarData = record(
   array[Days] of var bool: isOccupied,
@@ -127,8 +124,8 @@ type PatientFixData = record (
   array[int] of SkillLevels: skillLevelRequired,
 );
 type PatientVarData = record (
-  var 0..maxDay: admissionDay,
-  var 0..maxDay: admittedUntil,
+  var MaxDays: admissionDay,
+  var MaxDays: admittedUntil,
   var bool: isPostponed, 
   var bool: isAdmitted, % isPostponed <-> !isAdmited
 
@@ -136,7 +133,7 @@ type PatientVarData = record (
   array[Days] of var opt RoomIds: assignedRoom,
   array[NurseIds] of var bool: caredByNurse,
   
-  var 0..maxDay: penaltyAdmissionDelay,
+  var MaxDays: penaltyAdmissionDelay,
 );
 type Patient = PatientFixData ++ PatientVarData;
 
@@ -217,6 +214,13 @@ int: numberOfOccupants = length(occupantData);
 %array[OperatingTheaterIds] of OperatingTheater: operatingTheaters ::output = [id: operatingTheaterData[id] ++ operatingTheaterVar[id] | id in OperatingTheaterIds];
 %array[RoomIds] of Room: rooms ::output = [id: roomData[id] ++ roomVar[id] | id in RoomIds];
 
+array[NurseIds] of NurseFixData: nurses = nurseData;
+array[SurgeonIds] of SurgeonFixData: surgeons = surgeonData;
+array[PatientIds] of PatientFixData: patients = patientData;
+array[OccupantIds] of OccupantFixData: occupants = occupantData;
+array[OperatingTheaterIds] of OperatingTheaterFixData: operatingTheaters = operatingTheaterData;
+array[RoomIds] of RoomFixData: rooms = roomData;
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % UTILITY FUNCTIONS
@@ -235,6 +239,30 @@ function var bool: occupantIsPresent(OccupantIds: id, Days: day) =
 function var bool: patientIsPresent(PatientIds: id, Days: day) = 
   patientVar[id].admissionDay <= day /\ day <= patientVar[id].admittedUntil;
 
+
+
+
+function bool: isInRoom(OccupantFixData: occupant, RoomFixData: room, Days: day) =
+  occupant.assignedRoom == room.id /\ day < occupant.lengthOfStay;
+
+function var bool: isInRoom(PatientFixData: patient, RoomFixData: room, var Days: day) =
+  patientVar[patient.id].assignedRoom[day] == room.id;
+
+function bool: isPresent(OccupantFixData: occupant, Days: day) =
+  day < occupant.lengthOfStay;
+
+function var bool: isPresent(PatientFixData: patient, Days: day) =
+  patientVar[patient.id].admissionDay <= day /\ day <= patientVar[patient.id].admittedUntil;
+
+function bool: isWorking(NurseFixData: nurse, Days: day, ShiftTypes: shift) =
+  nurse.maxWorkloadPerShift[day, shift] > 0;
+
+array[RoomIds, Days] of bool: roomHasFixedOccupants = [(room.id, day): exists(occupant in occupants)(isInRoom(occupant, room, day)) | room in rooms, day in Days ];
+function var bool: isOccupied(RoomFixData: room, Days: day) =
+  roomHasFixedOccupants[room.id, day] \/ exists(patient in patients)(isInRoom(patient, room, day));
+
+function var bool: isPostponed(PatientFixData: patient) = patientVar[patient.id].isPostponed;
+function var bool: isAdmitted(PatientFixData: patient) = not patientVar[patient.id].isPostponed;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
