@@ -234,7 +234,7 @@ public class Ihtc2DznModelWriter {
 
 	private void write(Room obj, Writer writer) throws IOException {
 //		var availableCapacity = obj.getAvailableCapacity();
-		var genderAssignment = obj.getGenderAssignment();
+//		var genderAssignment = obj.getGenderAssignment();
 		var occupantsPerDay = obj.getOccupantsPerDay();
 //
 		writer.indentation().write("(") //
@@ -250,11 +250,11 @@ public class Ihtc2DznModelWriter {
 				.write(occupantsPerDay, (value, hasMore) -> {
 					writer.write(value).write(", ", hasMore);
 				}).write("]").write(", ") //
-				.write("predefinedGenderAssignment").write(": ") //
-				.write("[").write("0:", notEmpty(genderAssignment)) //
-				.write(genderAssignment, (value, hasMore) -> {
-					writer.write(nullable(value)).write(", ", hasMore);
-				}).write("]") //
+//				.write("predefinedGenderAssignment").write(": ") //
+//				.write("[").write("0:", notEmpty(genderAssignment)) //
+//				.write(genderAssignment, (value, hasMore) -> {
+//					writer.write(nullable(value)).write(", ", hasMore);
+//				}).write("]") //
 				.write(")");
 	}
 
