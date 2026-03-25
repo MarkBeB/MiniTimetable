@@ -15,7 +15,7 @@ public class MiniZincProcessArgs implements ProcessArgs {
 	public Path modelFile;
 	public Path dataFile;
 	public Path flatzincFile;
-	public Integer timeLimitMS;
+	public Long timeLimitMS;
 	public Integer threads;
 	public Path writeSolverModelToFile;
 	public boolean verbose;

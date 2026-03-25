@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -20,12 +22,19 @@ import org.tud.minitimetable.util.PathUtils;
 public class MiniZinc {
 
 	private static interface CodeLogger {
-		public void log(String msg);
+		void log(String msg);
+
+		void logEmptyLine();
 	}
 
 	private static final class NullCodeLogger implements CodeLogger {
 		@Override
 		public void log(String msg) {
+
+		}
+
+		@Override
+		public void logEmptyLine() {
 
 		}
 	}
@@ -35,6 +44,11 @@ public class MiniZinc {
 		public void log(String msg) {
 			System.out.println(msg);
 		}
+
+		@Override
+		public void logEmptyLine() {
+			System.out.println();
+		}
 	}
 
 	public static class Config {
@@ -43,48 +57,66 @@ public class MiniZinc {
 		public Log solverOutput;
 		public Log solverModelLog;
 		public Path miniZincLocation;
+		public Long timeLimitMS;
+		public Integer threads;
 	}
+
+	private static final long ONE_SECOND = 1000l;
+	private static final long ONE_MINUTE = ONE_SECOND * 60;
+	private static final long ONE_HOUR = ONE_MINUTE * 60;
 
 	private final Config config = new Config();
 	private final MiniZincProcessArgs arguments = new MiniZincProcessArgs();
 
 	private CodeLogger logger;
-	private Path _modelFile;
-	private Path _dataFile;
-	private Path _outputDirectory;
-	private String _dataFileName;
+	private Path modelFile;
+	private Path dataFile;
+	private Path outputDirectory;
+	private String dataFileName;
+	private Long setupDuration = 0l;
+	private Path cachedMiniZincLocation;
 
-	private boolean _setupCalled = false;
+//	private boolean _setupCalled;
 
 	public Config getConfig() {
 		return config;
 	}
 
-	public MiniZincProcessArgs getSolverConfig() {
-		return arguments;
+	public CompletableFuture<Process> run(Path modelFile, Path dataFile, Path outDirectory) throws IOException {
+		initializeInstance();
+
+		logger.log("---- Start ----");
+		logger.log(String.format("Start Time: %s", Instant.now()));
+
+		setup(modelFile, dataFile, outDirectory);
+		return run();
 	}
 
-	public void setup(Path modelFile, Path dataFile, Path outDirectory) throws IOException {
+	private void initializeInstance() {
+		logger = config.logger != null ? config.logger : new ConsolCodeLogger();
+	}
+
+	private void setup(Path modelFile, Path dataFile, Path outDirectory) throws IOException {
 		Objects.requireNonNull(modelFile, "modelFile");
 		Objects.requireNonNull(dataFile, "dataFile");
 		Objects.requireNonNull(outDirectory, "outDirectory");
 
-		logger = config.logger != null ? config.logger : new ConsolCodeLogger();
-
 		validateArguments(modelFile, dataFile, outDirectory);
 		setupDataFile();
-		_setupCalled = true;
+//		_setupCalled = true;
 	}
 
-	public CompletableFuture<Process> run() throws IOException {
-		if (!_setupCalled)
-			throw new IllegalStateException("Setup not completed. Call .setup(...) required.");
+	private CompletableFuture<Process> run() throws IOException {
+//		if (!_setupCalled)
+//			throw new IllegalStateException("Setup not completed. Call .setup(...) required.");
 
 //		MiniZincProcessRunner runner = new MiniZincProcessRunner(getMiniZinc(),  Path.of(System.getProperty("user.dir") , arguments);
-		MiniZincProcessRunner runner = new MiniZincProcessRunner(getMiniZinc(), _outputDirectory, arguments);
+		MiniZincProcessRunner runner = new MiniZincProcessRunner(getMiniZinc(), outputDirectory, arguments);
 
 		applyConfig(runner);
 
+		final Instant timeStamp = Instant.now();
+		logger.logEmptyLine();
 		logger.log("---- Start MiniZinc ----");
 		var isDone = runner.run();
 		if (config.solverOutput instanceof StreamLog streanLogger)
@@ -93,76 +125,116 @@ public class MiniZinc {
 		if (config.backendLog instanceof StreamLog streanLogger)
 			streanLogger.setStream(runner.getProcessErrorStream());
 
+		if (arguments.timeLimitMS != null) {
+			if (arguments.timeLimitMS <= ONE_SECOND) {
+				logger.log(String.format("With time limit: %d ms", arguments.timeLimitMS));
+			} else if (arguments.timeLimitMS <= ONE_MINUTE) {
+				double time = arguments.timeLimitMS / (ONE_SECOND + 0.0d);
+				logger.log(String.format("With time limit: %.3f s", time));
+			} else if (arguments.timeLimitMS <= ONE_HOUR) {
+				double time = arguments.timeLimitMS / (ONE_MINUTE + 0.0d);
+				logger.log(String.format("With time limit: %.3f m", time));
+			} else {
+				double time = arguments.timeLimitMS / (ONE_HOUR + 0.0d);
+				logger.log(String.format("With time limit: %.3f h", time));
+			}
+		}
+
+//		ChronoUnit.SECONDS.getDuration().
+
 		return isDone.whenComplete((p, ex) -> {
-			config.logger.log("---- MiniZinc Terminated ----");
+			logger.log("MiniZinc Terminated");
+			logger.log(String.format("Step done in %d ms", timeStamp.until(Instant.now(), ChronoUnit.MILLIS)));
+			logger.log(String.format("End Time: %s", Instant.now()));
+			if (ex != null)
+				logger.log("An Error occured: " + ex.getMessage());
 		});
 	}
 
 	private void validateArguments(Path modelFile, Path dataFile, Path outputDirectory) throws IOException {
-		_modelFile = modelFile.normalize().toAbsolutePath();
-		if (!Files.exists(_modelFile))
-			throw new IllegalArgumentException("Model file not found '" + _modelFile + "'");
+		final Instant timeStamp = Instant.now();
 
-		_dataFile = dataFile.normalize().toAbsolutePath();
-		if (!Files.exists(_dataFile))
-			throw new IllegalArgumentException("Data file not found '" + _dataFile + "'");
-		_dataFileName = PathUtils.getFileNameWithoutExtension(_dataFile);
+		this.modelFile = modelFile.normalize().toAbsolutePath();
+		if (!Files.exists(this.modelFile))
+			throw new IllegalArgumentException("Model file not found '" + this.modelFile + "'");
 
-		_outputDirectory = outputDirectory.normalize().toAbsolutePath();
-		if (Files.isRegularFile(_outputDirectory))
-			throw new IllegalArgumentException("Output directory can not be a file '" + _outputDirectory + "'");
+		this.dataFile = dataFile.normalize().toAbsolutePath();
+		if (!Files.exists(this.dataFile))
+			throw new IllegalArgumentException("Data file not found '" + this.dataFile + "'");
+		this.dataFileName = PathUtils.getFileNameWithoutExtension(dataFile);
 
-		if (!Files.exists(_outputDirectory))
-			Files.createDirectories(_outputDirectory);
+		this.outputDirectory = outputDirectory.normalize().toAbsolutePath();
+		if (Files.isRegularFile(this.outputDirectory))
+			throw new IllegalArgumentException("Output directory can not be a file '" + this.outputDirectory + "'");
 
+		if (!Files.exists(this.outputDirectory))
+			Files.createDirectories(this.outputDirectory);
+
+		logger.logEmptyLine();
 		logger.log("---- Setup Files ----");
-		logger.log("Model File: " + _modelFile);
-		logger.log("Data File: " + _dataFile);
-		logger.log("Output Folder: " + _outputDirectory);
+		logger.log("Model File: " + this.modelFile);
+		logger.log("Data File: " + this.dataFile);
+		logger.log("Output Folder: " + this.outputDirectory);
+		logger.log(String.format("Step done in %d ms", timeStamp.until(Instant.now(), ChronoUnit.MILLIS)));
 	}
 
 	private void setupDataFile() throws IOException {
-		if ("dzn".equals(PathUtils.getFileExtension(_dataFile))) {
+		if ("dzn".equals(PathUtils.getFileExtension(dataFile))) {
 			return;
 		}
 
+		logger.logEmptyLine();
 		logger.log("---- Convert Data File ----");
+		final Instant timeStamp = Instant.now();
 
-		var newDataFile = _outputDirectory.resolve(_dataFileName + ".dzn");
+		var newDataFile = outputDirectory.resolve(dataFileName + ".dzn");
 
 		InputModelReader reader = new InputModelReader();
-		var data = reader.read(_dataFile);
+		var data = reader.read(dataFile);
 
 		OutputModelWriter writer = new OutputModelWriter();
 		writer.write(data, newDataFile);
 
-		_dataFile = newDataFile;
+		dataFile = newDataFile;
 
-		logger.log("Data File: " + _dataFile);
+		var duration = timeStamp.until(Instant.now(), ChronoUnit.MILLIS);
+		setupDuration = duration;
+
+		logger.log(String.format("Data File [%d ms]: %s", duration, dataFile));
+		logger.log(String.format("Step done in %d ms", timeStamp.until(Instant.now(), ChronoUnit.MILLIS)));
 	}
 
 	private void applyConfig(MiniZincProcessRunner runner) throws IOException {
-		runner.arguments().modelFile = _modelFile;
-		runner.arguments().dataFile = _dataFile;
+		final Instant timeStamp = Instant.now();
 
+		runner.arguments().modelFile = modelFile;
+		runner.arguments().dataFile = dataFile;
+
+		logger.logEmptyLine();
 		logger.log("---- Setup Configuration ----");
+
+		if (config.timeLimitMS != null)
+			arguments.timeLimitMS = config.timeLimitMS - setupDuration;
+
+		runner.arguments().threads = config.threads;
 
 		applyModelLog(runner);
 		applyProcessLog(runner);
 		applySolverLog(runner);
+
+		logger.log(String.format("Step done in %d ms", timeStamp.until(Instant.now(), ChronoUnit.MILLIS)));
 	}
 
 	private void applyModelLog(MiniZincProcessRunner runner) throws IOException {
 		if (config.solverModelLog instanceof Log logger && !(logger instanceof NullLog)) {
 			if (logger instanceof FileLog fileLog) {
-				var path = fileLog.generatePath(_outputDirectory, _dataFileName, "lp");
+				var path = fileLog.generatePath(outputDirectory, dataFileName, "lp");
 				if (!path.isAbsolute())
-					path = _outputDirectory.resolve(path);
+					path = outputDirectory.resolve(path);
 
-				if (!path.startsWith(_outputDirectory))
-					throw new IllegalArgumentException(
-							String.format("Model log file must be within output directory '%s' but was '%s'",
-									_outputDirectory, path));
+				if (!path.startsWith(outputDirectory))
+					throw new IllegalArgumentException(String.format(
+							"Model log file must be within output directory '%s' but was '%s'", outputDirectory, path));
 
 				if (!Files.exists(path.getParent()))
 					Files.createDirectories(path.getParent());
@@ -185,14 +257,14 @@ public class MiniZinc {
 				runner.setOutputRedirect(Redirect.DISCARD);
 
 			} else if (logger instanceof FileLog fileLog) {
-				var path = fileLog.generatePath(_outputDirectory, _dataFileName, "json");
+				var path = fileLog.generatePath(outputDirectory, dataFileName, "json");
 				if (!path.isAbsolute())
-					path = _outputDirectory.resolve(path);
+					path = outputDirectory.resolve(path);
 
-				if (!path.startsWith(_outputDirectory))
+				if (!path.startsWith(outputDirectory))
 					throw new IllegalArgumentException(
 							String.format("MiniZinc log file must be within output directory '%s' but was '%s'",
-									_outputDirectory, path));
+									outputDirectory, path));
 
 				if (!Files.exists(path.getParent()))
 					Files.createDirectories(path.getParent());
@@ -215,14 +287,14 @@ public class MiniZinc {
 				runner.setErrorRedirect(Redirect.DISCARD);
 
 			} else if (logger instanceof FileLog fileLog) {
-				var path = fileLog.generatePath(_outputDirectory, _dataFileName, "txt");
+				var path = fileLog.generatePath(outputDirectory, dataFileName, "txt");
 				if (!path.isAbsolute())
-					path = _outputDirectory.resolve(path);
+					path = outputDirectory.resolve(path);
 
-				if (!path.startsWith(_outputDirectory))
+				if (!path.startsWith(outputDirectory))
 					throw new IllegalArgumentException(
 							String.format("Solver log file must be within output directory '%s' but was '%s'",
-									_outputDirectory, path));
+									outputDirectory, path));
 
 				if (!Files.exists(path.getParent()))
 					Files.createDirectories(path.getParent());
@@ -242,6 +314,9 @@ public class MiniZinc {
 	}
 
 	private Path getMiniZinc() {
+		if (cachedMiniZincLocation != null && Files.exists(cachedMiniZincLocation))
+			return cachedMiniZincLocation;
+
 		MiniZincLocator locator = new MiniZincLocator();
 		if (config.miniZincLocation != null)
 			locator.addFolder(config.miniZincLocation);
@@ -253,6 +328,7 @@ public class MiniZinc {
 			throw new IllegalArgumentException(
 					"MiniZinc executable not found. Please ensure MiniZinc folder is in the same directory as this JAR, or provide the correct path.");
 
-		return location.get();
+		cachedMiniZincLocation = location.get();
+		return cachedMiniZincLocation;
 	}
 }

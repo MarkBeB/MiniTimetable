@@ -17,16 +17,9 @@ public class LocalRunner {
 
 		MiniZinc minizinc = new MiniZinc();
 		DefaultSettings.applyDefaultMiniZincConfiguration(minizinc);
-//		minizinc.getConfig().setMiniZincExe(exe);
-//		minizinc.getConfig().runnerLog = new DefaultFileLog("%s-log");
-//		minizinc.getConfig().backendLog = new DefaultFileLog("%s-backend");
-//		minizinc.getConfig().solverOutput = new DefaultFileLog("%s-solution");
-//		minizinc.getConfig().solverModelLog = new DefaultFileLog("%s-lp.lp", true);
+		minizinc.getConfig().timeLimitMS = 2 * 60 * 1000l;
 
-		minizinc.getSolverConfig().timeLimitMS = 2 * 60 * 1000; // DefaultSettings.DEFAULT_TIME_LIMIT_IN_MS;
-
-		minizinc.setup(modelFile, dataFile, outputFolder);
-		minizinc.run().join();
+		minizinc.run(modelFile, dataFile, outputFolder).join();
 	}
 
 }

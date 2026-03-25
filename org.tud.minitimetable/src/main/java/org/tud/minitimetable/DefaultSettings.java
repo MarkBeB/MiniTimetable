@@ -8,7 +8,7 @@ public class DefaultSettings {
 	/**
 	 * 10 Minutes
 	 */
-	public static final Integer DEFAULT_TIME_LIMIT_IN_MS = 10 * 60 * 1000;
+	public static final Long DEFAULT_TIME_LIMIT_IN_MS = 10l * 60l * 1000l;
 
 	/**
 	 * 4 Threads
@@ -22,8 +22,8 @@ public class DefaultSettings {
 		minizinc.getConfig().solverOutput = new DefaultFileLog("%s-solution");
 		minizinc.getConfig().solverModelLog = new DefaultFileLog("%s-lp.lp", true);
 
-		minizinc.getSolverConfig().timeLimitMS = DefaultSettings.DEFAULT_TIME_LIMIT_IN_MS;
-		minizinc.getSolverConfig().threads = DefaultSettings.DEFAULT_NUMBER_OF_THREADS;
+		minizinc.getConfig().timeLimitMS = DefaultSettings.DEFAULT_TIME_LIMIT_IN_MS;
+		minizinc.getConfig().threads = DefaultSettings.DEFAULT_NUMBER_OF_THREADS;
 
 	}
 

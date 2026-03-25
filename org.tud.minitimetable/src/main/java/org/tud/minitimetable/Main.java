@@ -37,8 +37,7 @@ public class Main {
 
 		applyArguments(minizinc, commandLine);
 
-		minizinc.setup(modelFile, dataFile, outputFolder);
-		minizinc.run().join();
+		minizinc.run(modelFile, dataFile, outputFolder).join();
 	}
 
 	private static Path getModelFile(CommandLine commandLine) {
@@ -131,15 +130,15 @@ public class Main {
 
 		if (commandLine.hasOption(OPTION_SHORT_TIMELIMIT_S)) {
 			var value = parseInteger(commandLine, OPTION_SHORT_TIMELIMIT_S, "Unable to parse time limit");
-			minizinc.getSolverConfig().timeLimitMS = value * 1000;
+			minizinc.getConfig().timeLimitMS = value * 1000l;
 
 		} else if (commandLine.hasOption(OPTION_SHORT_TIMELIMIT_M)) {
 			var value = parseInteger(commandLine, OPTION_SHORT_TIMELIMIT_M, "Unable to parse time limit");
-			minizinc.getSolverConfig().timeLimitMS = value * 60 * 1000;
+			minizinc.getConfig().timeLimitMS = value * 60l * 1000l;
 
 		} else if (commandLine.hasOption(OPTION_SHORT_TIMELIMIT_H)) {
 			var value = parseInteger(commandLine, OPTION_SHORT_TIMELIMIT_H, "Unable to parse time limit");
-			minizinc.getSolverConfig().timeLimitMS = value * 60 * 60 * 1000;
+			minizinc.getConfig().timeLimitMS = value * 60l * 60l * 1000l;
 
 		}
 	}
