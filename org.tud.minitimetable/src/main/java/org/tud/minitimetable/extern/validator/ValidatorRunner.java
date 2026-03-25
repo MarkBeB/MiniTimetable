@@ -56,9 +56,7 @@ public class ValidatorRunner {
 		var outStream = process.getInputStream();
 		var result = parseOutput(outStream);
 
-		while (!isDone.isDone()) {
-			Thread.sleep(100);
-		}
+		isDone.join();
 
 		return result;
 	}
