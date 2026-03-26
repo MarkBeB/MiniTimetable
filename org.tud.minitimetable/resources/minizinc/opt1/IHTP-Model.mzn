@@ -41,40 +41,29 @@ type PenalityType = record(
 );
 
 
-type NurseFixData = record(
+type Nurse = record(
   NurseIds: id,
   SkillLevels: skillLevel,
   array[Days, ShiftTypes] of int: maxWorkloadPerShift,
 );
-type NurseVarData = record(
-  array[Days, ShiftTypes, RoomIds] of var bool: assignedRooms,
-  array[Days, ShiftTypes] of var int: expectedWorkload,
 
-  array[Days, ShiftTypes] of var 0..maxPenalityValue: penaltySkillLevel,
-);
-type Nurse = NurseFixData ++ NurseVarData;
-
-
-type SurgeonFixData = record(
+type Surgeon = record(
   SurgeonIds: id,
   array[Days] of DayTime: maxSurgeryTime,
 );
-type SurgeonVarData = record(
-  array[Days] of var DayTime: usedTime,
-  array[Days, OperatingTheaterIds] of var bool: worksInOT,
-);
-type Surgeon = SurgeonFixData ++ SurgeonVarData;
 
-
-type OperatingTheaterFixData = record(
+type OperatingTheater = record(
   OperatingTheaterIds: id,
   array[Days] of DayTime: availability,
   array[Days] of bool: isAvailable,
 );
-type OperatingTheaterVarData = record(  
-  array[Days] of var DayTime: usedTime,
-);
-type OperatingTheater = OperatingTheaterFixData ++ OperatingTheaterVarData;
+
+
+
+
+
+
+
 
 
 type RoomFixData = record(
@@ -83,18 +72,18 @@ type RoomFixData = record(
   array[Days] of int: assignedOccupants,
 );
 type RoomVarData = record(
-  array[Days] of var bool: isOccupied, % utility constraint
-  array[Days] of var 0..100: assignedPatients,  
-  array[Days] of var Genders: assignedGender,
-  array[Days, ShiftTypes] of var int: workload,
-  array[Days, ShiftTypes] of var opt NurseIds: assignedNurse,
+  array[Days] of var bool: XisOccupied, % utility constraint
+  array[Days] of var 0..100: XassignedPatients,  
+  %array[Days] of var Genders: assignedGender,
+  array[Days, ShiftTypes] of var int: Xworkload,
+  array[Days, ShiftTypes] of var opt NurseIds: XassignedNurse,
 
-  array[Days] of var 0..length(AgeGroups): penaltyAgeMixing,
+  array[Days] of var 0..length(AgeGroups): XpenaltyAgeMixing,
 );
 type Room = RoomFixData ++ RoomVarData;
 
 
-type OccupantFixData = record (
+type Occupant = record (
   OccupantIds: id,
   Genders: gender,
   AgeGroups: ageGroup,
@@ -103,13 +92,9 @@ type OccupantFixData = record (
   array[int] of SkillLevels: skillLevelRequired, %length = lengthOfStay * length(ShiftType)
   RoomIds: assignedRoom,
 );
-type OccupantVarData = record (
-  array[NurseIds] of var bool: caredByNurse
-);
-type Occupant = OccupantFixData ++ OccupantVarData;
 
 
-type PatientFixData = record (
+type Patient = record (
   PatientIds: id,
   bool: mandatory,
   Genders: gender,
@@ -124,21 +109,8 @@ type PatientFixData = record (
   array[int] of SkillLevels: skillLevelRequired,
 );
 
-array[PatientIds, Days, RoomIds] of var bool: patientRoomAssignment;
-array[PatientIds, Days, NurseIds] of var bool: patientNurseAssignment;
 
-type PatientVarData = record (
-  var MaxDays: admissionDay,
-  var MaxDays: admittedUntil,
-  var bool: isPostponed, 
-  var bool: isAdmitted, % isPostponed <-> !isAdmited
 
-  var opt OperatingTheaterIds: assignedOT,
-  array[NurseIds] of var bool: caredByNurse,
-  
-  var MaxDays: penaltyAdmissionDelay,
-);
-type Patient = PatientFixData ++ PatientVarData;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -188,19 +160,14 @@ enum RoomIdOrNotAssigned = {RoomNotAssigned} ++ C_room(RoomIds);
 enum GenderOrNotAssigned = {GenderNotAssigned} ++ C_gender(Genders);
 
 
-array[NurseIds] of NurseFixData: nurseData;
-array[SurgeonIds] of SurgeonFixData: surgeonData;
-array[PatientIds] of PatientFixData: patientData;
-array[OccupantIds] of OccupantFixData: occupantData;
-array[OperatingTheaterIds] of OperatingTheaterFixData: operatingTheaterData;
+array[NurseIds] of Nurse: nurseData;
+array[SurgeonIds] of Surgeon: surgeonData;
+array[PatientIds] of Patient: patientData;
+array[OccupantIds] of Occupant: occupantData;
+array[OperatingTheaterIds] of OperatingTheater: operatingTheaterData;
 array[RoomIds] of RoomFixData: roomData;
 
 
-array[NurseIds] of NurseVarData: nurseVar;
-array[SurgeonIds] of SurgeonVarData: surgeonVar;
-array[PatientIds] of PatientVarData: patientVar;
-array[OccupantIds] of OccupantVarData: occupantVar;
-array[OperatingTheaterIds] of OperatingTheaterVarData: operatingTheaterVar;
 array[RoomIds] of RoomVarData: roomVar;
 
 %deprecated
@@ -208,21 +175,44 @@ int: numberOfPatients = length(patientData);
 %deprecated
 int: numberOfOccupants = length(occupantData);
 
-% Usage may cause memory segmentation fault since version 2.9.5, was fine before. Seems to happen when a combined Type has 'too many' fields.
-%
-%array[NurseIds] of Nurse: nurses ::output = [id: nurseData[id] ++ nurseVar[id] | id in NurseIds];
-%array[SurgeonIds] of Surgeon: surgeons ::output = [id: surgeonData[id] ++ surgeonVar[id] | id in SurgeonIds];
-%array[PatientIds] of Patient: patients ::output = [id: patientData[id] ++ patientVar[id] | id in PatientIds]; % <-- has too many fields ?!?
-%array[OccupantIds] of Occupant: occupants ::output = [id: occupantData[id] | id in OccupantIds];
-%array[OperatingTheaterIds] of OperatingTheater: operatingTheaters ::output = [id: operatingTheaterData[id] ++ operatingTheaterVar[id] | id in OperatingTheaterIds];
-%array[RoomIds] of Room: rooms ::output = [id: roomData[id] ++ roomVar[id] | id in RoomIds];
-
-array[NurseIds] of NurseFixData: nurses = nurseData;
-array[SurgeonIds] of SurgeonFixData: surgeons = surgeonData;
-array[PatientIds] of PatientFixData: patients = patientData;
-array[OccupantIds] of OccupantFixData: occupants = occupantData;
-array[OperatingTheaterIds] of OperatingTheaterFixData: operatingTheaters = operatingTheaterData;
+array[NurseIds] of Nurse: nurses = nurseData;
+array[SurgeonIds] of Surgeon: surgeons = surgeonData;
+array[PatientIds] of Patient: patients = patientData;
+array[OccupantIds] of Occupant: occupants = occupantData;
+array[OperatingTheaterIds] of OperatingTheater: operatingTheaters = operatingTheaterData;
 array[RoomIds] of RoomFixData: rooms = roomData;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% DECISION VARIABLES
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+array[PatientIds] of var opt RoomIds: patientRoomAssignment;
+array[PatientIds, Days, RoomIds] of var bool: isPatientInRoom;
+array[PatientIds] of var MaxDays: patientAdmissionDay;
+array[PatientIds] of var MaxDays: patientAdmittedUntil;
+array[PatientIds] of var bool: isPatientPostponed;
+array[PatientIds, NurseIds] of var bool: patientCaredByNurse;
+array[PatientIds] of var opt OperatingTheaterIds: patientOTAssignment;
+array[PatientIds, Days, NurseIds] of var bool: patientNurseAssignment;
+
+
+array[OccupantIds, NurseIds] of var bool: occupantCaredByNurse;
+
+array[NurseIds, Days, ShiftTypes, RoomIds] of var bool: isNurseInRoom;
+array[NurseIds, Days, ShiftTypes] of var 0..1000: nurseWorkload;
+
+array[SurgeonIds, Days, OperatingTheaterIds] of var bool: surgeonUsesOT;
+array[SurgeonIds, Days] of var DayTime: surgeonSurgeryTime;
+
+array[OperatingTheaterIds, Days] of var DayTime: otSurgeryTime;
+
+array[RoomIds, Days] of var Genders: roomGender;
+array[RoomIds, Days] of var bool: isRoomOccupied;
+array[RoomIds, Days, ShiftTypes] of var 0..1000: roomWorkload;
+array[RoomIds, Days] of var 0..100: roomAssignedPatients;
+array[RoomIds,Days, ShiftTypes] of var opt NurseIds: roomNurseAssignment;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -233,22 +223,47 @@ array[RoomIds] of RoomFixData: rooms = roomData;
 % Types with many arguments can lead to segmentation faults if used as function arguments 
 
 function var bool: isPatientInRoom(PatientIds: p, Days: d, RoomIds: r) = 
-  patientRoomAssignment[p, d, r];
+  isPatientInRoom[p, d, r];
 
-function bool: isOccupantInRoom(OccupantIds: o, Days: d, RoomIds: r) =
+function var bool: isNurseInRoom(NurseIds: n, Days: d, ShiftTypes: s, RoomIds: r) = 
+  isNurseInRoom[n, d, s, r];
+
+function bool: isOccupantInRoom(OccupantIds: o, Days: d,  RoomIds: r) =
   isOccupantInRoom(occupantData[o], d, r);
 
-function bool: isOccupantInRoom(OccupantFixData: o, Days: d, RoomIds: r) = 
+function bool: isOccupantInRoom(Occupant: o, Days: d, RoomIds: r) = 
   (o.assignedRoom == r) /\ (d < o.lengthOfStay);
 
-%deprecated
 function bool: isOccupantPresent(OccupantIds: o, Days: d) = 
-  d < occupantData[o].lengthOfStay;
+  d < occupants[o].lengthOfStay;
 
-%deprecated
 function var bool: isPatientPresent(PatientIds: p, Days: d) = 
-  patientVar[p].admissionDay <= d /\ d <= patientVar[p].admittedUntil;
+  patientAdmissionDay[p] <= d /\ d <= patientAdmittedUntil[p];
+
+function var bool: isPatientPostponed(PatientIds: p) =
+  isPatientPostponed[p];
+  
+function var bool: isPatientAdmitted(PatientIds: p) = 
+  not isPatientPostponed[p];
 
 
 function bool: isNurseWorking(NurseIds: n, Days: d, ShiftTypes: s) =
-  nurseData[n].maxWorkloadPerShift[d, s] > 0; 
+  nurses[n].maxWorkloadPerShift[d, s] > 0; 
+
+function var bool: isRoomOccupied(RoomIds: r, Days: d) = 
+  isRoomOccupied[r,d];
+
+function bool: isOTAvailable(OperatingTheaterIds: ot, Days: d) = 
+  operatingTheaters[ot].availability[d] > 0;
+  
+function bool: isSurgeonAvailable(SurgeonIds: s, Days: d) = 
+  surgeons[s].maxSurgeryTime[d] > 0;
+
+
+
+
+function int: occupantDailyIndex(Days: day, ShiftTypes: shift) = 
+  enum2int(shift) - 1 + enum2int(day) * length(ShiftTypes);
+  
+function var int: patientDailyIndex(PatientIds: id, Days: day, ShiftTypes: shift) =
+  enum2int(shift) - 1 + (enum2int(day) - patientAdmissionDay[id]) * length(ShiftTypes);

@@ -4,10 +4,12 @@ include "../IHTP-model.mzn";
 % H2 Compatible rooms: Patients can only be assigned to one of their compatible rooms.
 %
 
-constraint forall(p in PatientIds, d in Days , r in patientData[p].incompatibleRooms)(
-  patientRoomAssignment[p,d,r] = false
-);
+array[PatientIds] of set of RoomIds: patientCompatibleRooms = [
+    RoomIds diff array2set(p.incompatibleRooms) | p in patients
+];
 
-constraint forall(p in PatientIds, d in Days )(
-  sum(r in RoomIds)(patientRoomAssignment[p,d,r]) <= 1
+%array[PatientIds] of RoomIds: patientCompatibleRooms2 = [ r | p in patients, r in RoomIds where not (r in p.incompatibleRooms) ];
+
+constraint forall(p in PatientIds)(
+  patientRoomAssignment[p] in patientCompatibleRooms[p]
 );

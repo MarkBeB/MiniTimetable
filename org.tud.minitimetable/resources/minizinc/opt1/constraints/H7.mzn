@@ -5,9 +5,9 @@ include "../IHTP-model.mzn";
 %
 
 constraint forall(r in RoomIds, d in Days)(
-  roomVar[r].assignedPatients[d] = sum(p in PatientIds)(isPatientInRoom(p,d,r))
+  roomAssignedPatients[r,d] = sum(p in PatientIds)(isPatientInRoom(p,d,r))
 );
 
-constraint forall(roomId in RoomIds, day in Days)(  
-  roomVar[roomId].assignedPatients[day] + roomData[roomId].assignedOccupants[day] <= roomData[roomId].capacity
+constraint forall(r in RoomIds, d in Days)(  
+  roomAssignedPatients[r,d] + rooms[r].assignedOccupants[d] <= rooms[r].capacity
 );

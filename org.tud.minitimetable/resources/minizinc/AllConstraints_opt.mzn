@@ -13,7 +13,7 @@ include "base/constraints/H7.mzn";
 include "base/constraints/H8.mzn";
 
 include "opt1/constraints/S1.mzn";
-include "base/constraints/S2.mzn";
+include "opt1/constraints/S2.mzn";
 include "base/constraints/S3.mzn";
 include "base/constraints/S4.mzn";
 include "base/constraints/S5.mzn";

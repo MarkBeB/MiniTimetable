@@ -5,10 +5,10 @@ include "../IHTP-model.mzn";
 % Given that optional patients do not have a due date, they can be admitted on any day after their release date.
 %
 
-constraint forall(id in PatientIds where patientData[id].mandatory)(
-    patientData[id].earliestPossibleAdmission <= patientVar[id].admissionDay /\ patientVar[id].admissionDay <= patientData[id].latestPossibleAdmission
+constraint forall(p in PatientIds where patients[p].mandatory)(
+    patients[p].earliestPossibleAdmission <= patientAdmissionDay[p] /\ patientAdmissionDay[p] <= patients[p].latestPossibleAdmission
 );
 
-constraint forall(id in PatientIds where not patientData[id].mandatory)(
-    patientData[id].earliestPossibleAdmission <= patientVar[id].admissionDay /\ patientVar[id].admissionDay <= lastDay + 1
+constraint forall(p in PatientIds where not patientData[p].mandatory)(
+    patients[p].earliestPossibleAdmission <= patientAdmissionDay[p] /\ patientAdmissionDay[p] <= lastDay + 1
 );

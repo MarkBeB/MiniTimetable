@@ -5,14 +5,14 @@ include "../IHTP-model.mzn";
 %
 
 % Admissions should only be allowed on days when at least one OT is available.
-set of ExtendedDays: daysWithOTCapacity = {postponedDay} union { day | day in Days where exists(ot in operatingTheaterData)(ot.isAvailable[day])};
-constraint redundant_constraint(forall(patient in patientVar)(
-  patient.admissionDay in daysWithOTCapacity
+set of ExtendedDays: daysWithOTCapacity = {postponedDay} union { d | d in Days where exists(ot in OperatingTheaterIds)(isOTAvailable(ot,d))};
+constraint redundant_constraint(forall(p in PatientIds)(
+  patientAdmissionDay[p] in daysWithOTCapacity
 ));
 
 % Patients can only be admitted on days when their assigned surgeon is available.
-constraint redundant_constraint(forall(patientId in PatientIds)( let {
-    set of ExtendedDays: daysWithAvailableSurgeon = {postponedDay} union { day | day in Days where surgeonData[patientData[patientId].assignedSurgeon].maxSurgeryTime[day] > 0}
+constraint redundant_constraint(forall(p in PatientIds)( let {
+    set of ExtendedDays: daysWithAvailableSurgeon = {postponedDay} union { d | d in Days where isSurgeonAvailable(patientData[p].assignedSurgeon, d)}
   } in
-  patientVar[patientId].admissionDay in daysWithAvailableSurgeon
+  patientAdmissionDay[p] in daysWithAvailableSurgeon
 ));

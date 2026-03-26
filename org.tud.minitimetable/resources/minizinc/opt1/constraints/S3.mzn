@@ -6,26 +6,23 @@ include "../IHTP-model.mzn";
 % thus resulting in a minimum cost for this component of 3 times the number of admitted patients.
 %
 
-constraint forall(patient in patientVar, day in Days where patient.isAdmitted)(
-  let{ var opt RoomIds: roomId = patient.assignedRoom[day] } in
-  forall(shift in ShiftTypes, nurseId in NurseIds)(
-    nurseVar[nurseId].assignedRooms[day, shift, roomId] -> patient.caredByNurse[nurseId]
+constraint forall(p in PatientIds, d in Days where isPatientPresent(p, d))(
+  let{ var opt RoomIds: r = patientRoomAssignment[p] } in
+  forall(s in ShiftTypes, n in NurseIds)(
+    isNurseInRoom[n, d, s, r] -> patientCaredByNurse[p, n]
   )
 );
 
-constraint forall(occupantId in OccupantIds, day in Days where occupantIsPresent(occupantId, day))(
-  let{ RoomIds: roomId = occupantData[occupantId].assignedRoom } in
-  forall(shift in ShiftTypes, nurseId in NurseIds)(
-    nurseVar[nurseId].assignedRooms[day, shift, roomId] -> occupantVar[occupantId].caredByNurse[nurseId]
+constraint forall(o in OccupantIds, d in Days where isOccupantPresent(o, d))(
+  let{ RoomIds: r = occupantData[o].assignedRoom } in
+  forall(s in ShiftTypes, n in NurseIds)(
+    isNurseInRoom[n, d, s, r] -> occupantCaredByNurse[o, n]
   )
 );
-
-%constraint Penalties.continuityOfCare = Weights.continuityOfCare * sum(patient in patientVar)
-%  (max(0, sum(nurseId in NurseIds)(patient.caredByNurse[nurseId]) - length(ShiftTypes)));
 
 constraint Penalties.continuityOfCare = Weights.continuityOfCare * (
-    count(patient in patientVar, nurseId in NurseIds)(patient.caredByNurse[nurseId])
-  + count(occupant in occupantVar, nurseId in NurseIds)(occupant.caredByNurse[nurseId])
+    sum(p in PatientIds, n in NurseIds)(patientCaredByNurse[p, n])
+  + sum(o in OccupantIds, n in NurseIds)(occupantCaredByNurse[o, n])
 );
 
-constraint Penalties.continuityOfCare >= Weights.continuityOfCare * length(ShiftTypes) * (count(patient in patientVar)(patient.isAdmitted) + length(OccupantIds));
+constraint Penalties.continuityOfCare >= Weights.continuityOfCare * card(ShiftTypes) * (count(p in PatientIds)(isPatientAdmitted(p)) + card(OccupantIds));

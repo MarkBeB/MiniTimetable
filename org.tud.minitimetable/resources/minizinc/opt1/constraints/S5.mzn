@@ -5,4 +5,4 @@ include "../IHTP-model.mzn";
 %
 
 constraint Penalties.openOperatingTheater = Weights.openOperatingTheater 
-  * count(day in Days, ot in operatingTheaterVar)(ot.usedTime[day] > 0);
+  * sum(d in Days, ot in OperatingTheaterIds)(otSurgeryTime[ot, d]);
