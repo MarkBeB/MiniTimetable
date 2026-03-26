@@ -27,6 +27,10 @@ constraint forall(p in PatientIds, d in Days, r in RoomIds)(
 % AH11 Surgery on admission day: Patients undergo surgery on the day of their admission
 %
 
+constraint forall(p in PatientIds, ot in OperatingTheaterIds, d in Days) (
+  isPatientInOT[p, ot, d] <-> (patientOTAssignment[p] == ot /\ patientAdmissionDay[p] == d)
+);
+
 % Every admitted patient must be assigned to an OT. Patients who have not been admitted should not be assigned to an OT.
 constraint forall(p in PatientIds)(
   isPatientAdmitted(p) -> patientOTAssignment[p] != <>

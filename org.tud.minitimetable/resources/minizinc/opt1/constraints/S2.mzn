@@ -7,34 +7,29 @@ include "../IHTP-model.mzn";
 % Note that a nurse with a skill level greater than the minimum required can be assigned to the room at no additional cost.
 %
 
-
-
-function int: getRequiredOccupantSkill(OccupantIds: o, Days: d, ShiftTypes: s) =
-  occupantData[o].skillLevelRequired[occupantDailyIndex(d, s)];
+function int: requiredOccupantSkill(OccupantIds: o, Days: d, ShiftTypes: s) =
+  occupants[o].skillLevelRequired[occupantDailyIndex(d,s)];
   
-function var int: getRequiredPatientSkill(PatientIds: p, Days: d, ShiftTypes: s) =
-  patientData[p].skillLevelRequired[ patientDailyIndex(p, d, s) ];
-
-array[PatientIds, Days, ShiftTypes] of var PenaltyRange: patientSkillDifference;
-array[OccupantIds, Days, ShiftTypes] of var PenaltyRange: occupantSkillDifference;
+function var int: requiredPatientSkill(PatientIds: p, Days: d, ShiftTypes: s) =
+  patients[p].skillLevelRequired[patientDailyIndex(p,d,s)];
 
 constraint forall(p in PatientIds, d in Days, s in ShiftTypes)(
   forall(n in NurseIds, r in RoomIds where isNurseWorking(n,d,s))(
-    (isPatientInRoom(p,d,r) /\ isNurseInRoom[n, d, s, r]) -> (
-      patientSkillDifference[p, d, s] >= getRequiredPatientSkill(p, d, s) - nurseData[n].skillLevel
+    (isPatientInRoom[p,d,r] /\ isNurseInRoom[n,d,s,r]) -> (
+      patientSkillDifference[p,d,s] = max(0, requiredPatientSkill(p,d,s) - nurseSkillLevel(n))
     )
   )
 );
 
 constraint forall(o in OccupantIds, d in Days, s in ShiftTypes)(
     forall(n in NurseIds, r in RoomIds where isNurseWorking(n,d,s) /\ isOccupantInRoom(o,d,r))(
-      isNurseInRoom[n, d, s, r] -> (
-        occupantSkillDifference[o, d, s] >= getRequiredOccupantSkill(o, d, s) - nurseData[n].skillLevel
+      isNurseInRoom[n,d,s,r] -> (
+        occupantSkillDifference[o,d,s] = max(0, requiredOccupantSkill(o,d,s) - nurseSkillLevel(n))
       )
     )
 );
 
-constraint Penalties.roomNurseSkill = Weights.roomNurseSkill * (
-    sum(p in PatientIds, d in Days, s in ShiftTypes)(patientSkillDifference[p, d, s]) +
-    sum(o in OccupantIds, d in Days, s in ShiftTypes)(occupantSkillDifference[o, d, s])
+constraint (Penalties.roomNurseSkill = 
+    Weights.roomNurseSkill * sum(p in PatientIds, d in Days, s in ShiftTypes)(patientSkillDifference[p,d,s]) +
+    Weights.roomNurseSkill * sum(o in OccupantIds, d in Days, s in ShiftTypes)(occupantSkillDifference[o,d,s])
 );

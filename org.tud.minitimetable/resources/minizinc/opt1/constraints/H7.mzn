@@ -5,9 +5,9 @@ include "../IHTP-model.mzn";
 %
 
 constraint forall(r in RoomIds, d in Days)(
-  roomAssignedPatients[r,d] = sum(p in PatientIds)(isPatientInRoom(p,d,r))
-);
-
-constraint forall(r in RoomIds, d in Days)(  
-  roomAssignedPatients[r,d] + rooms[r].assignedOccupants[d] <= rooms[r].capacity
+  let {
+    int: occupantsInRoom = rooms[r].assignedOccupants[d]; % count(o in Occupants)(occupants[o].assignedRoom == r)
+    var int: patientsInRoom = sum(p in PatientIds)(isPatientInRoom[p,d,r]);
+  } in
+  occupantsInRoom + patientsInRoom <= roomCapacity(r)
 );

@@ -15,7 +15,7 @@ constraint forall(r in RoomIds, d in Days)(
     int: numOccupants = sum(o in occupantData)(isOccupantInRoom(o,d,r));
     array[PatientIds] of var bool: patientsInRoom = [ isPatientInRoom(p,d,r) | p in PatientIds ];
   } in
-  sum(patientsInRoom) + numOccupants <= roomData[r].capacity * isRoomOccupied[r,d] /\ isRoomOccupied[r,d] <= sum(patientsInRoom) + numOccupants
+  sum(patientsInRoom) + numOccupants <= roomCapacity(r) * isRoomOccupied[r,d] /\ isRoomOccupied[r,d] <= sum(patientsInRoom) + numOccupants
 );
 
 constraint forall(r in RoomIds, d in Days)(
@@ -28,6 +28,13 @@ constraint forall(r in RoomIds, d in Days)(
     let {
       array[PatientIds] of var bool: patientsInRoom = [ isPatientInRoom(p,d,r) | p in PatientIds ];
     } in
-    sum(patientsInRoom) <= roomData[r].capacity * isRoomOccupied[r,d] /\ isRoomOccupied[r,d] <= sum(patientsInRoom)
+    sum(patientsInRoom) <= roomCapacity(r) * isRoomOccupied[r,d] /\ isRoomOccupied[r,d] <= sum(patientsInRoom)
   endif
+);
+
+
+
+array[NurseIds, Days, RoomIds] of var bool: nurseAssignedToRoom;
+constraint forall(n in NurseIds, d in Days, s in ShiftTypes, r in RoomIds where isNurseWorking(n,d,s)) (
+  nurseAssignedToRoom[n,d,r] >= isNurseInRoom[n,d,s,r]
 );

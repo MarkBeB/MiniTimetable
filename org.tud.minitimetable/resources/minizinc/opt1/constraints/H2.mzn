@@ -6,7 +6,7 @@ include "../IHTP-model.mzn";
 
 constraint forall(p in PatientIds)(
   let {
-    set of RoomIds: compatibleRooms = RoomIds diff array2set(patients[p].incompatibleRooms);
+    set of RoomIds: compatibleRooms = RoomIds diff incompatibleRooms(p);
   } in
   patientRoomAssignment[p] in compatibleRooms
 );

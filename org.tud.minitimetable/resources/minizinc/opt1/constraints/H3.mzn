@@ -5,11 +5,11 @@ include "../IHTP-model.mzn";
 %
 
 constraint forall(s in SurgeonIds, d in Days)(
-    surgeonSurgeryTime[s, d] = sum(p in PatientIds where patients[p].assignedSurgeon == s)(
-        patients[p].surgeryDuration * bool2int(patientAdmissionDay[p] == d)
-    )
+  surgeonSurgeryTime[s, d] = sum(p in PatientIds where hasPatientSurgeon(p,s))(
+    surgeryDuration(p) * isPatientAdmittedAt[p,d]
+  )
 );
 
 constraint forall(s in SurgeonIds, d in Days)(
-  surgeonSurgeryTime[s, d] <= surgeons[s].maxSurgeryTime[d]
+  surgeonSurgeryTime[s, d] <= maxSurgeryTime(s,d)
 );

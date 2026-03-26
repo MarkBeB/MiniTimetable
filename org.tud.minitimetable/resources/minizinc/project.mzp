@@ -2,24 +2,11 @@
     "openFiles": [
         "AllConstraints_opt.mzn",
         "AllConstraints_opt2.mzn",
+        "opt1/constraints/S7.mzn",
         "opt1/IHTP-Model.mzn",
-        "opt1/constraints/S6.mzn",
-        "opt1/constraints/H3.mzn",
-        "opt1/constraints/AllAH.mzn",
-        "opt1/constraints/H8.mzn",
-        "base/constraints/H8.mzn",
-        "opt1/constraints/H7.mzn",
-        "opt1/constraints/H6.mzn",
-        "opt1/constraints/H5.mzn",
-        "opt1/constraints/H4.mzn",
-        "opt1/constraints/H2.mzn",
-        "opt1/constraints/H1.mzn",
         "opt1/constraints/S1.mzn",
         "opt1/constraints/S2.mzn",
-        "opt1/constraints/S3.mzn",
-        "base/constraints/S3.mzn",
-        "opt1/constraints/S4.mzn",
-        "opt1/constraints/S5.mzn"
+        "opt1/constraints/S3.mzn"
     ],
     "openTab": 1,
     "projectFiles": [
@@ -30,6 +17,7 @@
         "OnlyHardConstraints.mzn",
         "OutConsoleFormat.mzn",
         "base/IHTP-Model.mzn",
+        "base/OutJsonFormat.mzn",
         "base/Utility.mzn",
         "base/constraints/AllAH.mzn",
         "base/constraints/H1.mzn",
@@ -70,6 +58,8 @@
         "opt1/constraints/S4.mzn",
         "opt1/constraints/S5.mzn",
         "opt1/constraints/S6.mzn",
+        "opt1/constraints/S7.mzn",
+        "opt1/constraints/S8.mzn",
         "solver.mpc"
     ],
     "selectedBuiltinConfigId": "org.minizinc.mip.gurobi",
