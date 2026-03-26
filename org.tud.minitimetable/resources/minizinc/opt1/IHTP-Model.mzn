@@ -230,6 +230,8 @@ array[RoomIds] of RoomFixData: rooms = roomData;
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Types with many arguments can lead to segmentation faults if used as function arguments 
+
 function var bool: isPatientInRoom(PatientIds: p, Days: d, RoomIds: r) = 
   patientRoomAssignment[p, d, r];
 
@@ -239,34 +241,14 @@ function bool: isOccupantInRoom(OccupantIds: o, Days: d, RoomIds: r) =
 function bool: isOccupantInRoom(OccupantFixData: o, Days: d, RoomIds: r) = 
   (o.assignedRoom == r) /\ (d < o.lengthOfStay);
 
+%deprecated
 function bool: isOccupantPresent(OccupantIds: o, Days: d) = 
   d < occupantData[o].lengthOfStay;
 
+%deprecated
 function var bool: isPatientPresent(PatientIds: p, Days: d) = 
   patientVar[p].admissionDay <= d /\ d <= patientVar[p].admittedUntil;
 
-function bool: isWorking(NurseIds: n, Days: d, ShiftTypes: s) ::cache_result =
+
+function bool: isNurseWorking(NurseIds: n, Days: d, ShiftTypes: s) =
   nurseData[n].maxWorkloadPerShift[d, s] > 0; 
-
-/*
-constraint forall(nurseId in NurseIds, day in Days, shift in ShiftTypes)(
-  nurseVar[nurseId].isWorking[day, shift] = exists(workingShift in nurseData[nurseId].workingShifts)(
-      workingShift.day == day /\ workingShift.shift == shift)
-);
-
-constraint forall(nurseId in NurseIds, day in Days, shift in ShiftTypes)(
-  nurseVar[nurseId].isWorking[day, shift] -> exists(workingShift in nurseData[nurseId].workingShifts)(
-      workingShift.day == day /\ workingShift.shift == shift 
-      /\ nurseVar[nurseId].maxLoad[day, shift] = workingShift.maxLoad
-    )
-);
-*/
-
-function var int: indexOf(PatientIds: id, Days: day, ShiftTypes: shift) =
-  enum2int(shift) - 1 + (enum2int(day) - patientVar[id].admissionDay) * length(ShiftTypes);
-
-function int: indexOf(Days: day, ShiftTypes: shift) =
-  enum2int(shift) - 1 + enum2int(day) * length(ShiftTypes);
-
-% include "OutConsoleFormat.mzn";
-% include "OutJsonFormat.mzn";
