@@ -69,7 +69,7 @@ constraint forall(patient in patientVar)(
 
 %  The assigned OT should be available on the day of admission.
 constraint forall(patient in patientVar where patient.isAdmitted)(
-  exists(ot in operatingTheaterData where ot.isAvailable[patient.admissionDay])(
+  exists(ot in operatingTheaterData where ot.availability[patient.admissionDay] > 0)(
     patient.assignedOT = ot.id
   )
 ) :: constraint_name("Con_AH11_B");

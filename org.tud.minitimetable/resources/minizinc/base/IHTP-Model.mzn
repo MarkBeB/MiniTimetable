@@ -15,6 +15,7 @@ int: maxScoreValue = 100000000;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 type DayTime = 0..minutesPerDay;
+type PenaltyRange = 0..maxPenalityValue;
 
 type WeightType = record(
   int: roomMixedAge,
@@ -69,7 +70,6 @@ type Surgeon = SurgeonFixData ++ SurgeonVarData;
 type OperatingTheaterFixData = record(
   OperatingTheaterIds: id,
   array[Days] of DayTime: availability,
-  array[Days] of bool: isAvailable,
 );
 type OperatingTheaterVarData = record(  
   array[Days] of var DayTime: usedTime,
@@ -239,8 +239,20 @@ function var bool: occupantIsPresent(OccupantIds: id, Days: day) =
 function var bool: patientIsPresent(PatientIds: id, Days: day) = 
   patientVar[id].admissionDay <= day /\ day <= patientVar[id].admittedUntil;
 
+function bool: isOTAvailable(OperatingTheaterIds: ot, Days: d) = 
+  operatingTheaters[ot].availability[d] > 0;
 
+function var bool: isPatientInRoom(PatientIds: p, Days: d, RoomIds: r) = 
+  patientIsInRoom(p, d, r);
 
+function bool: isOccupantInRoom(OccupantIds: o, Days: d, RoomIds: r) =
+  occupantIsInRoom(o, d, r);
+
+function SurgeonIds: assignedSurgeon(PatientIds: p) =
+  patients[p].assignedSurgeon;
+
+function bool: isSurgeonAvailable(SurgeonIds: s, Days: d) = 
+  surgeons[s].maxSurgeryTime[d] > 0;
 
 function bool: isInRoom(OccupantFixData: occupant, RoomFixData: room, Days: day) =
   occupant.assignedRoom == room.id /\ day < occupant.lengthOfStay;
@@ -286,3 +298,7 @@ function int: indexOf(Days: day, ShiftTypes: shift) =
 
 % include "OutConsoleFormat.mzn";
 % include "OutJsonFormat.mzn";
+
+
+function bool: isNurseWorking(NurseIds: n, Days: d, ShiftTypes: s) =
+  nurseData[n].maxWorkloadPerShift[d, s] > 0; 
