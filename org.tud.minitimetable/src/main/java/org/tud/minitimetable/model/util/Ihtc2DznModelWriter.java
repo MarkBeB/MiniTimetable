@@ -224,11 +224,11 @@ public class Ihtc2DznModelWriter {
 				.write(obj.availability, (value, hasMore) -> {
 					writer.write(value).write(", ", hasMore);
 				}).write("]").write(",").newLine();
-		writer.indentation().write("isAvailable").write(": ")//
-				.write("[").write("0:", notEmpty(obj.availability)) //
-				.write(obj.availability, (value, hasMore) -> {
-					writer.write(value > 0).write(", ", hasMore);
-				}).write("]").write(",").newLine();
+//		writer.indentation().write("isAvailable").write(": ")//
+//				.write("[").write("0:", notEmpty(obj.availability)) //
+//				.write(obj.availability, (value, hasMore) -> {
+//					writer.write(value > 0).write(", ", hasMore);
+//				}).write("]").write(",").newLine();
 		writer.decreaseIndentation().indentation().write(")");
 	}
 

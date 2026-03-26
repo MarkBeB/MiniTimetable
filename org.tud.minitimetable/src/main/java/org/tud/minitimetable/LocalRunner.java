@@ -4,24 +4,30 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.tud.minitimetable.extern.solver.CodeLogger.FileCodeLogger;
+import org.tud.minitimetable.extern.solver.CodeLogger.MixedCodeLogger;
 import org.tud.minitimetable.extern.solver.MiniZinc;
 import org.tud.minitimetable.extern.solver.ProcessLogger.DefaultFileLog;
 import org.tud.minitimetable.extern.validator.ValidatorRunner;
 import org.tud.minitimetable.model.util.SolutionFileReader;
+import org.tud.minitimetable.util.PathUtils;
 
 public class LocalRunner {
 
 	public static void main(String[] args) throws IOException, InterruptedException {
 		Path resourceDirectory = Path.of("./", "resources").toAbsolutePath();
-		Path modelFile = resourceDirectory.resolve("minizinc").resolve("AllConstraints.mzn");
+		Path modelFile = resourceDirectory.resolve("minizinc").resolve("AllConstraints_opt2.mzn");
 		Path dataFile = resourceDirectory.resolve("input").resolve("ihtc").resolve("i02.json");
-		Path outputFolder = resourceDirectory.resolve("out").resolve("i02-4");
+		Path outputFolder = resourceDirectory.resolve("out").resolve("i02-opt5");
 
 		MiniZinc minizinc = new MiniZinc();
 		DefaultSettings.applyDefaultMiniZincConfiguration(minizinc);
-		minizinc.getConfig().timeLimitMS = 5 * 60 * 1000l;
+		minizinc.getConfig().logger = new MixedCodeLogger(
+				outputFolder.resolve(PathUtils.getFileNameWithoutExtension(dataFile) + "-log.txt"));
+		minizinc.getConfig().timeLimitMS = 10 * 60 * 1000l;
 
 		minizinc.run(modelFile, dataFile, outputFolder).join();
+		((FileCodeLogger) minizinc.getConfig().logger).close();
 
 		var solutionOutputFile = ((DefaultFileLog) minizinc.getConfig().solverOutput).getPath();
 		if (Files.exists(solutionOutputFile)) {

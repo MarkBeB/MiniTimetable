@@ -16,8 +16,6 @@ public class DefaultSettings {
 	public static final Integer DEFAULT_NUMBER_OF_THREADS = 4;
 
 	public static void applyDefaultMiniZincConfiguration(MiniZinc minizinc) {
-
-//		minizinc.getConfig().runnerLog = new DefaultFileLog("%s-log");
 		minizinc.getConfig().backendLog = new DefaultFileLog("%s-backend");
 		minizinc.getConfig().solverOutput = new DefaultFileLog("%s-solution");
 		minizinc.getConfig().solverModelLog = new DefaultFileLog("%s-lp.lp", true);

@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+import org.tud.minitimetable.extern.solver.CodeLogger.ConsolCodeLogger;
 import org.tud.minitimetable.extern.solver.ProcessLogger.FileLog;
 import org.tud.minitimetable.extern.solver.ProcessLogger.Log;
 import org.tud.minitimetable.extern.solver.ProcessLogger.NullLog;
@@ -21,38 +22,8 @@ import org.tud.minitimetable.util.PathUtils;
 
 public class MiniZinc {
 
-	private static interface CodeLogger {
-		void log(String msg);
-
-		void logEmptyLine();
-	}
-
-	private static final class NullCodeLogger implements CodeLogger {
-		@Override
-		public void log(String msg) {
-
-		}
-
-		@Override
-		public void logEmptyLine() {
-
-		}
-	}
-
-	private static final class ConsolCodeLogger implements CodeLogger {
-		@Override
-		public void log(String msg) {
-			System.out.println(msg);
-		}
-
-		@Override
-		public void logEmptyLine() {
-			System.out.println();
-		}
-	}
-
 	public static class Config {
-		public CodeLogger logger = new ConsolCodeLogger();
+		public CodeLogger.Logger logger = new ConsolCodeLogger();
 		public Log backendLog;
 		public Log solverOutput;
 		public Log solverModelLog;
@@ -68,7 +39,7 @@ public class MiniZinc {
 	private final Config config = new Config();
 	private final MiniZincProcessArgs arguments = new MiniZincProcessArgs();
 
-	private CodeLogger logger;
+	private CodeLogger.Logger logger;
 	private Path modelFile;
 	private Path dataFile;
 	private Path outputDirectory;
@@ -101,9 +72,13 @@ public class MiniZinc {
 		Objects.requireNonNull(dataFile, "dataFile");
 		Objects.requireNonNull(outDirectory, "outDirectory");
 
+		final Instant timeStamp = Instant.now();
+
 		validateArguments(modelFile, dataFile, outDirectory);
 		setupDataFile();
 //		_setupCalled = true;
+
+		setupDuration = timeStamp.until(Instant.now(), ChronoUnit.MILLIS);
 	}
 
 	private CompletableFuture<Process> run() throws IOException {
@@ -140,14 +115,13 @@ public class MiniZinc {
 			}
 		}
 
-//		ChronoUnit.SECONDS.getDuration().
-
 		return isDone.whenComplete((p, ex) -> {
 			logger.log("MiniZinc Terminated");
 			logger.log(String.format("Step done in %d ms", timeStamp.until(Instant.now(), ChronoUnit.MILLIS)));
 			logger.log(String.format("End Time: %s", Instant.now()));
 			if (ex != null)
 				logger.log("An Error occured: " + ex.getMessage());
+			logger.flush();
 		});
 	}
 
@@ -188,19 +162,13 @@ public class MiniZinc {
 		final Instant timeStamp = Instant.now();
 
 		var newDataFile = outputDirectory.resolve(dataFileName + ".dzn");
-
 		InputModelReader reader = new InputModelReader();
 		var data = reader.read(dataFile);
-
 		OutputModelWriter writer = new OutputModelWriter();
 		writer.write(data, newDataFile);
-
 		dataFile = newDataFile;
+		logger.log(String.format("Data File [%d ms]: %s", timeStamp.until(Instant.now(), ChronoUnit.MILLIS), dataFile));
 
-		var duration = timeStamp.until(Instant.now(), ChronoUnit.MILLIS);
-		setupDuration = duration;
-
-		logger.log(String.format("Data File [%d ms]: %s", duration, dataFile));
 		logger.log(String.format("Step done in %d ms", timeStamp.until(Instant.now(), ChronoUnit.MILLIS)));
 	}
 
@@ -213,16 +181,19 @@ public class MiniZinc {
 		logger.logEmptyLine();
 		logger.log("---- Setup Configuration ----");
 
-		if (config.timeLimitMS != null)
-			arguments.timeLimitMS = config.timeLimitMS - setupDuration;
-
 		runner.arguments().threads = config.threads;
 
 		applyModelLog(runner);
 		applyProcessLog(runner);
 		applySolverLog(runner);
 
-		logger.log(String.format("Step done in %d ms", timeStamp.until(Instant.now(), ChronoUnit.MILLIS)));
+		var duration = timeStamp.until(Instant.now(), ChronoUnit.MILLIS);
+		setupDuration += duration;
+
+		if (config.timeLimitMS != null)
+			arguments.timeLimitMS = config.timeLimitMS - setupDuration;
+
+		logger.log(String.format("Step done in %d ms", duration));
 	}
 
 	private void applyModelLog(MiniZincProcessRunner runner) throws IOException {
