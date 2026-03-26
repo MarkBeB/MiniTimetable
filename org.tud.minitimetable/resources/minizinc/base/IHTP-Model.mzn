@@ -83,7 +83,7 @@ type RoomFixData = record(
   array[Days] of int: assignedOccupants,
 );
 type RoomVarData = record(
-  array[Days] of var bool: isOccupied,
+  array[Days] of var bool: isOccupied, % utility constraint
   array[Days] of var 0..100: assignedPatients,  
   array[Days] of var Genders: assignedGender,
   array[Days, ShiftTypes] of var int: workload,
@@ -263,34 +263,6 @@ function var bool: isOccupied(RoomFixData: room, Days: day) =
 
 function var bool: isPostponed(PatientFixData: patient) = patientVar[patient.id].isPostponed;
 function var bool: isAdmitted(PatientFixData: patient) = not patientVar[patient.id].isPostponed;
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% UTILITY CONSTRAINTS
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-constraint forall(patient in patientVar)(
-  patient.isPostponed <-> not patient.isAdmitted
-);
-
-constraint forall(id in PatientIds)( 
-  patientVar[id].admittedUntil = patientVar[id].admissionDay + patientData[id].lengthOfStay - 1
-);
-
-constraint forall(roomId in RoomIds, day in Days)(
-  let {
-    bool: hasOccupants = exists(occupant in occupantData)(occupant.assignedRoom == roomId /\ day < occupant.lengthOfStay);
-    var bool: hasPatients = exists(patient in patientVar)(patient.assignedRoom[day] == roomId);
-  } in
-  roomVar[roomId].isOccupied[day] <-> hasOccupants \/ hasPatients
-);
-
-constraint forall(nurseId in NurseIds, day in Days, shift in ShiftTypes)(
-  nurseVar[nurseId].isWorking[day, shift] <-> nurseData[nurseId].maxWorkloadPerShift[day, shift] > 0
-);
-
 
 /*
 constraint forall(nurseId in NurseIds, day in Days, shift in ShiftTypes)(

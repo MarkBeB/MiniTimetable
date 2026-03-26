@@ -1,4 +1,4 @@
-include "IHTP-model.mzn" ;
+%include "base/IHTP-model.mzn" ;
 
 output :: "json"
 [ "{\n"] ++

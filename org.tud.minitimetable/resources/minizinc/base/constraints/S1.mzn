@@ -25,3 +25,5 @@ constraint forall(roomId in RoomIds, day in Days)(
 );
 
 constraint Penalties.roomMixedAge == Weights.roomMixedAge * sum(room in roomVar, day in Days)(room.penaltyAgeMixing[day]);
+
+
