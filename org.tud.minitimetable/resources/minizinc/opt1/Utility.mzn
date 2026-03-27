@@ -34,7 +34,4 @@ constraint forall(r in RoomIds, d in Days)(
 
 
 
-array[NurseIds, Days, RoomIds] of var bool: nurseAssignedToRoom;
-constraint forall(n in NurseIds, d in Days, s in ShiftTypes, r in RoomIds where isNurseWorking(n,d,s)) (
-  nurseAssignedToRoom[n,d,r] >= isNurseInRoom[n,d,s,r]
-);
+
