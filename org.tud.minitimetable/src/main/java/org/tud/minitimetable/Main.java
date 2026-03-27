@@ -22,6 +22,7 @@ public class Main {
 	private static final String OPTION_SHORT_TIMELIMIT_S = "ts";
 	private static final String OPTION_SHORT_TIMELIMIT_M = "tm";
 	private static final String OPTION_SHORT_TIMELIMIT_H = "th";
+	private static final String OPTION_SHORT_THREADS = "p";
 
 	public static void main(String[] args) throws IOException {
 		CommandLine commandLine = parseArguments(args);
@@ -91,6 +92,9 @@ public class Main {
 				.numberOfArgs(1) //
 				.desc("Timelimit in full hours. The default limit is 10 Minutes.").get();
 
+		Option threads = Option.builder(OPTION_SHORT_THREADS).longOpt("threads").hasArg().numberOfArgs(1) //
+				.desc("Number of threads to use").get();
+
 		Options options = new Options();
 		options.addOption(help);
 		options.addOption(dataFolder);
@@ -100,6 +104,7 @@ public class Main {
 		options.addOption(timelimitSeconds);
 		options.addOption(timelimitMinutes);
 		options.addOption(timelimitHours);
+		options.addOption(threads);
 
 		CommandLine commandLine;
 		try {
@@ -140,6 +145,13 @@ public class Main {
 			var value = parseInteger(commandLine, OPTION_SHORT_TIMELIMIT_H, "Unable to parse time limit");
 			minizinc.getConfig().timeLimitMS = value * 60l * 60l * 1000l;
 
+		}
+
+		if (commandLine.hasOption(OPTION_SHORT_THREADS)) {
+			var value = parseInteger(commandLine, OPTION_SHORT_THREADS, "Unable to parse number of threads");
+			if (value <= 0)
+				throw new IllegalArgumentException("Number of threads invalid: " + value);
+			minizinc.getConfig().threads = value;
 		}
 	}
 
