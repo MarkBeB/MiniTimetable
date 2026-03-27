@@ -1,18 +1,16 @@
 {
     "openFiles": [
-        "AllConstraints_opt.mzn",
-        "AllConstraints_opt2.mzn",
-        "opt1/constraints/S7.mzn",
-        "opt1/IHTP-Model.mzn",
-        "opt1/constraints/S1.mzn",
-        "opt1/constraints/S2.mzn",
-        "opt1/constraints/S3.mzn"
+        "v2/IHTP-Model.mzn",
+        "opt1/constraints/AllAH.mzn",
+        "v2/AH.mzn",
+        "AllConstraints_v2.mzn"
     ],
-    "openTab": 1,
+    "openTab": 3,
     "projectFiles": [
         "AllConstraints.mzn",
-        "AllConstraints_opt.mzn",
+        "AllConstraintsV2.mzn",
         "AllConstraints_opt2.mzn",
+        "AllConstraints_v2.mzn",
         "HardAndSomeSoft.mzn",
         "OnlyHardConstraints.mzn",
         "OutConsoleFormat.mzn",
@@ -30,7 +28,9 @@
         "base/constraints/H8.mzn",
         "base/constraints/Performance.mzn",
         "base/constraints/S1.mzn",
+        "base/constraints/S1v2.mzn",
         "base/constraints/S2.mzn",
+        "base/constraints/S2v2.mzn",
         "base/constraints/S3.mzn",
         "base/constraints/S4.mzn",
         "base/constraints/S5.mzn",
@@ -40,6 +40,7 @@
         "data/i02.dzn",
         "examples/MemoryViolation.mzn",
         "opt1/IHTP-Model.mzn",
+        "opt1/OutConsoleFormat.mzn",
         "opt1/OutJsonFormat.mzn",
         "opt1/Utility.mzn",
         "opt1/constraints/AllAH.mzn",
@@ -60,7 +61,13 @@
         "opt1/constraints/S6.mzn",
         "opt1/constraints/S7.mzn",
         "opt1/constraints/S8.mzn",
-        "solver.mpc"
+        "solver.mpc",
+        "v2/AH.mzn",
+        "v2/H1.mzn",
+        "v2/H2.mzn",
+        "v2/H3.mzn",
+        "v2/H4.mzn",
+        "v2/IHTP-Model.mzn"
     ],
     "selectedBuiltinConfigId": "org.minizinc.mip.gurobi",
     "selectedBuiltinConfigVersion": "13.0.0",
