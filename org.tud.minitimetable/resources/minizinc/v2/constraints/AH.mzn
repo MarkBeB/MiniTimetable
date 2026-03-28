@@ -1,4 +1,4 @@
-include "IHTP-model.mzn";
+include "../IHTP-model.mzn";
 
 % Derived from competition rules.
 % AH9 Room assignment: An admitted patient needs to be assigned to a room

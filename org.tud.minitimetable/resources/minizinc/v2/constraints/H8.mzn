@@ -1,4 +1,4 @@
-include "IHTP-model.mzn";
+include "../IHTP-model.mzn";
 
 % NRA
 % H8 For each shift, each occupied room must be allocated to a nurse who is on duty during this shift.

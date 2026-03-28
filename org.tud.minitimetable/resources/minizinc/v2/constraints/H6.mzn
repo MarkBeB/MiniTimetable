@@ -1,4 +1,4 @@
-include "IHTP-model.mzn";
+include "../IHTP-model.mzn";
 
 % Global
 % H6 Admission day: A patient can be admitted on any day from their release date to their due date.
