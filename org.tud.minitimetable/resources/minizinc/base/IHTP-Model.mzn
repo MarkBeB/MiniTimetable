@@ -5,8 +5,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 int: minutesPerDay = 24 * 60;
-int: maxPenalityValue = 1000000;
-int: maxScoreValue = 100000000;
+int: minPenaltyValue = 0;
+int: maxPenaltyValue = 10^4;
+int: minScoreValue = 0;
+int: maxScoreValue = 10^5;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -15,7 +17,8 @@ int: maxScoreValue = 100000000;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 type DayTime = 0..minutesPerDay;
-type PenaltyRange = 0..maxPenalityValue;
+type PenaltyRange = minPenaltyValue..maxPenaltyValue;
+type ScoreRange = minScoreValue..maxScoreValue;
 
 type WeightType = record(
   int: roomMixedAge,
@@ -30,14 +33,14 @@ type WeightType = record(
 
 
 type PenalityType = record(
-  var 0..maxPenalityValue: roomMixedAge,
-  var 0..maxPenalityValue: roomNurseSkill,
-  var 0..maxPenalityValue: continuityOfCare,
-  var 0..maxPenalityValue: nurseEccessiveWorkload,
-  var 0..maxPenalityValue: openOperatingTheater,
-  var 0..maxPenalityValue: surgeonTransfer,
-  var 0..maxPenalityValue: patientDelay,
-  var 0..maxPenalityValue: unscheduledOptional,
+  var PenaltyRange: roomMixedAge,
+  var PenaltyRange: roomNurseSkill,
+  var PenaltyRange: continuityOfCare,
+  var PenaltyRange: nurseEccessiveWorkload,
+  var PenaltyRange: openOperatingTheater,
+  var PenaltyRange: surgeonTransfer,
+  var PenaltyRange: patientDelay,
+  var PenaltyRange: unscheduledOptional,
 );
 
 
@@ -51,7 +54,7 @@ type NurseVarData = record(
   array[Days, ShiftTypes, RoomIds] of var bool: assignedRooms,
   array[Days, ShiftTypes] of var int: expectedWorkload,
 
-  array[Days, ShiftTypes] of var 0..maxPenalityValue: penaltySkillLevel,
+  array[Days, ShiftTypes] of var PenaltyRange: penaltySkillLevel,
 );
 type Nurse = NurseFixData ++ NurseVarData;
 
