@@ -9,7 +9,7 @@ constraint forall(p in PatientIds where isPatientMandatory(p))(
 );
 
 constraint forall(p in PatientIds where isPatientOptional(p))(
-  isPatientPostponed[p] = sum(d in Days)(isPatientAdmittedAt[p,d])
+  isPatientPostponed[p] = isPatientAdmittedAt[p,postponedDay]
 );
 
 /*
