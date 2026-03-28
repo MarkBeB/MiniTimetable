@@ -1,11 +1,9 @@
 {
     "openFiles": [
         "v2/IHTP-Model.mzn",
-        "opt1/constraints/AllAH.mzn",
-        "v2/AH.mzn",
-        "AllConstraints_v2.mzn"
+        "v2/AH.mzn"
     ],
-    "openTab": 3,
+    "openTab": 0,
     "projectFiles": [
         "AllConstraints.mzn",
         "AllConstraintsV2.mzn",
@@ -13,8 +11,8 @@
         "AllConstraints_v2.mzn",
         "HardAndSomeSoft.mzn",
         "OnlyHardConstraints.mzn",
-        "OutConsoleFormat.mzn",
         "base/IHTP-Model.mzn",
+        "base/OutConsoleFormat.mzn",
         "base/OutJsonFormat.mzn",
         "base/Utility.mzn",
         "base/constraints/AllAH.mzn",
@@ -67,7 +65,12 @@
         "v2/H2.mzn",
         "v2/H3.mzn",
         "v2/H4.mzn",
-        "v2/IHTP-Model.mzn"
+        "v2/H5.mzn",
+        "v2/H6.mzn",
+        "v2/H7.mzn",
+        "v2/H8.mzn",
+        "v2/IHTP-Model.mzn",
+        "v2/OutJsonFormat.mzn"
     ],
     "selectedBuiltinConfigId": "org.minizinc.mip.gurobi",
     "selectedBuiltinConfigVersion": "13.0.0",

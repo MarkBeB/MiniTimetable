@@ -5,7 +5,7 @@ include "IHTP-model.mzn";
 %
 
 constraint forall(p in PatientIds)(
-  patientRoomAssignment[p] in compatibleRooms(p) \/ patientRoomAssignment[p] == <>
+  patientRoomAssignment[p] in compatibleRooms(p) \/ absent(patientRoomAssignment[p])
 );
 
 /*

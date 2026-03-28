@@ -6,7 +6,7 @@ include "IHTP-model.mzn";
 
 array[OperatingTheaterIds, Days] of var 0..1000: otSurgeryTime;
 
-constraint forall(ot in OperatingTheaterIds, d in Days where isOTAvailable(ot, d))(
+constraint forall(ot in OperatingTheaterIds, d in Days)(
  otSurgeryTime[ot,d] = sum(p in PatientIds where isPatientAdmittedAt[p,d] /\ isPatientInOT[p,ot])(
       surgeryDuration(p)
     )
