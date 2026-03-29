@@ -55,6 +55,9 @@ public class MiniZincLocator {
 			if (isValidMiniZincLocation(path)) {
 				results.add(path);
 			} else {
+				if (!Files.exists(path))
+					continue;
+
 				try {
 					Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
 						@Override
@@ -78,7 +81,7 @@ public class MiniZincLocator {
 			return false;
 
 		var name = path.getFileName().toString();
-		var validName = "minizinc.exe".equals(name);
+		var validName = "minizinc".equals(name);
 		return validName;
 	}
 
