@@ -80,8 +80,7 @@ public class MiniZincLocator {
 		if (!Files.isExecutable(path))
 			return false;
 
-		var name = path.getFileName().toString();
-		var validName = "minizinc".equals(name);
+		var validName = "minizinc".equals(PathUtils.getFileNameWithoutExtension(path));
 		return validName;
 	}
 
