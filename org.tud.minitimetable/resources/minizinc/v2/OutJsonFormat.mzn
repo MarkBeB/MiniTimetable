@@ -39,7 +39,7 @@ output :: "json"
   "      \("id"): \(format(n)),\n" ++
   "      \("assignments"): [\n" ++
   join(",\n",[
-  "        {\("day"): "++show_int(3,d)++", \("shift"): \(format(s)), \("rooms"): ["++join(", ",[ "\(format(r))" |r in RoomIds where fix(nurseWorksInRoom[n,r,d])])++"]}"
+  "        {\("day"): "++show_int(3,d)++", \("shift"): \(format(s)), \("rooms"): ["++join(", ",[ "\(format(r))" |r in RoomIds where fix(nurseWorksInRoom[n,d,r])])++"]}"
     | d in Days, s in ShiftTypes where isNurseAvailable(n,d,s)]) ++ "\n" ++
   "      ]\n" ++
   "    },\n" 

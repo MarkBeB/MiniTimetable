@@ -25,9 +25,9 @@ constraint forall(p in PatientIds, d in ExtendedDays)(
   isPatientAdmittedAt[p,d] == (patientAdmissionDay[p] == d)
 );
 
-%array[PatientIds, Days, RoomIds] of var bool: isPatientPresentInRoom = [
-%  (p,d,r): isPatientInRoom[p,r] /\ isPatientPresent[p,d] | p in PatientIds, r in RoomIds, d in Days
-%];
+array[PatientIds, Days, RoomIds] of var bool: isPatientPresentInRoom = [
+  (p,d,r): isPatientInRoom[p,r] /\ isPatientPresent[p,d] | p in PatientIds, r in RoomIds, d in Days
+];
 
 constraint forall(p in PatientIds, d in Days)(
   isPatientPresent[p,d] == (patientAdmissionDay[p] <= d /\ d <= patientAdmissionDay[p] + patientLengthOfStay(p))
@@ -62,7 +62,7 @@ constraint forall(r in RoomIds, d in Days)(
 );
 
 array[RoomIds, Days, ShiftTypes] of var opt NurseIds: roomNurseAssignment;
-array[NurseIds, RoomIds, Days] of var bool: nurseWorksInRoom = [(n,r,d):
+array[NurseIds, Days, RoomIds] of var bool: nurseWorksInRoom = [(n,d,r):
   sum(s in ShiftTypes)(roomNurseAssignment[r,d,s]==n)>0 | n in NurseIds, r in RoomIds, d in Days
 ];
 
@@ -77,7 +77,13 @@ array[NurseIds, RoomIds, Days] of var bool: nurseWorksInRoom = [(n,r,d):
 
 array[PatientIds, NurseIds] of var bool: patientCaredByNurse;
 constraint forall(p in PatientIds, n in NurseIds)(
-  patientCaredByNurse[p,n] <-> 0 < sum(r in RoomIds, d in Days)(isPatientPresent[p,d] * isPatientInRoom[p,r] * nurseWorksInRoom[n,r,d])
+  % patientCaredByNurse[p,n] <-> 0 < sum(r in RoomIds, d in Days)(isPatientPresent[p,d] * isPatientInRoom[p,r] * nurseWorksInRoom[n,r,d])
+  patientCaredByNurse[p,n] <-> 0 < sum(r in RoomIds, d in Days)(isPatientPresentInRoom[p,d,r] * nurseWorksInRoom[n,r,d])
+);
+
+array[OccupantIds, NurseIds] of var bool: occupantCaredByNurse;
+constraint forall(o in OccupantIds, n in NurseIds)(
+  occupantCaredByNurse[o,n] <-> 0 < sum(r in RoomIds, d in Days)(isOccupantInRoom(o,d,r) * nurseWorksInRoom[n,r,d])
 );
 
 % OVERVIEW

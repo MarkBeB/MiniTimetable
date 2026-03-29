@@ -1,13 +1,14 @@
 {
     "openFiles": [
         "v2/IHTP-Model.mzn",
-        "base/ConstraintTest.mzn",
-        "base/IHTP-Model.mzn",
         "base/constraints/S6.mzn",
         "opt1/constraints/S6.mzn",
-        "v2/constraints/S6.mzn"
+        "v2/constraints/S6.mzn",
+        "v2/AllConstraints.mzn",
+        "base/IHTP-Model.mzn",
+        "v2/Variables.mzn"
     ],
-    "openTab": 1,
+    "openTab": 6,
     "projectFiles": [
         "AllConstraints.mzn",
         "AllConstraintsV2.mzn",
@@ -66,8 +67,11 @@
         "solver.mpc",
         "v2/AllConstraints.mzn",
         "v2/ConstraintTest.mzn",
+        "v2/Functions.mzn",
         "v2/IHTP-Model.mzn",
         "v2/OutJsonFormat.mzn",
+        "v2/Parameters.mzn",
+        "v2/Variables.mzn",
         "v2/constraints/AH.mzn",
         "v2/constraints/H1.mzn",
         "v2/constraints/H2.mzn",
