@@ -1,5 +1,5 @@
-%include "Parameters.mzn";
-%include "Functions.mzn";
+include "Parameters.mzn";
+include "Functions.mzn";
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -78,12 +78,12 @@ array[NurseIds, Days, RoomIds] of var bool: nurseWorksInRoom = [(n,d,r):
 array[PatientIds, NurseIds] of var bool: patientCaredByNurse;
 constraint forall(p in PatientIds, n in NurseIds)(
   % patientCaredByNurse[p,n] <-> 0 < sum(r in RoomIds, d in Days)(isPatientPresent[p,d] * isPatientInRoom[p,r] * nurseWorksInRoom[n,r,d])
-  patientCaredByNurse[p,n] <-> 0 < sum(r in RoomIds, d in Days)(isPatientPresentInRoom[p,d,r] * nurseWorksInRoom[n,r,d])
+  patientCaredByNurse[p,n] <-> 0 < sum(r in RoomIds, d in Days)(isPatientPresentInRoom[p,d,r] * nurseWorksInRoom[n,d,r])
 );
 
 array[OccupantIds, NurseIds] of var bool: occupantCaredByNurse;
 constraint forall(o in OccupantIds, n in NurseIds)(
-  occupantCaredByNurse[o,n] <-> 0 < sum(r in RoomIds, d in Days)(isOccupantInRoom(o,d,r) * nurseWorksInRoom[n,r,d])
+  occupantCaredByNurse[o,n] <-> 0 < sum(r in RoomIds, d in Days)(isOccupantInRoom(o,d,r) * nurseWorksInRoom[n,d,r])
 );
 
 % OVERVIEW
@@ -95,3 +95,28 @@ constraint forall(o in OccupantIds, n in NurseIds)(
 
 %array[RoomIds, Days] of var 0..1000: roomUtilization;
 %array[RoomIds, Days] of var 0..1000: roomWorkload;
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% CONSTRAINTS TO IMPROVE PERFORMANCE BY REDUCING SEARCH SPACE
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Prohibit admission on days when there is no OT capacity.
+set of Days: daysWithoutOTCapacity = { d | d in Days where not exists(ot in OperatingTheaterIds)(isOTAvailable(ot, d))};
+constraint redundant_constraint(forall(p in PatientIds, d in daysWithoutOTCapacity)(
+  isPatientAdmittedAt[p,d] = false
+));
+
+% Prohibit admission on days when there is no surgeon available.
+constraint redundant_constraint(forall(p in PatientIds)(
+  let {
+    SurgeonIds: s = assignedSurgeon(p);
+    set of Days: daysWithoutSurgeonCapacity = { d | d in Days where not isSurgeonAvailable(s,d)};
+  } in
+  forall(d in daysWithoutSurgeonCapacity)(
+    isPatientAdmittedAt[p,d] = false
+  )
+));
+

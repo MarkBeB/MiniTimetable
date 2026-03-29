@@ -1,3 +1,3 @@
-include "Parameters.mzn";
-include "Functions.mzn";
-include "Variables.mzn";
+include "model/Parameters.mzn";
+include "model/Functions.mzn";
+include "model/Variables.mzn";
