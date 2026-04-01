@@ -14,8 +14,23 @@ public class MiniZincProcessArgs implements ProcessArgs {
 
 	public Path modelFile;
 	public Path dataFile;
+	public Path outputflatzincFile;
 	public Path flatzincFile;
+	public Path outputOZNFile;
+	public Path oznFile;
 	public Long timeLimitMS;
+	/**
+	 * <ul>
+	 * <li>0 disabled
+	 * <li>1 default
+	 * <li>2 pass
+	 * </ul>
+	 */
+	public Integer optimizeLevel;
+	/**
+	 * Takes precedence over {@link #timeLimitMS}
+	 */
+	public Long solverTImeLimitMS;
 	public Integer threads;
 	public Path writeSolverModelToFile;
 	public boolean verbose;
@@ -33,6 +48,10 @@ public class MiniZincProcessArgs implements ProcessArgs {
 
 		args.add("--solver");
 		args.add("Gurobi");
+
+		if (optimizeLevel != null) {
+			args.add("-O" + optimizeLevel);
+		}
 
 		if (writeSolverModelToFile != null) {
 			args.add("--writeModel");
@@ -55,6 +74,14 @@ public class MiniZincProcessArgs implements ProcessArgs {
 			args.add(timeLimitMS.toString());
 		}
 
+		if (solverTImeLimitMS != null) {
+			if (solverTImeLimitMS < 0)
+				throw new IllegalArgumentException("Solver Time limit must be greater than 0");
+
+			args.add("--solver-time-limit");
+			args.add(solverTImeLimitMS.toString());
+		}
+
 		if (modelFile != null) {
 			args.add("--model");
 			args.add(modelFile.toString());
@@ -65,10 +92,26 @@ public class MiniZincProcessArgs implements ProcessArgs {
 			args.add(dataFile.toString());
 		}
 
-		if (flatzincFile != null) {
+		if (outputflatzincFile != null) {
 			args.add("--compile");
-			args.add("--output-to-file");
+			args.add("--output-fzn-to-file");
+//			args.add("--output-to-file");
+			args.add(outputflatzincFile.toString());
+		}
+
+		if (flatzincFile != null) {
+//			args.add("--fzn-file");
 			args.add(flatzincFile.toString());
+		}
+
+		if (outputOZNFile != null) {
+			args.add("--output-ozn-to-file");
+			args.add(outputOZNFile.toString());
+		}
+
+		if (oznFile != null) {
+			args.add("--ozn-file");
+			args.add(oznFile.toString());
 		}
 
 		if (verbose) {

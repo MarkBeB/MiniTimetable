@@ -21,7 +21,6 @@ public class Main {
 	private static final String OPTION_SHORT_MINIZINC_FILE = "e";
 	private static final String OPTION_SHORT_TIMELIMIT_S = "ts";
 	private static final String OPTION_SHORT_TIMELIMIT_M = "tm";
-	private static final String OPTION_SHORT_TIMELIMIT_H = "th";
 	private static final String OPTION_SHORT_THREADS = "p";
 
 	public static void main(String[] args) throws IOException {
@@ -88,10 +87,6 @@ public class Main {
 				.numberOfArgs(1) //
 				.desc("Timelimit in full minutes. The default limit is 10 Minutes.").get();
 
-		Option timelimitHours = Option.builder(OPTION_SHORT_TIMELIMIT_H).longOpt("timelimit-hours").hasArg()
-				.numberOfArgs(1) //
-				.desc("Timelimit in full hours. The default limit is 10 Minutes.").get();
-
 		Option threads = Option.builder(OPTION_SHORT_THREADS).longOpt("threads").hasArg().numberOfArgs(1) //
 				.desc("Number of threads to use").get();
 
@@ -103,7 +98,6 @@ public class Main {
 		options.addOption(miniZincExe);
 		options.addOption(timelimitSeconds);
 		options.addOption(timelimitMinutes);
-		options.addOption(timelimitHours);
 		options.addOption(threads);
 
 		CommandLine commandLine;
@@ -136,15 +130,9 @@ public class Main {
 		if (commandLine.hasOption(OPTION_SHORT_TIMELIMIT_S)) {
 			var value = parseInteger(commandLine, OPTION_SHORT_TIMELIMIT_S, "Unable to parse time limit");
 			minizinc.getConfig().timeLimitMS = value * 1000l;
-
 		} else if (commandLine.hasOption(OPTION_SHORT_TIMELIMIT_M)) {
 			var value = parseInteger(commandLine, OPTION_SHORT_TIMELIMIT_M, "Unable to parse time limit");
 			minizinc.getConfig().timeLimitMS = value * 60l * 1000l;
-
-		} else if (commandLine.hasOption(OPTION_SHORT_TIMELIMIT_H)) {
-			var value = parseInteger(commandLine, OPTION_SHORT_TIMELIMIT_H, "Unable to parse time limit");
-			minizinc.getConfig().timeLimitMS = value * 60l * 60l * 1000l;
-
 		}
 
 		if (commandLine.hasOption(OPTION_SHORT_THREADS)) {

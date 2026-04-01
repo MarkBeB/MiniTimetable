@@ -23,12 +23,15 @@ import org.tud.minitimetable.util.PathUtils;
 public class MiniZinc {
 
 	public static class Config {
+
 		public CodeLogger.Logger logger = new ConsolCodeLogger();
 		public Log backendLog;
 		public Log solverOutput;
 		public Log solverModelLog;
 		public Path miniZincLocation;
+		public Integer optimizeLevel;
 		public Long timeLimitMS;
+		public Long solverTimeLimitMS;
 		public Integer threads;
 	}
 
@@ -181,7 +184,11 @@ public class MiniZinc {
 		logger.logEmptyLine();
 		logger.log("---- Setup Configuration ----");
 
-		runner.arguments().threads = config.threads;
+		if (config.threads != null)
+			runner.arguments().threads = config.threads;
+
+		if (config.optimizeLevel != null)
+			runner.arguments().optimizeLevel = config.optimizeLevel;
 
 		applyModelLog(runner);
 		applyProcessLog(runner);
@@ -192,6 +199,9 @@ public class MiniZinc {
 
 		if (config.timeLimitMS != null)
 			arguments.timeLimitMS = config.timeLimitMS - setupDuration;
+
+		if (config.solverTimeLimitMS != null)
+			arguments.solverTImeLimitMS = config.solverTimeLimitMS;
 
 		logger.log(String.format("Step done in %d ms", duration));
 	}

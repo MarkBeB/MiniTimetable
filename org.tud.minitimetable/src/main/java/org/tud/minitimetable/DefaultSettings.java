@@ -15,6 +15,8 @@ public class DefaultSettings {
 	 */
 	public static final Integer DEFAULT_NUMBER_OF_THREADS = 4;
 
+	public static final Integer DEFAULT_OPTIMIZE_LEVEL = 1;
+
 	public static void applyDefaultMiniZincConfiguration(MiniZinc minizinc) {
 		minizinc.getConfig().backendLog = new DefaultFileLog("%s-backend");
 		minizinc.getConfig().solverOutput = new DefaultFileLog("%s-solution");
@@ -22,6 +24,7 @@ public class DefaultSettings {
 
 		minizinc.getConfig().timeLimitMS = DefaultSettings.DEFAULT_TIME_LIMIT_IN_MS;
 		minizinc.getConfig().threads = DefaultSettings.DEFAULT_NUMBER_OF_THREADS;
+		minizinc.getConfig().optimizeLevel = DefaultSettings.DEFAULT_OPTIMIZE_LEVEL;
 
 	}
 
