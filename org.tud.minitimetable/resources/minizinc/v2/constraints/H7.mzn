@@ -5,8 +5,8 @@ include "../IHTP-model.mzn";
 %
 constraint forall(r in RoomIds, d in Days)(
   let {
-    int: occupantsInRoom = sum(o in OccupantIds)(isOccupantInRoom(o,d,r));
-    var int: patientsInRoom = sum(p in PatientIds)(isPatientPresent[p,d] /\ isPatientInRoom[p,r]);
+    int: occupantsInRoom = sum(o in OccupantIds)(isOccupantPresentInRoom(o,d,r));
+    var int: patientsInRoom = sum(p in PatientIds)(isPatientPresentInRoom[p,d,r]);
   } in
   (occupantsInRoom + patientsInRoom) <= roomCapacity(r)
 );
