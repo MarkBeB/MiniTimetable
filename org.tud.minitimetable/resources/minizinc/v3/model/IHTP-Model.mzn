@@ -52,7 +52,7 @@ type NurseFixData = record(
 type NurseVarData = record(
 %  array[Days, ShiftTypes] of var bool: isWorking,
   array[Days, ShiftTypes, RoomIds] of var bool: assignedRooms,
-  array[Days, ShiftTypes] of var int: expectedWorkload,
+%  array[Days, ShiftTypes] of var int: expectedWorkload,
   array[Days, ShiftTypes] of var PenaltyRange: penaltySkillLevel,
    var bool: empty
 );

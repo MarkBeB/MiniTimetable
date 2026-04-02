@@ -1,7 +1,7 @@
 include "IHTP-Model.mzn";
 
 array[NurseIds, Days, ShiftTypes, RoomIds] of var bool: isNurseInRoom;
-array[NurseIds, Days, ShiftTypes] of var int: nurseWorkload;
+
 %array[NurseIds, Days, ShiftTypes] of var int: nursePenaltySkillLevel;
 
 array[SurgeonIds, Days] of var DayTime: surgeonTime;
