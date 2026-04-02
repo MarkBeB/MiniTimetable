@@ -4,14 +4,14 @@ include "../IHTP-model.mzn";
 % H8 For each shift, each occupied room must be allocated to a nurse who is on duty during this shift.
 %
 
-constraint forall(roomId in RoomIds, day in Days, shift in ShiftTypes)(
-  bool2int(roomVar[roomId].isOccupied[day]) == count(nurseId in NurseIds)( nurseVar[nurseId].assignedRooms[day, shift, roomId] ) 
+constraint forall(r in RoomIds, d in Days, s in ShiftTypes)(
+  bool2int(roomVar[r].isOccupied[d]) == count(n in NurseIds)( nurseVar[n].assignedRooms[d, s, r] ) 
 );
 
-constraint forall(nurseId in NurseIds, day in Days, shift in ShiftTypes, roomId in RoomIds)(
-  nurseVar[nurseId].assignedRooms[day, shift, roomId] -> isNurseAvailable(nurseId, day, shift)
+constraint forall(n in NurseIds, d in Days, s in ShiftTypes, r in RoomIds)(
+  nurseVar[n].assignedRooms[d, s, r] -> isNurseAvailable(n, d, s)
 );
 
-constraint forall(nurseId in NurseIds, day in Days, shift in ShiftTypes, roomId in RoomIds)(
-  nurseVar[nurseId].assignedRooms[day, shift, roomId] <-> roomVar[roomId].assignedNurse[day, shift] == nurseId
+constraint forall(n in NurseIds, d in Days, s in ShiftTypes, r in RoomIds)(
+  nurseVar[n].assignedRooms[d, s, r] <-> roomVar[r].assignedNurse[d, s] == n
 );
