@@ -1,4 +1,4 @@
-include "IHTP-model.mzn";
+include "IHTP-model.mzn" ;
 
 output :: "json"
 [ "{\n"] ++
@@ -36,14 +36,14 @@ output :: "json"
 
 [ "  \("nurses"): [\n" ] ++
 [ "    {\n" ++
-  "      \("id"): \(format(n)),\n" ++
+  "      \("id"): \(format(id)),\n" ++
   "      \("assignments"): [\n" ++
   join(",\n",[
-  "        {\("day"): "++show_int(3,day)++", \("shift"): \(format(shift)), \("rooms"): ["++join(", ",[ "\(format(room))" |room in RoomIds where fix(isNurseInRoom[n, day, shift, room])])++"]}"
-    | day in Days, shift in ShiftTypes where fix(isNurseAvailable[n, day, shift])]) ++ "\n" ++
+  "        {\("day"): "++show_int(3,day)++", \("shift"): \(format(shift)), \("rooms"): ["++join(", ",[ "\(format(room))" |room in RoomIds where fix(n.assignedRooms[day, shift, room])])++"]}"
+    | day in Days, shift in ShiftTypes where fix(n.isWorking[day, shift])]) ++ "\n" ++
   "      ]\n" ++
   "    },\n" 
-  | n in NurseIds ] ++
+  | id in NurseIds, n = nurseVar[id], nF = nurseData[id] ] ++
 [ "  ],\n" ] ++
 
 [ "}" ]

@@ -4,15 +4,15 @@ include "../IHTP-model.mzn";
 % S6 Surgeon transfer: The number of different OTs a surgeon is as-signed to per working day should be minimized.
 %
 
-constraint forall(patientId in PatientIds where patientVar[patientId].isAdmitted)(
-  let { SurgeonIds: surgeonId = patientData[patientId].assignedSurgeon } in
-  forall(otId in OperatingTheaterIds, day in Days)(
-    (patientVar[patientId].assignedOT == otId /\ patientVar[patientId].admissionDay == day) -> isSurgeonInOT[surgeonId, day, otId]
+constraint forall(p in PatientIds where patientVar[p].isAdmitted)(
+  let { SurgeonIds: s = assignedSurgeon(p) } in
+  forall(ot in OperatingTheaterIds, d in Days)(
+    (patientVar[p].assignedOT == ot /\ patientVar[p].admissionDay == d) -> isSurgeonInOT[s,d,ot]
   )
 );
 
 constraint Penalties.surgeonTransfer = Weights.surgeonTransfer * 
-  sum(day in Days, surgeon in SurgeonIds)( max(0, sum(otId in OperatingTheaterIds)(isSurgeonInOT[surgeon, day, otId])-1) );
+  sum(d in Days, s in SurgeonIds)( max(0, sum(ot in OperatingTheaterIds)(isSurgeonInOT[s,d,ot])-1) );
 
 /*
 constraint forall(p in PatientIds where patientVar[p].isAdmitted)(

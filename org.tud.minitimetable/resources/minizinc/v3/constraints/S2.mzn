@@ -18,16 +18,16 @@ array[OccupantIds, Days, ShiftTypes] of var PenaltyRange: occupantSkillDifferenc
 
 constraint forall(p in PatientIds, d in Days, s in ShiftTypes)(
   forall(n in NurseIds, r in RoomIds where isNurseWorking(n,d,s))(
-    (patientVar[p].assignedRoom[d] == r /\ isNurseInRoom[n,d,s,r]) -> (
-      patientSkillDifference[p,d,s] = max(0, requiredPatientSkill(p,d,s) - nurseData[n].skillLevel)
+    (patientVar[p].assignedRoom[d] == r /\ nurseVar[n].assignedRooms[d,s,r]) -> (
+      patientSkillDifference[p,d,s] = max(0, requiredPatientSkill(p,d,s) - nurseSkillLevel(n))
     )
   )
 );
 
 constraint forall(o in OccupantIds, d in Days, s in ShiftTypes)(
   forall(n in NurseIds, r in RoomIds where isNurseWorking(n,d,s) /\ isOccupantInRoom(o,d,r))(
-    isNurseInRoom[n,d,s,r] -> (
-      occupantSkillDifference[o,d,s] = max(0, requiredOccupantSkill(o,d,s) - nurseData[n].skillLevel)
+    nurseVar[n].assignedRooms[d,s,r] -> (
+      occupantSkillDifference[o,d,s] = max(0, requiredOccupantSkill(o,d,s) - nurseSkillLevel(n))
     )
   )
 );

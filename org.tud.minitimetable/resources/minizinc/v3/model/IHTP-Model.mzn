@@ -50,11 +50,11 @@ type NurseFixData = record(
   array[Days, ShiftTypes] of int: maxWorkloadPerShift,
 );
 type NurseVarData = record(
-%  array[Days, ShiftTypes] of var bool: isWorking,
-%  array[Days, ShiftTypes, RoomIds] of var bool: assignedRooms,
-%  array[Days, ShiftTypes] of var int: expectedWorkload,
-%  array[Days, ShiftTypes] of var PenaltyRange: penaltySkillLevel,
-var bool: empty
+  array[Days, ShiftTypes] of var bool: isWorking,
+  array[Days, ShiftTypes, RoomIds] of var bool: assignedRooms,
+  array[Days, ShiftTypes] of var int: expectedWorkload,
+  array[Days, ShiftTypes] of var PenaltyRange: penaltySkillLevel,
+   var bool: empty
 );
 type Nurse = NurseFixData ++ NurseVarData;
 
@@ -64,8 +64,8 @@ type SurgeonFixData = record(
   array[Days] of DayTime: maxSurgeryTime,
 );
 type SurgeonVarData = record(
-  %array[Days] of var DayTime: usedTime,
-  %array[Days, OperatingTheaterIds] of var bool: worksInOT,
+  array[Days] of var DayTime: usedTime,
+  array[Days, OperatingTheaterIds] of var bool: worksInOT,
   var bool: empty
 );
 type Surgeon = SurgeonFixData ++ SurgeonVarData;
@@ -76,7 +76,7 @@ type OperatingTheaterFixData = record(
   array[Days] of DayTime: availability,
 );
 type OperatingTheaterVarData = record(  
-  %array[Days] of var DayTime: usedTime,
+  array[Days] of var DayTime: usedTime,
   var bool: empty
 );
 type OperatingTheater = OperatingTheaterFixData ++ OperatingTheaterVarData;
@@ -198,11 +198,11 @@ array[OperatingTheaterIds] of OperatingTheaterFixData: operatingTheaterData;
 array[RoomIds] of RoomFixData: roomData;
 
 
-%array[NurseIds] of NurseVarData: nurseVar;
+array[NurseIds] of NurseVarData: nurseVar;
 %array[SurgeonIds] of SurgeonVarData: surgeonVar;
 array[PatientIds] of PatientVarData: patientVar;
 array[OccupantIds] of OccupantVarData: occupantVar;
-%array[OperatingTheaterIds] of OperatingTheaterVarData: operatingTheaterVar;
+array[OperatingTheaterIds] of OperatingTheaterVarData: operatingTheaterVar;
 array[RoomIds] of RoomVarData: roomVar;
 
 %deprecated

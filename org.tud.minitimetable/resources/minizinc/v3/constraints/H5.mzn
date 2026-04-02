@@ -4,11 +4,11 @@ include "../IHTP-model.mzn";
 % H5 Mandatory versus optional patients: All mandatory patients must be admitted within the decision horizon, whereas optional patients may be postponed to future periods.
 %
 
-constraint forall(id in PatientIds where patientData[id].mandatory)(
+constraint forall(id in PatientIds where isPatientMandatory(id))(
   patientVar[id].isPostponed = false
 );
 
-constraint forall(id in PatientIds where not patientData[id].mandatory)(
+constraint forall(id in PatientIds where not isPatientMandatory(id))(
   patientVar[id].isPostponed = (lastDay < patientVar[id].admissionDay)
 );
 

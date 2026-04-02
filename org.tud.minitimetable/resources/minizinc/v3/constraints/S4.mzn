@@ -6,17 +6,17 @@ include "../IHTP-model.mzn";
 % The penalty is the amount by which the total workload exceeds the limit, or 0 if it does not exceed the maximum workload of the nurse.
 %
 
-constraint forall(roomId in RoomIds, day in Days, shift in ShiftTypes)(
+constraint forall(r in RoomIds, d in Days, s in ShiftTypes)(
   let {
-    int: occupantWorkload = sum(occupant in occupantData where occupant.assignedRoom == roomId /\ day < occupant.lengthOfStay)
-      (occupant.workloadProduced[enum2int(shift) - 1 + enum2int(day) * length(ShiftTypes)]);
-    var int: patientWorkload = sum(patientId in PatientIds where patientVar[patientId].assignedRoom[day] == roomId)
-      (patientData[patientId].workloadProduced[enum2int(shift) - 1 + (enum2int(day)-patientVar[patientId].admissionDay) * length(ShiftTypes)]) 
+    int: occupantWorkload = sum(o in occupantData where isOccupantInRoom(o.id, d, r))
+      (occupantWorkload(o.id,d,s));
+    var int: patientWorkload = sum(p in PatientIds where patientVar[p].assignedRoom[d] == r)
+      (patientData[p].workloadProduced[enum2int(s) - 1 + (enum2int(d)-patientVar[p].admissionDay) * length(ShiftTypes)]) 
   } in
-  roomVar[roomId].workload[day, shift] = occupantWorkload + patientWorkload  
+  roomVar[r].workload[d, s] = occupantWorkload + patientWorkload  
 );
 
-constraint Penalties.nurseEccessiveWorkload = Weights.nurseEccessiveWorkload * sum(nurseId in NurseIds, day in Days, shift in ShiftTypes where isNurseAvailable[nurseId,day, shift])(
-  let { var 0..1000: workload = sum(roomId in RoomIds where isNurseInRoom[nurseId,day, shift, roomId])(roomVar[roomId].workload[day, shift]) } in
-  max(0, workload - nurseData[nurseId].maxWorkloadPerShift[day, shift])
+constraint Penalties.nurseEccessiveWorkload = Weights.nurseEccessiveWorkload * sum(n in NurseIds, d in Days, s in ShiftTypes where isNurseAvailable(n,d,s))(
+  let { var 0..1000: workload = sum(r in RoomIds where nurseVar[n].assignedRooms[d, s, r])(roomVar[r].workload[d, s]) } in
+  max(0, workload - nurseWorkloadCapacity(n,d,s))
 );

@@ -1,17 +1,27 @@
 {
     "openFiles": [
-        "v3/model/IHTP-Model.mzn",
         "v3/model/Variables.mzn",
-        "v2/model/Variables.mzn",
         "v3/AllConstraints.mzn",
+        "v3/model/Parameters.mzn",
+        "v3/IHTP-Model.mzn",
+        "v3/model/ParFunctions.mzn",
+        "v3/constraints/H1.mzn",
+        "v3/constraints/H2.mzn",
+        "v3/constraints/H3.mzn",
+        "v3/constraints/H4.mzn",
+        "v3/constraints/H5.mzn",
+        "v3/constraints/H6.mzn",
+        "v3/constraints/H7.mzn",
+        "v3/constraints/H8.mzn",
+        "v3/constraints/Performance.mzn",
+        "v3/constraints/S1.mzn",
+        "v3/constraints/S2.mzn",
         "v3/constraints/S3.mzn",
         "v3/constraints/S4.mzn",
-        "v3/constraints/H1.mzn",
-        "v3/model/Parameters.mzn",
-        "v3/model/ParFunctions.mzn",
-        "v3/IHTP-Model.mzn"
+        "v3/constraints/S5.mzn",
+        "v3/constraints/S6.mzn"
     ],
-    "openTab": 9,
+    "openTab": 1,
     "projectFiles": [
         "AllConstraintsV2.mzn",
         "AllConstraints_opt2.mzn",
@@ -118,6 +128,7 @@
         "v3/model/IHTP-Model.mzn",
         "v3/model/ParFunctions.mzn",
         "v3/model/Parameters.mzn",
+        "v3/model/Utility.mzn",
         "v3/model/Variables.mzn"
     ],
     "selectedBuiltinConfigId": "org.minizinc.mip.gurobi",

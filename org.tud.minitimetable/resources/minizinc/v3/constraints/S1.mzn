@@ -22,7 +22,7 @@ constraint forall(p in PatientIds, d in Days)(
 
 constraint forall(r in RoomIds, d in Days)(
     let { 
-        array[int] of AgeGroups: occupantAges = [ occupantData[o].ageGroup | o in OccupantIds where isOccupantInRoom(o,d,r)] 
+        array[int] of AgeGroups: occupantAges = [ occupantAgeGroup(o) | o in OccupantIds where isOccupantInRoom(o,d,r)] 
     } in
     if length(occupantAges) > 0 then
         roomMaxAge[r, d] >= max(occupantAges) /\

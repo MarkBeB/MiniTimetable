@@ -9,7 +9,7 @@ constraint forall(roomId in RoomIds, day in Days)(
 );
 
 constraint forall(roomId in RoomIds, day in Days)(  
-  roomVar[roomId].assignedPatients[day] + roomData[roomId].assignedOccupants[day] <= roomData[roomId].capacity
+  roomVar[roomId].assignedPatients[day] + roomData[roomId].assignedOccupants[day] <= roomCapacity(roomId)
 );
 
 %constraint forall(roomId in RoomIds, day in Days)(

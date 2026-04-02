@@ -6,17 +6,17 @@ include "../IHTP-model.mzn";
 % thus resulting in a minimum cost for this component of 3 times the number of admitted patients.
 %
 
-constraint forall(patient in patientVar, day in Days where patient.isAdmitted)(
-  let{ var opt RoomIds: roomId = patient.assignedRoom[day] } in
-  forall(shift in ShiftTypes, nurseId in NurseIds)(
-    isNurseInRoom[nurseId,day, shift, roomId] -> patient.caredByNurse[nurseId]
+constraint forall(p in patientVar, d in Days where p.isAdmitted)(
+  let{ var opt RoomIds: r = p.assignedRoom[d] } in
+  forall(s in ShiftTypes, n in NurseIds)(
+    nurseVar[n].assignedRooms[d, s, r] -> p.caredByNurse[n]
   )
 );
 
-constraint forall(occupantId in OccupantIds, day in Days where isOccupantPresent(occupantId, day))(
-  let{ RoomIds: roomId = occupantData[occupantId].assignedRoom } in
-  forall(shift in ShiftTypes, nurseId in NurseIds)(
-    isNurseInRoom[nurseId,day, shift, roomId] -> occupantVar[occupantId].caredByNurse[nurseId]
+constraint forall(o in OccupantIds, d in Days where isOccupantPresent(o, d))(
+  let{ RoomIds: r = occupantRoom(o)} in
+  forall(s in ShiftTypes, n in NurseIds)(
+    nurseVar[n].assignedRooms[d, s, r] -> occupantVar[o].caredByNurse[n]
   )
 );
 
@@ -24,8 +24,8 @@ constraint forall(occupantId in OccupantIds, day in Days where isOccupantPresent
 %  (max(0, sum(nurseId in NurseIds)(patient.caredByNurse[nurseId]) - length(ShiftTypes)));
 
 constraint Penalties.continuityOfCare = Weights.continuityOfCare * (
-    count(patient in patientVar, nurseId in NurseIds)(patient.caredByNurse[nurseId])
-  + count(occupant in occupantVar, nurseId in NurseIds)(occupant.caredByNurse[nurseId])
+    count(p in patientVar, n in NurseIds)(p.caredByNurse[n])
+  + count(o in occupantVar, n in NurseIds)(o.caredByNurse[n])
 );
 
-constraint Penalties.continuityOfCare >= Weights.continuityOfCare * length(ShiftTypes) * (count(patient in patientVar)(patient.isAdmitted) + length(OccupantIds));
+constraint Penalties.continuityOfCare >= Weights.continuityOfCare * length(ShiftTypes) * (count(p in patientVar)(p.isAdmitted) + length(OccupantIds));

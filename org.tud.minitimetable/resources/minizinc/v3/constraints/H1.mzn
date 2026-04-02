@@ -5,8 +5,8 @@ include "../IHTP-model.mzn";
 %
 
 constraint forall(r in RoomIds)(
-  forall(o in OccupantIds where isOccupantInRoom(o,r))(
-    forall(d in Days where isOccupantPresent(o,d))(
+  forall(o in OccupantIds where isOccupantInRoom(o, r))(
+    forall(d in Days where d <= occupantLengthOfStay(o))(
       roomVar[r].assignedGender[d] = occupantGender(o)
     )
   )
