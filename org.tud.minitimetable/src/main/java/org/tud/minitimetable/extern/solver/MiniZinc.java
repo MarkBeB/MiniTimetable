@@ -97,26 +97,18 @@ public class MiniZinc {
 		logger.logEmptyLine();
 		logger.log("---- Start MiniZinc ----");
 		var isDone = runner.run();
-		if (config.solverOutput instanceof StreamLog streanLogger)
-			streanLogger.setStream(runner.getProcessOutputStream());
 
-		if (config.backendLog instanceof StreamLog streanLogger)
-			streanLogger.setStream(runner.getProcessErrorStream());
+		if (config.solverOutput instanceof StreamLog streamLogger)
+			streamLogger.setStream(runner.getProcessOutputStream());
 
-		if (arguments.timeLimitMS != null) {
-			if (arguments.timeLimitMS <= ONE_SECOND) {
-				logger.log(String.format("With time limit: %d ms", arguments.timeLimitMS));
-			} else if (arguments.timeLimitMS <= ONE_MINUTE) {
-				double time = arguments.timeLimitMS / (ONE_SECOND + 0.0d);
-				logger.log(String.format("With time limit: %.3f s", time));
-			} else if (arguments.timeLimitMS <= ONE_HOUR) {
-				double time = arguments.timeLimitMS / (ONE_MINUTE + 0.0d);
-				logger.log(String.format("With time limit: %.3f m", time));
-			} else {
-				double time = arguments.timeLimitMS / (ONE_HOUR + 0.0d);
-				logger.log(String.format("With time limit: %.3f h", time));
-			}
-		}
+		if (config.backendLog instanceof StreamLog streamLogger)
+			streamLogger.setStream(runner.getProcessErrorStream());
+
+		if (arguments.timeLimitMS != null)
+			logger.log(String.format("With time limit: %s", parseTimeLimit(arguments.timeLimitMS)));
+
+		if (arguments.solverTImeLimitMS != null)
+			logger.log(String.format("With solver time limit: %s", parseTimeLimit(arguments.solverTImeLimitMS)));
 
 		return isDone.whenComplete((p, ex) -> {
 			logger.log("MiniZinc Terminated");
@@ -126,6 +118,21 @@ public class MiniZinc {
 				logger.log("An Error occured: " + ex.getMessage());
 			logger.flush();
 		});
+	}
+
+	private static String parseTimeLimit(long miliseconds) {
+		if (miliseconds <= ONE_SECOND) {
+			return String.format("%d ms", miliseconds);
+		} else if (miliseconds <= ONE_MINUTE) {
+			double time = miliseconds / (ONE_SECOND + 0.0d);
+			return String.format("%.3f s", time);
+		} else if (miliseconds <= ONE_HOUR) {
+			double time = miliseconds / (ONE_MINUTE + 0.0d);
+			return String.format("%.3f m", time);
+		} else {
+			double time = miliseconds / (ONE_HOUR + 0.0d);
+			return String.format("%.3f h", time);
+		}
 	}
 
 	private void validateArguments(Path modelFile, Path dataFile, Path outputDirectory) throws IOException {

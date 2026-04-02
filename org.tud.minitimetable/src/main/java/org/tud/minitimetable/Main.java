@@ -21,6 +21,8 @@ public class Main {
 	private static final String OPTION_SHORT_MINIZINC_FILE = "e";
 	private static final String OPTION_SHORT_TIMELIMIT_S = "ts";
 	private static final String OPTION_SHORT_TIMELIMIT_M = "tm";
+	private static final String OPTION_SHORT_SOLVER_TIMELIMIT_S = "sts";
+	private static final String OPTION_SHORT_SOLVER_TIMELIMIT_M = "stm";
 	private static final String OPTION_SHORT_THREADS = "p";
 
 	public static void main(String[] args) throws IOException {
@@ -81,11 +83,21 @@ public class Main {
 
 		Option timelimitSeconds = Option.builder(OPTION_SHORT_TIMELIMIT_S).longOpt("timelimit-seconds").hasArg()
 				.numberOfArgs(1) //
-				.desc("Timelimit in full seconds. The default limit is 10 Minutes.").get();
+				.desc("Time limit in full seconds. The default limit is 10 Minutes.").get();
 
 		Option timelimitMinutes = Option.builder(OPTION_SHORT_TIMELIMIT_M).longOpt("timelimit-minutes").hasArg()
 				.numberOfArgs(1) //
-				.desc("Timelimit in full minutes. The default limit is 10 Minutes.").get();
+				.desc("Time limit in full minutes. The default limit is 10 Minutes.").get();
+
+		Option solverTimelimitSeconds = Option.builder(OPTION_SHORT_SOLVER_TIMELIMIT_S)
+				.longOpt("solver-timelimit-seconds").hasArg().numberOfArgs(1) //
+				.desc("Solver time limit in full seconds. Has precedence over time limit. Defaults to time limit.")
+				.get();
+
+		Option solverTimelimitMinutes = Option.builder(OPTION_SHORT_SOLVER_TIMELIMIT_M)
+				.longOpt("solver-timelimit-minutes").hasArg().numberOfArgs(1) //
+				.desc("Solver time limit in full minutes. Has precedence over time limit. Defaults to time limit.")
+				.get();
 
 		Option threads = Option.builder(OPTION_SHORT_THREADS).longOpt("threads").hasArg().numberOfArgs(1) //
 				.desc("Number of threads to use").get();
@@ -98,6 +110,8 @@ public class Main {
 		options.addOption(miniZincExe);
 		options.addOption(timelimitSeconds);
 		options.addOption(timelimitMinutes);
+		options.addOption(solverTimelimitSeconds);
+		options.addOption(solverTimelimitMinutes);
 		options.addOption(threads);
 
 		CommandLine commandLine;
@@ -133,6 +147,14 @@ public class Main {
 		} else if (commandLine.hasOption(OPTION_SHORT_TIMELIMIT_M)) {
 			var value = parseInteger(commandLine, OPTION_SHORT_TIMELIMIT_M, "Unable to parse time limit");
 			minizinc.getConfig().timeLimitMS = value * 60l * 1000l;
+		}
+
+		if (commandLine.hasOption(OPTION_SHORT_SOLVER_TIMELIMIT_S)) {
+			var value = parseInteger(commandLine, OPTION_SHORT_SOLVER_TIMELIMIT_S, "Unable to parse solver time limit");
+			minizinc.getConfig().solverTimeLimitMS = value * 1000l;
+		} else if (commandLine.hasOption(OPTION_SHORT_SOLVER_TIMELIMIT_M)) {
+			var value = parseInteger(commandLine, OPTION_SHORT_SOLVER_TIMELIMIT_M, "Unable to parse solver time limit");
+			minizinc.getConfig().solverTimeLimitMS = value * 60l * 1000l;
 		}
 
 		if (commandLine.hasOption(OPTION_SHORT_THREADS)) {
