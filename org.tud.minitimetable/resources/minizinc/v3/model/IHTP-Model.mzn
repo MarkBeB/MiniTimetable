@@ -64,8 +64,8 @@ type SurgeonFixData = record(
   array[Days] of DayTime: maxSurgeryTime,
 );
 type SurgeonVarData = record(
-  array[Days] of var DayTime: usedTime,
-  array[Days, OperatingTheaterIds] of var bool: worksInOT,
+%  array[Days] of var DayTime: usedTime,
+%  array[Days, OperatingTheaterIds] of var bool: worksInOT,
   var bool: empty
 );
 type Surgeon = SurgeonFixData ++ SurgeonVarData;
@@ -76,7 +76,7 @@ type OperatingTheaterFixData = record(
   array[Days] of DayTime: availability,
 );
 type OperatingTheaterVarData = record(  
-  array[Days] of var DayTime: usedTime,
+%  array[Days] of var DayTime: usedTime,
   var bool: empty
 );
 type OperatingTheater = OperatingTheaterFixData ++ OperatingTheaterVarData;
