@@ -8,15 +8,15 @@ include "../IHTP-model.mzn";
 
 constraint forall(r in RoomIds, d in Days, s in ShiftTypes)(
   let {
-    int: occupantWorkload = sum(o in occupantData where isOccupantInRoom(o.id, d, r))
-      (occupantWorkload(o.id,d,s));
+    int: occupantWorkload = sum(o in OccupantIds where isOccupantInRoom(o, d, r))
+      (occupantWorkload(o,d,s));
     var int: patientWorkload = sum(p in PatientIds where patientVar[p].assignedRoom[d] == r)
       (patientData[p].workloadProduced[enum2int(s) - 1 + (enum2int(d)-patientVar[p].admissionDay) * length(ShiftTypes)]) 
   } in
-  roomVar[r].workload[d, s] = occupantWorkload + patientWorkload  
+  roomWorkload[r,d,s] = occupantWorkload + patientWorkload  
 );
 
 constraint Penalties.nurseEccessiveWorkload = Weights.nurseEccessiveWorkload * sum(n in NurseIds, d in Days, s in ShiftTypes where isNurseAvailable(n,d,s))(
-  let { var 0..1000: workload = sum(r in RoomIds where nurseVar[n].assignedRooms[d, s, r])(roomVar[r].workload[d, s]) } in
+  let { var 0..1000: workload = sum(r in RoomIds where nurseVar[n].assignedRooms[d, s, r])(roomWorkload[r,d,s]) } in
   max(0, workload - nurseWorkloadCapacity(n,d,s))
 );

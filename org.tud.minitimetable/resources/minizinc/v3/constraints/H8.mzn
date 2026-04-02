@@ -5,7 +5,7 @@ include "../IHTP-model.mzn";
 %
 
 constraint forall(r in RoomIds, d in Days, s in ShiftTypes)(
-  bool2int(roomVar[r].isOccupied[d]) == count(n in NurseIds)( nurseVar[n].assignedRooms[d, s, r] ) 
+  bool2int(isRoomOccupied[r,d]) == count(n in NurseIds)( nurseVar[n].assignedRooms[d, s, r] ) 
 );
 
 constraint forall(n in NurseIds, d in Days, s in ShiftTypes, r in RoomIds)(

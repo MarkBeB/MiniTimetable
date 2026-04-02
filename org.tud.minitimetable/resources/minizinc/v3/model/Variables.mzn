@@ -9,8 +9,9 @@ array[SurgeonIds,Days, OperatingTheaterIds] of var bool: isSurgeonInOT;
 
 %array[OperatingTheaterIds, Days] of var DayTime: otTime;
 
-%array[RoomIds, Days] of var bool: isRoomOccupied;
+array[RoomIds, Days] of var bool: isRoomOccupied;
 array[RoomIds, Days] of var Genders: roomGender;
+array[RoomIds, Days, ShiftTypes] of var int: roomWorkload;
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -32,5 +33,5 @@ constraint forall(roomId in RoomIds, day in Days)(
     bool: hasOccupants = exists(occupant in occupantData)(occupant.assignedRoom == roomId /\ day < occupant.lengthOfStay);
     var bool: hasPatients = exists(patient in patientVar)(patient.assignedRoom[day] == roomId);
   } in
-  roomVar[roomId].isOccupied[day] <-> hasOccupants \/ hasPatients
+  isRoomOccupied[roomId,day] <-> hasOccupants \/ hasPatients
 );
