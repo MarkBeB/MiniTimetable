@@ -36,14 +36,14 @@ output :: "json"
 
 [ "  \("nurses"): [\n" ] ++
 [ "    {\n" ++
-  "      \("id"): \(format(id)),\n" ++
+  "      \("id"): \(format(n)),\n" ++
   "      \("assignments"): [\n" ++
   join(",\n",[
-  "        {\("day"): "++show_int(3,day)++", \("shift"): \(format(shift)), \("rooms"): ["++join(", ",[ "\(format(room))" |room in RoomIds where fix(n.assignedRooms[day, shift, room])])++"]}"
-    | day in Days, shift in ShiftTypes where fix(n.isWorking[day, shift])]) ++ "\n" ++
+  "        {\("day"): "++show_int(3,d)++", \("shift"): \(format(s)), \("rooms"): ["++join(", ",[ "\(format(r))" |r in RoomIds where fix(nV.assignedRooms[d, s, r])])++"]}"
+    | d in Days, s in ShiftTypes where isNurseAvailable(n,d,s)]) ++ "\n" ++
   "      ]\n" ++
   "    },\n" 
-  | id in NurseIds, n = nurseVar[id], nF = nurseData[id] ] ++
+  | n in NurseIds, nV = nurseVar[n], nF = nurseData[n] ] ++
 [ "  ],\n" ] ++
 
 [ "}" ]

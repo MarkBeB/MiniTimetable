@@ -22,7 +22,3 @@ constraint forall(roomId in RoomIds, day in Days)(
   roomVar[roomId].isOccupied[day] <-> hasOccupants \/ hasPatients
 );
 
-constraint forall(nurseId in NurseIds, day in Days, shift in ShiftTypes)(
-  nurseVar[nurseId].isWorking[day, shift] <-> nurseData[nurseId].maxWorkloadPerShift[day, shift] > 0
-);
-

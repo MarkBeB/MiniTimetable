@@ -50,7 +50,7 @@ type NurseFixData = record(
   array[Days, ShiftTypes] of int: maxWorkloadPerShift,
 );
 type NurseVarData = record(
-  array[Days, ShiftTypes] of var bool: isWorking,
+%  array[Days, ShiftTypes] of var bool: isWorking,
   array[Days, ShiftTypes, RoomIds] of var bool: assignedRooms,
   array[Days, ShiftTypes] of var int: expectedWorkload,
   array[Days, ShiftTypes] of var PenaltyRange: penaltySkillLevel,
@@ -90,7 +90,7 @@ type RoomFixData = record(
 type RoomVarData = record(
   array[Days] of var bool: isOccupied, % utility constraint
   array[Days] of var 0..100: assignedPatients,  
-  array[Days] of var Genders: assignedGender,
+%  array[Days] of var Genders: assignedGender,
   array[Days, ShiftTypes] of var int: workload,
   array[Days, ShiftTypes] of var opt NurseIds: assignedNurse,
 
