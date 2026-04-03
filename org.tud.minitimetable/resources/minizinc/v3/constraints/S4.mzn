@@ -17,6 +17,6 @@ constraint forall(r in RoomIds, d in Days, s in ShiftTypes)(
 );
 
 constraint Penalties.nurseEccessiveWorkload = Weights.nurseEccessiveWorkload * sum(n in NurseIds, d in Days, s in ShiftTypes where isNurseAvailable(n,d,s))(
-  let { var 0..1000: workload = sum(r in RoomIds where nurseVar[n].assignedRooms[d, s, r])(roomWorkload[r,d,s]) } in
+  let { var 0..1000: workload = sum(r in RoomIds where isNurseInRoom[n,d,s,r])(roomWorkload[r,d,s]) } in
   max(0, workload - nurseWorkloadCapacity(n,d,s))
 );

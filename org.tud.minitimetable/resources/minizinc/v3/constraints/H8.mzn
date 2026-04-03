@@ -5,13 +5,13 @@ include "../IHTP-model.mzn";
 %
 
 constraint forall(r in RoomIds, d in Days, s in ShiftTypes)(
-  bool2int(isRoomOccupied[r,d]) == count(n in NurseIds)( nurseVar[n].assignedRooms[d, s, r] ) 
+  bool2int(isRoomOccupied[r,d]) == count(n in NurseIds)( isNurseInRoom[n,d,s,r] ) 
 );
 
 constraint forall(n in NurseIds, d in Days, s in ShiftTypes, r in RoomIds)(
-  nurseVar[n].assignedRooms[d, s, r] -> isNurseAvailable(n, d, s)
+  isNurseInRoom[n,d,s,r] -> isNurseAvailable(n,d,s)
 );
 
 constraint forall(n in NurseIds, d in Days, s in ShiftTypes, r in RoomIds)(
-  nurseVar[n].assignedRooms[d, s, r] <-> roomVar[r].assignedNurse[d, s] == n
+  isNurseInRoom[n,d,s,r] <-> roomNurseAssignment[r,d,s] == n
 );

@@ -9,14 +9,14 @@ include "../IHTP-model.mzn";
 constraint forall(p in patientVar, d in Days where p.isAdmitted)(
   let{ var opt RoomIds: r = p.assignedRoom[d] } in
   forall(s in ShiftTypes, n in NurseIds)(
-    nurseVar[n].assignedRooms[d, s, r] -> p.caredByNurse[n]
+    isNurseInRoom[n,d,s,r] -> p.caredByNurse[n]
   )
 );
 
 constraint forall(o in OccupantIds, d in Days where isOccupantPresent(o, d))(
   let{ RoomIds: r = occupantRoom(o)} in
   forall(s in ShiftTypes, n in NurseIds)(
-    nurseVar[n].assignedRooms[d, s, r] -> occupantVar[o].caredByNurse[n]
+    isNurseInRoom[n,d,s,r] -> occupantVar[o].caredByNurse[n]
   )
 );
 

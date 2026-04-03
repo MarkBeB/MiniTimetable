@@ -51,7 +51,7 @@ type NurseFixData = record(
 );
 type NurseVarData = record(
 %  array[Days, ShiftTypes] of var bool: isWorking,
-  array[Days, ShiftTypes, RoomIds] of var bool: assignedRooms,
+%  array[Days, ShiftTypes, RoomIds] of var bool: assignedRooms,
 %  array[Days, ShiftTypes] of var int: expectedWorkload,
 %  array[Days, ShiftTypes] of var PenaltyRange: penaltySkillLevel,
    var bool: empty
@@ -92,8 +92,8 @@ type RoomVarData = record(
   array[Days] of var 0..100: assignedPatients,  
 %  array[Days] of var Genders: assignedGender,
 %  array[Days, ShiftTypes] of var int: workload,
-  array[Days, ShiftTypes] of var opt NurseIds: assignedNurse,
-
+%  array[Days, ShiftTypes] of var opt NurseIds: assignedNurse,
+var bool: empty
 %  array[Days] of var 0..length(AgeGroups): penaltyAgeMixing,
 );
 type Room = RoomFixData ++ RoomVarData;

@@ -12,6 +12,7 @@ array[OperatingTheaterIds, Days] of var DayTime: otTime;
 array[RoomIds, Days] of var bool: isRoomOccupied;
 array[RoomIds, Days] of var Genders: roomGender;
 array[RoomIds, Days, ShiftTypes] of var int: roomWorkload;
+array[RoomIds, Days, ShiftTypes] of var opt NurseIds: roomNurseAssignment;
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

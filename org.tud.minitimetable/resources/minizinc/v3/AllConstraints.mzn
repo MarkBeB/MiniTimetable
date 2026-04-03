@@ -13,9 +13,9 @@ include "constraints/H6.mzn";
 include "constraints/H7.mzn";
 include "constraints/H8.mzn";
 
-include "constraints/S1.mzn";
+include "constraints/S1v2.mzn";
 include "constraints/S2.mzn";
-include "constraints/S3.mzn";
+include "constraints/S3v2.mzn";
 include "constraints/S4.mzn";
 include "constraints/S5.mzn";
 include "constraints/S6.mzn";
