@@ -2,16 +2,20 @@ include "IHTP-Model.mzn";
 
 array[NurseIds, Days, ShiftTypes, RoomIds] of var bool: isNurseInRoom;
 
-%array[NurseIds, Days, ShiftTypes] of var int: nursePenaltySkillLevel;
+array[PatientIds] of var MaxDays: patientAdmissionDay;
+array[PatientIds] of var MaxDays: patientAdmittedUntil;
+array[PatientIds] of var bool: isPatientPostponed;
+array[PatientIds] of var bool: isPatientAdmitted = [p: not isPatientPostponed[p] | p in PatientIds];
+array[PatientIds, NurseIds] of var bool: patientCaredByNurse;
+array[PatientIds,Days] of var opt RoomIds: patientRoom;
+array[PatientIds] of var opt OperatingTheaterIds: patientOT;
 
-array[SurgeonIds, Days] of var DayTime: surgeonTime;
-array[SurgeonIds,Days, OperatingTheaterIds] of var bool: isSurgeonInOT;
+array[OccupantIds, NurseIds] of var bool: occupantCaredByNurse;
 
 array[OperatingTheaterIds, Days] of var DayTime: otTime;
 
+
 array[RoomIds, Days] of var bool: isRoomOccupied;
-array[RoomIds, Days] of var Genders: roomGender;
-array[RoomIds, Days, ShiftTypes] of var int: roomWorkload;
 array[RoomIds, Days, ShiftTypes] of var opt NurseIds: roomNurseAssignment;
 
 
@@ -21,18 +25,14 @@ array[RoomIds, Days, ShiftTypes] of var opt NurseIds: roomNurseAssignment;
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-constraint forall(p in patientVar)(
-  p.isPostponed <-> not p.isAdmitted
-);
-
 constraint forall(p in PatientIds)( 
-  patientVar[p].admittedUntil = patientVar[p].admissionDay + patientLengthOfStay(p) - 1
+  patientAdmittedUntil[p] = patientAdmissionDay[p] + patientLengthOfStay(p) - 1
 );
 
 constraint forall(r in RoomIds, d in Days)(
   let {
     bool: hasOccupants = exists(o in OccupantIds)(isOccupantInRoom(o,d,r));
-    var bool: hasPatients = exists(patient in patientVar)(patient.assignedRoom[d] == r);
+    var bool: hasPatients = exists(p in PatientIds)(patientRoom[p,d] == r);
   } in
   isRoomOccupied[r,d] <-> hasOccupants \/ hasPatients
 );

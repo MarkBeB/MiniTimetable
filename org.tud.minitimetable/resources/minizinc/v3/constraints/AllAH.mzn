@@ -19,11 +19,11 @@ constraint forall(id in PatientIds)(
 ) :: constraint_name("Con_AH9");
 */
 
-constraint forall(id in PatientIds)(
-     patientVar[id].isAdmitted -> sum(day in Days)(patientVar[id].assignedRoom[day] != <>) >= 1
-  /\ not patientVar[id].isAdmitted -> forall(day in Days)(patientVar[id].assignedRoom[day] == <>)
+constraint forall(p in PatientIds)(
+     isPatientAdmitted[p] -> sum(d in Days)(patientRoom[p,d] != <>) >= 1
+  /\ isPatientPostponed[p] -> forall(d in Days)(patientRoom[p,d] == <>)
 ) :: constraint_name("Con_AH9_A");
-
+ 
 /*
 constraint forall(id in PatientIds)(
   not patientVar[id].isPostponed -> sum(day in Days)(patientVar[id].assignedRoom[day] != <>) >= 1
@@ -45,31 +45,31 @@ constraint forall(patient in patientVar)(
 % AH10 No Room Transfer: Each patient must remain in the same room for the entire duration of their stay
 %
 
-constraint forall(patient in patientVar where patient.isAdmitted)(
-  exists(roomId in RoomIds)(
-    forall(day in Days)(
-      if patient.admissionDay <= day /\ day <= patient.admittedUntil then
-        patient.assignedRoom[day] = roomId
+constraint forall(p in PatientIds where isPatientAdmitted[p])(
+  exists(r in RoomIds)(
+    forall(d in Days)(
+      if patientAdmissionDay[p] <= d /\ d <= patientAdmittedUntil[p] then
+        patientRoom[p,d] = r
       else
-        patient.assignedRoom[day] = <>
+        patientRoom[p,d] = <>
       endif
     )
   )
-) :: constraint_name("Con_AH10");
+);
 
 % Derived from competition rules.
 % AH11 Surgery on admission day: Patients undergo surgery on the day of their admission
 %
 
 % Every admitted patient must be assigned to an OT. Patients who have not been admitted should not be assigned to an OT.
-constraint forall(patient in patientVar)(
-  patient.isAdmitted -> patient.assignedOT != <>
-  /\ not patient.isAdmitted -> patient.assignedOT == <>
-) :: constraint_name("Con_AH11_A");
+constraint forall(p in PatientIds)(
+     isPatientAdmitted[p] -> patientOT[p] != <>
+  /\ isPatientPostponed[p] -> patientOT[p] == <>
+);
 
 %  The assigned OT should be available on the day of admission.
-constraint forall(patient in patientVar where patient.isAdmitted)(
-  exists(ot in operatingTheaterData where ot.availability[patient.admissionDay] > 0)(
-    patient.assignedOT = ot.id
+constraint forall(p in PatientIds where isPatientAdmitted[p])(
+  exists(ot in operatingTheaterData where ot.availability[patientAdmissionDay[p]] > 0)(
+    patientOT[p] = ot.id
   )
-) :: constraint_name("Con_AH11_B");
+);

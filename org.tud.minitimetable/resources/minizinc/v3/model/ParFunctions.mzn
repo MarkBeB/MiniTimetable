@@ -33,16 +33,16 @@ function int: occupantLengthOfStay(OccupantIds: o) =
   occupantData[o].lengthOfStay;
   
 function int: occupantWorkload(OccupantIds: o, Days: d, ShiftTypes: s) =
-  occupantData[o].workloadProduced[occupantDailyIndex(d,s)];
+  occupantData[o].workloadProduced[occupantIndex(d,s)];
 
 function int: occupantSkillRequired(OccupantIds: o, Days: d, ShiftTypes: s) =
-  occupantData[o].skillLevelRequired[occupantDailyIndex(d,s)];
+  occupantData[o].skillLevelRequired[occupantIndex(d,s)];
 
-function int: occupantDailyIndex(Days: d, ShiftTypes: s) =
+function int: occupantIndex(Days: d, ShiftTypes: s) =
   enum2int(s) - 1 + enum2int(d) * length(ShiftTypes);
 
-function int: toIndex(int: d, ShiftTypes: s) =
-   enum2int(s) - 1 + d * length(ShiftTypes);
+function int: toIndex(Days: d, ShiftTypes: s) =
+  enum2int(s) - 1 + enum2int(d) * length(ShiftTypes);
 
 
 
@@ -64,11 +64,14 @@ function AgeGroups: patientAgeGroup(PatientIds: p) =
 function Genders: patientGender(PatientIds: p) =
   patientData[p].gender;
 
-function int: patientWorkload(PatientIds: p, int: d, ShiftTypes: s) =
-  patientData[p].workloadProduced[toIndex(d,s)];
+function var int: patientWorkload(PatientIds: p, var int: relativeDay, ShiftTypes: s) =
+  patientData[p].workloadProduced[toIndex(relativeDay,s)];
 
-function int: patientSkillRequired(PatientIds: p, int: d, ShiftTypes: s) =
-  patientData[p].skillLevelRequired[toIndex(d,s)];
+function var int: patientSkillRequired(PatientIds: p, var int: relativeDay, ShiftTypes: s) =
+  patientData[p].skillLevelRequired[toIndex(relativeDay,s)];
+
+function var int: toIndex(var int: d, ShiftTypes: s) =
+  enum2int(s) - 1 + d * length(ShiftTypes);
 
 function int: patientLengthOfStay(PatientIds: p) =
   patientData[p].lengthOfStay;

@@ -6,26 +6,23 @@ include "../IHTP-model.mzn";
 % thus resulting in a minimum cost for this component of 3 times the number of admitted patients.
 %
 
-constraint forall(p in patientVar, d in Days where p.isAdmitted)(
-  let{ var opt RoomIds: r = p.assignedRoom[d] } in
+constraint forall(p in PatientIds, d in Days where isPatientAdmitted[p])(
+  let{ var opt RoomIds: r = patientRoom[p,d] } in
   forall(s in ShiftTypes, n in NurseIds)(
-    isNurseInRoom[n,d,s,r] -> p.caredByNurse[n]
+    isNurseInRoom[n,d,s,r] -> patientCaredByNurse[p,n]
   )
 );
 
 constraint forall(o in OccupantIds, d in Days where isOccupantPresent(o, d))(
   let{ RoomIds: r = occupantRoom(o)} in
   forall(s in ShiftTypes, n in NurseIds)(
-    isNurseInRoom[n,d,s,r] -> occupantVar[o].caredByNurse[n]
+    isNurseInRoom[n,d,s,r] -> occupantCaredByNurse[o,n]
   )
 );
 
-%constraint Penalties.continuityOfCare = Weights.continuityOfCare * sum(patient in patientVar)
-%  (max(0, sum(nurseId in NurseIds)(patient.caredByNurse[nurseId]) - length(ShiftTypes)));
-
 constraint Penalties.continuityOfCare = Weights.continuityOfCare * (
-    count(p in patientVar, n in NurseIds)(p.caredByNurse[n])
-  + count(o in occupantVar, n in NurseIds)(o.caredByNurse[n])
+    count(p in PatientIds, n in NurseIds)(patientCaredByNurse[p,n])
+  + count(o in OccupantIds, n in NurseIds)(occupantCaredByNurse[o,n])
 );
 
-constraint Penalties.continuityOfCare >= Weights.continuityOfCare * length(ShiftTypes) * (count(p in patientVar)(p.isAdmitted) + length(OccupantIds));
+constraint Penalties.continuityOfCare >= Weights.continuityOfCare * length(ShiftTypes) * (count(p in PatientIds)(isPatientAdmitted[p]) + length(OccupantIds));

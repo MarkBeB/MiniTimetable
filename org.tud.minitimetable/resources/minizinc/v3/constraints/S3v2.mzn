@@ -6,11 +6,8 @@ include "../IHTP-model.mzn";
 % thus resulting in a minimum cost for this component of 3 times the number of admitted patients.
 %
 
-array[PatientIds, NurseIds] of var bool: patientCaredByNurse;
-array[OccupantIds, NurseIds] of var bool: occupantCaredByNurse;
-
-constraint forall(p in PatientIds, d in Days, s in ShiftTypes, n in NurseIds where patientVar[p].assignedRoom[d] != <>)(
-    patientCaredByNurse[p, n] >= isNurseInRoom[n, d, s, patientVar[p].assignedRoom[d]]
+constraint forall(p in PatientIds, d in Days, s in ShiftTypes, n in NurseIds where patientRoom[p,d] != <>)(
+    patientCaredByNurse[p, n] >= isNurseInRoom[n, d, s, patientRoom[p,d]]
 );
 
 constraint forall(o in OccupantIds, d in Days, s in ShiftTypes, n in NurseIds where isOccupantPresent(o,d))(

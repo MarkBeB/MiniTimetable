@@ -27,9 +27,13 @@
         "v1/constraints/S1.mzn",
         "v3/constraints/S1v3.mzn",
         "v3/constraints/S1v1.mzn",
-        "v3/constraints/S3v2.mzn"
+        "v3/constraints/S3v2.mzn",
+        "v3/model/GlobalVariables.mzn",
+        "v3/constraints/S3v1.mzn",
+        "AllConstraints_opt2.mzn",
+        "data/i02.dzn"
     ],
-    "openTab": 2,
+    "openTab": 26,
     "projectFiles": [
         "AllConstraints_opt2.mzn",
         "HardAndSomeSoft.mzn",

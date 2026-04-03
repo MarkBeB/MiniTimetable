@@ -6,12 +6,14 @@ include "../IHTP-model.mzn";
 % The penalty is the amount by which the total workload exceeds the limit, or 0 if it does not exceed the maximum workload of the nurse.
 %
 
+array[RoomIds, Days, ShiftTypes] of var int: roomWorkload;
+
 constraint forall(r in RoomIds, d in Days, s in ShiftTypes)(
   let {
     int: occupantWorkload = sum(o in OccupantIds where isOccupantInRoom(o, d, r))
       (occupantWorkload(o,d,s));
-    var int: patientWorkload = sum(p in PatientIds where patientVar[p].assignedRoom[d] == r)
-      (patientData[p].workloadProduced[enum2int(s) - 1 + (enum2int(d)-patientVar[p].admissionDay) * length(ShiftTypes)]) 
+    var int: patientWorkload = sum(p in PatientIds where patientRoom[p,d] == r)
+      (patientWorkload(p,d-patientAdmissionDay[p],s));
   } in
   roomWorkload[r,d,s] = occupantWorkload + patientWorkload  
 );

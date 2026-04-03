@@ -29,6 +29,7 @@ public class MiniZinc {
 		public Log solverOutput;
 		public Log solverModelLog;
 		public Path miniZincLocation;
+		public Path gurobiParameterFile;
 		public Integer optimizeLevel;
 		public Long timeLimitMS;
 		public Long solverTimeLimitMS;
@@ -209,6 +210,9 @@ public class MiniZinc {
 
 		if (config.solverTimeLimitMS != null)
 			arguments.solverTImeLimitMS = config.solverTimeLimitMS;
+
+		if (config.gurobiParameterFile != null)
+			arguments.gurobiParameterFile = config.gurobiParameterFile;
 
 		logger.log(String.format("Step done in %d ms", duration));
 	}

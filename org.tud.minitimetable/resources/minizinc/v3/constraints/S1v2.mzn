@@ -6,7 +6,7 @@ include "../IHTP-model.mzn";
 
 var int: agePenalty = sum(d in Days, r in RoomIds) (
     let {
-        var set of AgeGroups: patientAges = { patientAgeGroup(p) | p in PatientIds where patientVar[p].assignedRoom[d] == r };       
+        var set of AgeGroups: patientAges = { patientAgeGroup(p) | p in PatientIds where patientRoom[p,d] == r };       
         set of AgeGroups: occupantAges = { occupantAgeGroup(o) | o in OccupantIds where isOccupantInRoom(o,d,r) };
         var set of AgeGroups: allAges = patientAges union occupantAges;
     } in 

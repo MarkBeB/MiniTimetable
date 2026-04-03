@@ -10,7 +10,7 @@ array[RoomIds, Days] of var AgeGroups: minRoomAge;
 
 constraint forall(r in RoomIds, d in Days, g in AgeGroups) (
     agePresent[r, d, g] <-> (
-        exists(p in PatientIds where patientAgeGroup(p) == g)(patientVar[p].assignedRoom[d] == r)
+        exists(p in PatientIds where patientAgeGroup(p) == g)(patientRoom[p,d] == r)
         \/
         exists(o in OccupantIds where occupantAgeGroup(o) == g)(isOccupantInRoom(o,d,r))
     )

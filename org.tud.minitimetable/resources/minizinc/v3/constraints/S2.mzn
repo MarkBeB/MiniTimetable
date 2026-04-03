@@ -6,28 +6,22 @@ include "../IHTP-model.mzn";
 % a penalty equal to the difference between the two skill levels is incurred.
 % Note that a nurse with a skill level greater than the minimum required can be assigned to the room at no additional cost.
 %
-
-function int: requiredOccupantSkill(OccupantIds: o, Days: d, ShiftTypes: s) =
-  occupants[o].skillLevelRequired[indexOf(d,s)];
   
-function var int: requiredPatientSkill(PatientIds: p, Days: d, ShiftTypes: s) =
-  patients[p].skillLevelRequired[indexOf(p,d,s)];
-
 array[PatientIds, Days, ShiftTypes] of var PenaltyRange: patientSkillDifference;
 array[OccupantIds, Days, ShiftTypes] of var PenaltyRange: occupantSkillDifference;
 
 constraint forall(p in PatientIds, d in Days, s in ShiftTypes)(
-  forall(n in NurseIds, r in RoomIds where isNurseWorking(n,d,s))(
-    (patientVar[p].assignedRoom[d] == r /\ isNurseInRoom[n,d,s,r]) -> (
-      patientSkillDifference[p,d,s] = max(0, requiredPatientSkill(p,d,s) - nurseSkillLevel(n))
+  forall(n in NurseIds, r in RoomIds where isNurseAvailable(n,d,s))(
+    (patientRoom[p,d] == r /\ isNurseInRoom[n,d,s,r]) -> (
+      patientSkillDifference[p,d,s] = max(0, patientSkillRequired(p, d-patientAdmissionDay[p], s) - nurseSkillLevel(n))
     )
-  )
+  ) 
 );
 
 constraint forall(o in OccupantIds, d in Days, s in ShiftTypes)(
-  forall(n in NurseIds, r in RoomIds where isNurseWorking(n,d,s) /\ isOccupantInRoom(o,d,r))(
+  forall(n in NurseIds, r in RoomIds where isNurseAvailable(n,d,s) /\ isOccupantInRoom(o,d,r))(
     isNurseInRoom[n,d,s,r] -> (
-      occupantSkillDifference[o,d,s] = max(0, requiredOccupantSkill(o,d,s) - nurseSkillLevel(n))
+      occupantSkillDifference[o,d,s] = max(0, occupantSkillRequired(o,d,s) - nurseSkillLevel(n))
     )
   )
 );

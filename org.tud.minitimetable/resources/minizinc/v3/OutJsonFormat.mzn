@@ -16,21 +16,21 @@ output :: "json"
 [ "  },\n" ] ++
 
 [ "  \("patients"): [\n" ] ++
-[ "    {\("id"): \("\(id)"), " ++
-      "\("no_nurses"): \(count(nurseId in NurseIds)(p.caredByNurse[nurseId])), " ++
-      "\("admission_day"): "++show_int(3, p.admissionDay)++", " ++ 
-      "\("room"): \(format(p.assignedRoom[p.admissionDay])), " ++
-      "\("operating_theater"): \("\(p.assignedOT)")},\n" | id in PatientIds, p = patientVar[id] where fix(p.isAdmitted) ] ++
+[ "    {\("id"): \("\(p)"), " ++
+      "\("no_nurses"): \(count(n in NurseIds)(patientCaredByNurse[p, n])), " ++
+      "\("admission_day"): "++show_int(3, patientAdmissionDay[p])++", " ++ 
+      "\("room"): \(format(patientRoom[p,patientAdmissionDay[p]])), " ++
+      "\("operating_theater"): \("\(patientOT[p])")},\n" | p in PatientIds where fix(isPatientAdmitted[p]) ] ++
 [ "  ],\n" ] ++
 
 [ "  \("occupants"): [\n" ] ++
-[ "    {\("id"): \("\(id)"), "  ++
-      "\("no_nurses"): \(count(nurseId in NurseIds)(o.caredByNurse[nurseId])), " ++ 
-      "\("room"): \(format(occupantData[id].assignedRoom))},\n" | id in OccupantIds, o = occupantVar[id] ] ++
+[ "    {\("id"): \("\(o)"), "  ++
+      "\("no_nurses"): \(count(n in NurseIds)(occupantCaredByNurse[o, n])), " ++ 
+      "\("room"): \(format(occupantData[o].assignedRoom))},\n" | o in OccupantIds ] ++
 [ "  ],\n" ] ++
 
 [ " \("postponedPatients"): [" ] ++
-[ "    \("\(id)")," | id in PatientIds, p = patientVar[id] where not fix(p.isAdmitted) ] ++
+[ "    \("\(p)")," | p in PatientIds where not fix(isPatientAdmitted[p]) ] ++
 [ "  ],\n" ] ++
 
 

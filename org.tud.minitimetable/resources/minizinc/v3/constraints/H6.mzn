@@ -6,9 +6,9 @@ include "../IHTP-model.mzn";
 %
 
 constraint forall(p in PatientIds where isPatientMandatory(p))(
-    earliestAdmissionDay(p) <= patientVar[p].admissionDay /\ patientVar[p].admissionDay <= latestAdmissionDay(p)
+    earliestAdmissionDay(p) <= patientAdmissionDay[p] /\ patientAdmissionDay[p] <= latestAdmissionDay(p)
 );
 
 constraint forall(p in PatientIds where not isPatientMandatory(p))(
-    earliestAdmissionDay(p) <= patientVar[p].admissionDay /\ patientVar[p].admissionDay <= lastDay + 1
+    earliestAdmissionDay(p) <= patientAdmissionDay[p] /\ patientAdmissionDay[p] <= lastDay + 1
 );

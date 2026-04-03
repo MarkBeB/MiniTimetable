@@ -18,6 +18,7 @@ public class Main {
 	private static final String OPTION_SHORT_OUTPUT_FOLDER = "o";
 	private static final String OPTION_SHORT_MODEL_FILE = "m";
 	private static final String OPTION_SHORT_DATA_FILE = "d";
+	private static final String OPTION_SHORT_GUROBI_PARAM_FILE = "gP";
 	private static final String OPTION_SHORT_MINIZINC_FILE = "e";
 	private static final String OPTION_SHORT_TIMELIMIT_S = "ts";
 	private static final String OPTION_SHORT_TIMELIMIT_M = "tm";
@@ -81,6 +82,10 @@ public class Main {
 		Option miniZincExe = Option.builder(OPTION_SHORT_MINIZINC_FILE).longOpt("minizinc").hasArg().numberOfArgs(1) //
 				.desc("Path to minizinc exe").get();
 
+		Option paramFile = Option.builder(OPTION_SHORT_GUROBI_PARAM_FILE).longOpt("gurobi-param").hasArg()
+				.numberOfArgs(1) //
+				.desc("Gurobi parameter file (prm)").get();
+
 		Option timelimitSeconds = Option.builder(OPTION_SHORT_TIMELIMIT_S).longOpt("timelimit-seconds").hasArg()
 				.numberOfArgs(1) //
 				.desc("Time limit in full seconds. The default limit is 10 Minutes.").get();
@@ -107,6 +112,7 @@ public class Main {
 		options.addOption(dataFolder);
 		options.addOption(outFolder);
 		options.addOption(modelFile);
+		options.addOption(paramFile);
 		options.addOption(miniZincExe);
 		options.addOption(timelimitSeconds);
 		options.addOption(timelimitMinutes);
@@ -139,6 +145,11 @@ public class Main {
 		if (commandLine.hasOption(OPTION_SHORT_MINIZINC_FILE)) {
 			minizinc.getConfig().miniZincLocation = Path.of(commandLine.getOptionValue(OPTION_SHORT_MINIZINC_FILE))
 					.toAbsolutePath();
+		}
+
+		if (commandLine.hasOption(OPTION_SHORT_GUROBI_PARAM_FILE)) {
+			minizinc.getConfig().gurobiParameterFile = Path
+					.of(commandLine.getOptionValue(OPTION_SHORT_GUROBI_PARAM_FILE)).toAbsolutePath();
 		}
 
 		if (commandLine.hasOption(OPTION_SHORT_TIMELIMIT_S)) {

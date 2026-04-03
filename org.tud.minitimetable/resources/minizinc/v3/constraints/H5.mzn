@@ -5,11 +5,11 @@ include "../IHTP-model.mzn";
 %
 
 constraint forall(p in PatientIds where isPatientMandatory(p))(
-  patientVar[p].isPostponed = false
+  isPatientPostponed[p] = false
 );
 
 constraint forall(p in PatientIds where not isPatientMandatory(p))(
-  patientVar[p].isPostponed = (lastDay < patientVar[p].admissionDay)
+  isPatientPostponed[p] = (lastDay < patientAdmissionDay[p])
 );
 
 /*
