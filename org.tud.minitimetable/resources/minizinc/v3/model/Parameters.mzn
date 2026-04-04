@@ -19,7 +19,6 @@ int: maxScoreValue = 10^5;
 type DayTime = 0..minutesPerDay;
 type PenaltyRange = minPenaltyValue..maxPenaltyValue;
 type ScoreRange = minScoreValue..maxScoreValue;
-type PosInteger = 0..10^8;
 
 type WeightType = record(
   int: roomMixedAge,

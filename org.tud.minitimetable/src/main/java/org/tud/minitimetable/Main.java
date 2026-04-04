@@ -25,6 +25,9 @@ public class Main {
 	private static final String OPTION_SHORT_SOLVER_TIMELIMIT_S = "sts";
 	private static final String OPTION_SHORT_SOLVER_TIMELIMIT_M = "stm";
 	private static final String OPTION_SHORT_THREADS = "p";
+	private static final String OPTION_SHORT_OPTIMIZE_FLAG_1 = "O0";
+	private static final String OPTION_SHORT_OPTIMIZE_FLAG_2 = "O1";
+	private static final String OPTION_SHORT_OPTIMIZE_FLAG_3 = "O2";
 
 	public static void main(String[] args) throws IOException {
 		CommandLine commandLine = parseArguments(args);
@@ -107,6 +110,13 @@ public class Main {
 		Option threads = Option.builder(OPTION_SHORT_THREADS).longOpt("threads").hasArg().numberOfArgs(1) //
 				.desc("Number of threads to use").get();
 
+		Option optimize1 = Option.builder(OPTION_SHORT_OPTIMIZE_FLAG_1) //
+				.desc("Disable Flatzinc Optimization").get();
+		Option optimize2 = Option.builder(OPTION_SHORT_OPTIMIZE_FLAG_2) //
+				.desc("Default Flatzinc Optimization").get();
+		Option optimize3 = Option.builder(OPTION_SHORT_OPTIMIZE_FLAG_3) //
+				.desc("Double Pass Flatzinc Optimization").get();
+
 		Options options = new Options();
 		options.addOption(help);
 		options.addOption(dataFolder);
@@ -119,6 +129,9 @@ public class Main {
 		options.addOption(solverTimelimitSeconds);
 		options.addOption(solverTimelimitMinutes);
 		options.addOption(threads);
+		options.addOption(optimize1);
+		options.addOption(optimize2);
+		options.addOption(optimize3);
 
 		CommandLine commandLine;
 		try {
@@ -173,6 +186,14 @@ public class Main {
 			if (value <= 0)
 				throw new IllegalArgumentException("Number of threads invalid: " + value);
 			minizinc.getConfig().threads = value;
+		}
+
+		if (commandLine.hasOption(OPTION_SHORT_OPTIMIZE_FLAG_1)) {
+			minizinc.getConfig().optimizeLevel = 0;
+		} else if (commandLine.hasOption(OPTION_SHORT_OPTIMIZE_FLAG_2)) {
+			minizinc.getConfig().optimizeLevel = 1;
+		} else if (commandLine.hasOption(OPTION_SHORT_OPTIMIZE_FLAG_3)) {
+			minizinc.getConfig().optimizeLevel = 2;
 		}
 	}
 

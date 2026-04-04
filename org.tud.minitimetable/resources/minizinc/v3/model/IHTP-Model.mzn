@@ -146,86 +146,9 @@ array[OccupantIds] of Occupant: occupantData;
 array[OperatingTheaterIds] of OperatingTheater: operatingTheaterData;
 array[RoomIds] of Room: roomData;
 
-
-%array[NurseIds] of NurseVarData: nurseVar;
-%array[SurgeonIds] of SurgeonVarData: surgeonVar;
-%array[PatientIds] of PatientVarData: patientVar;
-%array[OccupantIds] of OccupantVarData: occupantVar;
-%array[OperatingTheaterIds] of OperatingTheaterVarData: operatingTheaterVar;
-%array[RoomIds] of RoomVarData: roomVar;
-
-%deprecated
-%int: numberOfPatients = length(patientData);
-%deprecated
-%int: numberOfOccupants = length(occupantData);
-
-% Usage may cause memory segmentation fault since version 2.9.5, was fine before. Seems to happen when a combined Type has 'too many' fields.
-%
-%array[NurseIds] of Nurse: nurses ::output = [id: nurseData[id] ++ nurseVar[id] | id in NurseIds];
-%array[SurgeonIds] of Surgeon: surgeons ::output = [id: surgeonData[id] ++ surgeonVar[id] | id in SurgeonIds];
-%array[PatientIds] of Patient: patients ::output = [id: patientData[id] ++ patientVar[id] | id in PatientIds]; % <-- has too many fields ?!?
-%array[OccupantIds] of Occupant: occupants ::output = [id: occupantData[id] | id in OccupantIds];
-%array[OperatingTheaterIds] of OperatingTheater: operatingTheaters ::output = [id: operatingTheaterData[id] ++ operatingTheaterVar[id] | id in OperatingTheaterIds];
-%array[RoomIds] of Room: rooms ::output = [id: roomData[id] ++ roomVar[id] | id in RoomIds];
-
 array[NurseIds] of Nurse: nurses = nurseData;
 array[SurgeonIds] of Surgeon: surgeons = surgeonData;
 array[PatientIds] of Patient: patients = patientData;
 array[OccupantIds] of Occupant: occupants = occupantData;
 array[OperatingTheaterIds] of OperatingTheater: operatingTheaters = operatingTheaterData;
 array[RoomIds] of Room: rooms = roomData;
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% UTILITY FUNCTIONS
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-%function var bool: patientIsInRoom(PatientIds: id, Days: day, RoomIds: roomId) = 
-%  patientRoom[id,day] == roomId;
-
-%function var bool: patientIsPresent(PatientIds: id, Days: day) = 
-%  patientVar[id].admissionDay <= day /\ day <= patientAdmittedUntil[id];
-
-%function var bool: isPatientInRoom(PatientIds: p, Days: d, RoomIds: r) = 
-%  patientIsInRoom(p, d, r);
-
-%function bool: isInRoom(OccupantFixData: occupant, RoomFixData: room, Days: day) =
-%  occupant.assignedRoom == room.id /\ day < occupant.lengthOfStay;
-
-%function var bool: isInRoom(PatientFixData: patient, RoomFixData: room, var Days: day) =
-%  patientVar[patient.id].assignedRoom[day] == room.id;
-
-%function bool: isPresent(OccupantFixData: occupant, Days: day) =
-%  day < occupant.lengthOfStay;
-
-%function var bool: isPresent(PatientFixData: patient, Days: day) =
-%  patientVar[patient.id].admissionDay <= day /\ day <= patientVar[patient.id].admittedUntil;
-
-%function bool: isWorking(NurseFixData: nurse, Days: day, ShiftTypes: shift) =
-%  nurse.maxWorkloadPerShift[day, shift] > 0;
-
-%array[RoomIds, Days] of bool: roomHasFixedOccupants = [(room.id, day): exists(occupant in occupants)(isInRoom(occupant, room, day)) | room in rooms, day in Days ];
-%function var bool: isOccupied(RoomFixData: room, Days: day) =
-%  roomHasFixedOccupants[room.id, day] \/ exists(patient in patients)(isInRoom(patient, room, day));
-
-%function var bool: isPostponed(PatientFixData: patient) = patientVar[patient.id].isPostponed;
-%function var bool: isAdmitted(PatientFixData: patient) = not patientVar[patient.id].isPostponed;
-
-/*
-constraint forall(nurseId in NurseIds, day in Days, shift in ShiftTypes)(
-  nurseVar[nurseId].isWorking[day, shift] = exists(workingShift in nurseData[nurseId].workingShifts)(
-      workingShift.day == day /\ workingShift.shift == shift)
-);
-
-constraint forall(nurseId in NurseIds, day in Days, shift in ShiftTypes)(
-  nurseVar[nurseId].isWorking[day, shift] -> exists(workingShift in nurseData[nurseId].workingShifts)(
-      workingShift.day == day /\ workingShift.shift == shift 
-      /\ nurseVar[nurseId].maxLoad[day, shift] = workingShift.maxLoad
-    )
-);
-*/
-
-% include "OutConsoleFormat.mzn";
-% include "OutJsonFormat.mzn";

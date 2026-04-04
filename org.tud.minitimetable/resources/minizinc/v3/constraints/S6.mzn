@@ -1,4 +1,4 @@
-include "../IHTP-model.mzn";
+include "../IHTP-Model.mzn";
 
 % SCP
 % S6 Surgeon transfer: The number of different OTs a surgeon is as-signed to per working day should be minimized.

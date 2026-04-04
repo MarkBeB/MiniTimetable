@@ -35,8 +35,8 @@ public class LocalRunner {
 		minizinc.getConfig().logger = new MixedCodeLogger(
 				outputFolder.resolve(PathUtils.getFileNameWithoutExtension(dataFile) + "-log.txt"));
 		minizinc.getConfig().timeLimitMS = 15 * 60 * 1000l;
-		minizinc.getConfig().solverTimeLimitMS = 5 * 60 * 1000L;
-		minizinc.getConfig().gurobiParameterFile = resourceDirectory.resolve("minizinc").resolve("Gurobi.prm");
+		minizinc.getConfig().solverTimeLimitMS = 3 * 60 * 1000L;
+//		minizinc.getConfig().gurobiParameterFile = resourceDirectory.resolve("minizinc").resolve("Gurobi.prm");
 //		minizinc.getConfig().optimizeLevel = 2;
 
 		minizinc.run(modelFile, dataFile, outputFolder).join();
