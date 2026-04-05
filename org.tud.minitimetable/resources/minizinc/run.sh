@@ -1,30 +1,32 @@
 #!/bin/bash
 
-modelFile="./model/v3/AllConstraints.mzn"
-gurobiParam="./model/Gurobi.prm"
 miniZincDir="/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64"
+modelFile="./model/v3/AllConstraints.mzn"
 
+OUTPUT_DIR="./out"
 
-for i in {01..02};do
-	dataFile="./data/i$i.json"
-	outDir="./out/i$i-01/"
-	
-	mkdir -p "$outDir"
-	
-    ARGS=(
-        "-m" "$modelFile"
-        "-e" "$miniZincDir"
-        "-gP" "$gurobiParam"
-        "-d" "$dataFile"
-        "-o" "$outDir"
-    )
-	
-	echo ">>> Start solving: $dataFile"
-	
-	echo java -jar ./MiniZincRunner.jar "${ARGS[@]}" -O1 -p 4 -tm 2 -stm 2 &> "$outDir/run.log" || {
-        echo "ERROR: $dataFile!"
-        exit 1
-    }
+while getopts "o:" opt; do
+  case ${opt} in
+    o)
+      OUTPUT_DIR=$OPTARG
+      ;;
+  esac
 done
 
-echo "Done"
+
+
+#for i in $(seq 1 $#); do
+  # Wir prüfen jedes Argument einzeln
+#  arg="${!i}"   # Das ist "Indirect Expansion" um auf $1, $2 etc. zuzugreifen
+  
+#  if [[ "$arg" == "-o" || "$arg" == "--out" ]]; then
+    # Das nächste Argument nach der Flag ist der Ordner
+#    next_index=$((i + 1))
+#    OUTPUT_DIR="${!next_index}"
+#  fi
+#done
+
+mkdir -p "$OUTPUT_DIR"
+
+
+java -jar ./MiniZincRunner.jar -e "$miniZincDir" -m "$modelFile" "$@" &> "$OUTPUT_DIR/run.log" 
