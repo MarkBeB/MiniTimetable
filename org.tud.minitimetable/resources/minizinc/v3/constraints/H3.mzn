@@ -7,7 +7,7 @@ include "../IHTP-Model.mzn";
 array[SurgeonIds, Days] of var DayTime: surgeonTime;
 
 constraint forall(s in SurgeonIds, d in Days)(
-  surgeonTime[s,d] = sum(p in PatientIds where patientOfSurgeon(p, s))(
+  surgeonTime[s,d] = sum(p in PatientIds where isPatientOfSurgeon(p, s))(
     if patientAdmissionDay[p] == d then surgeryDuration(p) else 0 endif
   )    
 );

@@ -49,8 +49,11 @@ function int: toIndex(Days: d, ShiftTypes: s) =
 % PATIENTS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function bool: patientOfSurgeon(PatientIds: p, SurgeonIds: s) =
+function bool: isPatientOfSurgeon(PatientIds: p, SurgeonIds: s) =
   assignedSurgeon(p) == s;
+  
+function bool: isPatientSurgeonAvailable(PatientIds: p, Days: d) =
+  isSurgeonAvailable(assignedSurgeon(p),d);
 
 function SurgeonIds: assignedSurgeon(PatientIds: p) =
   patientData[p].assignedSurgeon;
@@ -94,7 +97,8 @@ function Days: earliestAdmissionDay(PatientIds: p) =
 function Days: latestAdmissionDay(PatientIds: p) =
   patientData[p].latestPossibleAdmission;
 
-
+function bool: isPatientAdmittable(PatientIds: p, Days: d) = true;
+%  (earliestAdmissionDay(p) <= d) /\ (card(compatibleRooms(p)) > 0) /\ isAnyOTAvailable(d) /\ isPatientSurgeonAvailable(p, d);
 
 
 % NURSES
@@ -130,6 +134,9 @@ function int: surgeonSurgeryCapacity(SurgeonIds: s, Days: d) =
 
 function bool: isOTAvailable(OperatingTheaterIds: ot, Days: d) = 
   otSurgeryCapacity(ot,d) > 0;
+
+function bool: isAnyOTAvailable(Days: d) =
+  exists(ot in OperatingTheaterIds)(isOTAvailable(ot,d));
 
 function int: otSurgeryCapacity(OperatingTheaterIds: ot, Days: d) = 
   operatingTheaterData[ot].availability[d];
