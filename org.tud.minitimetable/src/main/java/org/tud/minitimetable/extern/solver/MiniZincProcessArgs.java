@@ -38,6 +38,7 @@ public class MiniZincProcessArgs implements ProcessArgs {
 	public boolean json;
 	public boolean outputTime;
 	public Path gurobiParameterFile;
+	public String solver;
 	public final List<Flag> additionalFlags = new LinkedList<>();
 	public final List<Flag> solverFlags = new LinkedList<>();
 	public final List<Path> parameterFiles = new ArrayList<>(5);
@@ -47,8 +48,13 @@ public class MiniZincProcessArgs implements ProcessArgs {
 
 		List<String> args = new LinkedList<>();
 
-		args.add("--solver");
-		args.add("Gurobi");
+		if (solver != null) {
+			args.add("--solver");
+			args.add(solver);
+		} else {
+			args.add("--solver");
+			args.add("Gurobi");
+		}
 
 		if (optimizeLevel != null) {
 			args.add("-O" + optimizeLevel);

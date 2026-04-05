@@ -28,6 +28,8 @@ public class Main {
 	private static final String OPTION_SHORT_OPTIMIZE_FLAG_1 = "O0";
 	private static final String OPTION_SHORT_OPTIMIZE_FLAG_2 = "O1";
 	private static final String OPTION_SHORT_OPTIMIZE_FLAG_3 = "O2";
+	private static final String OPTION_SHORT_SPECIAL_FLAG = "ptf";
+	private static final String OPTION_SHORT_SOLVER_FLAG = "s";
 
 	public static void main(String[] args) throws IOException {
 		CommandLine commandLine = parseArguments(args);
@@ -117,6 +119,13 @@ public class Main {
 		Option optimize3 = Option.builder(OPTION_SHORT_OPTIMIZE_FLAG_3) //
 				.desc("Double Pass Flatzinc Optimization").get();
 
+		Option passthroughFlag = Option.builder(OPTION_SHORT_SPECIAL_FLAG).longOpt("passthrough").hasArg()
+				.numberOfArgs(1) //
+				.desc("Flags directly passed to the backend").get();
+
+		Option solverFlag = Option.builder(OPTION_SHORT_SOLVER_FLAG).longOpt("solver").hasArg().numberOfArgs(1) //
+				.desc("Set the used solver").get();
+
 		Options options = new Options();
 		options.addOption(help);
 		options.addOption(dataFolder);
@@ -132,6 +141,8 @@ public class Main {
 		options.addOption(optimize1);
 		options.addOption(optimize2);
 		options.addOption(optimize3);
+		options.addOption(passthroughFlag);
+		options.addOption(solverFlag);
 
 		CommandLine commandLine;
 		try {
@@ -194,6 +205,15 @@ public class Main {
 			minizinc.getConfig().optimizeLevel = 1;
 		} else if (commandLine.hasOption(OPTION_SHORT_OPTIMIZE_FLAG_3)) {
 			minizinc.getConfig().optimizeLevel = 2;
+		}
+
+		if (commandLine.hasOption(OPTION_SHORT_SOLVER_FLAG)) {
+			var solver = commandLine.getOptionValue(OPTION_SHORT_SOLVER_FLAG);
+			minizinc.getArguments().solver = solver;
+		}
+
+		if (commandLine.hasOption(OPTION_SHORT_SPECIAL_FLAG)) {
+			var additionalFlags = commandLine.getOptionValue(OPTION_SHORT_SPECIAL_FLAG);
 		}
 	}
 

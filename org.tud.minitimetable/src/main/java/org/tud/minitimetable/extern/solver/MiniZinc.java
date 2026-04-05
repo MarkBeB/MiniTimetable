@@ -57,6 +57,10 @@ public class MiniZinc {
 		return config;
 	}
 
+	public MiniZincProcessArgs getArguments() {
+		return arguments;
+	}
+
 	public CompletableFuture<Process> run(Path modelFile, Path dataFile, Path outDirectory) throws IOException {
 		initializeInstance();
 
