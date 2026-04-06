@@ -5,7 +5,7 @@ include "../IHTP-Model.mzn";
 %
 
 constraint forall(s in SurgeonIds, d in Days) (
-  (sum(p in PatientIds where isPatientOfSurgeon(p, s)) (
+  (sum(p in PatientIds where isPatientOfSurgeon(p,s)) (
     isPatientAdmittedAt[p,d] * surgeryDuration(p)
   ) <= surgeonSurgeryCapacity(s, d))
   :: "Con_H3_A \(s) \(d)"

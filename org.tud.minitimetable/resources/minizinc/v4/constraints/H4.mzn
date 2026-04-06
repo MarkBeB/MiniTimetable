@@ -15,6 +15,6 @@ constraint forall(ot in OperatingTheaterIds, d in Days) (
 %      var bool: active = (isPatientAdmittedAt[p,d] /\ patientInOT[p,ot])
 %    } in 
     (isPatientAdmittedAt[p,d] /\ isPatientInOT[p,ot]) * surgeryDuration(p)
-  ) <= otSurgeryCapacity(ot, d))
+  ) <= otSurgeryCapacity(ot,d))
   :: "Con_H4_B \(ot) \(d)"
 );

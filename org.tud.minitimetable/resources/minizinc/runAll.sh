@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 if [ -z "$1" ]; then
     read -p "No Run ID provided. Please enter a Run ID (e.g., 01): " RUN_ID
     RUN_ID=${RUN_ID:-"01"}

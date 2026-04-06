@@ -20,6 +20,14 @@ include "constraints/S8.mzn";
 
 %include "constraints/RoomSymBreak.mzn";
 
+/*
+solve :: seq_search([
+    bool_search(isPatientInRoom, first_fail, indomain_random),
+    int_search(patientAdmissionDay, first_fail, indomain_random)
+  ])
+  minimize score;
+*/
+
 solve minimize score;
 
 include "OutJsonFormat.mzn";

@@ -12,7 +12,7 @@ array[OccupantIds, Days, ShiftTypes] of var 0..: occupantSkillDifference;
 
 constraint forall(p in PatientIds, d in Days, s in ShiftTypes)(
   forall(n in NurseIds, r in RoomIds where isNurseAvailable(n,d,s))(
-    (isPatientPresent[p,d] /\ isPatientInRoom[p,r] /\ isNurseInRoom[n,r,d,s]) -> (
+    (isPatientPresentInRoom[p,r,d] /\ isNurseInRoom[n,r,d,s]) -> (
       patientSkillDifference[p,d,s] = max(0, patientSkillRequired(p, d-patientAdmissionDay[p], s) - nurseSkillLevel(n))
     )
   ) 

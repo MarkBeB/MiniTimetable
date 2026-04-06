@@ -13,7 +13,7 @@ constraint forall(p in PatientIds, d in Days)(
       AgeGroups: age = patientData[p].ageGroup
   } in
   forall(r in RoomIds)(
-    isPatientPresent[p,d] /\ isPatientInRoom[p,r] == r -> (
+    isPatientPresentInRoom[p,r,d] == r -> (
       roomMaxAge[r, d] >= age /\
       roomMinAge[r, d] <= age
     )

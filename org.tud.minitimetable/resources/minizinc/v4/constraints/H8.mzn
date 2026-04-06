@@ -7,20 +7,21 @@ include "../IHTP-Model.mzn";
 array[RoomIds, Days] of var bool: isRoomOccupied;
 
 constraint forall(r in RoomIds, d in Days)(
-  let {
-    bool: hasOccupants = exists(o in OccupantIds)(isOccupantInRoom(o,d,r));
-    var bool: hasPatients = exists(p in PatientIds where r in compatibleRooms(p))(isPatientPresent[p,d] /\ isPatientInRoom[p,r]);
-  } in
-  (isRoomOccupied[r,d] <-> hasOccupants \/ hasPatients)
+  if roomHasOccupants(r,d) then
+    isRoomOccupied[r,d] = 1
+  else
+    isRoomOccupied[r,d] <-> exists(p in PatientIds where r in compatibleRooms(p))(isPatientPresentInRoom[p,r,d])
+  endif
   :: "Var RoomOccupied \(r) \(d)"
 );
 
-
+/*
 constraint forall(r in RoomIds, d in Days, s in ShiftTypes)(
      (isRoomOccupied[r,d] -> (roomNurse[r,d,s] in activeNurses[d,s]))
   /\ (not isRoomOccupied[r,d] -> absent(roomNurse[r,d,s]))
   :: "Con_H8_A \(r) \(d) \(s)"
 );
+*/
 
 /*
 constraint forall(r in RoomIds, d in Days, s in ShiftTypes)(
@@ -45,10 +46,24 @@ constraint forall(r in RoomIds, d in Days, s in ShiftTypes)(
 );
 */
 
+constraint forall(r in RoomIds, d in Days, s in ShiftTypes)(
+  isRoomOccupied[r,d] == sum(n in activeNurses[d,s])(isNurseInRoom[n,r,d,s])
+  :: "Con_H8_A \(r) \(d) \(s)"
+);
+
+constraint forall(d in Days, s in ShiftTypes, n in NurseIds where not (n in activeNurses[d,s])) (
+  forall(r in RoomIds)(
+    isNurseInRoom[n,r,d,s] = 0
+    :: "Con_H8_B \(r) \(d) \(s) \(n)"
+  )
+);
+
+/*
 constraint forall(r in RoomIds, d in Days, s in ShiftTypes) (
   sum(n in NurseIds)(isNurseInRoom[n,r,d,s]) <= 1
   :: "Con_H8_B \(r) \(d) \(s)"
 );
+*/
 
 constraint forall(r in RoomIds, d in Days, s in ShiftTypes, n in NurseIds) (
   isNurseInRoom[n,r,d,s] <-> (roomNurse[r,d,s] = n)

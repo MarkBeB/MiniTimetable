@@ -26,6 +26,9 @@ function RoomIds: occupantRoom(OccupantIds: o) =
 
 function AgeGroups: occupantAgeGroup(OccupantIds: o) =
   occupantData[o].ageGroup;
+  
+function bool: isOccupantAgeGroup(OccupantIds: o, AgeGroups: g) =
+  g == occupantAgeGroup(o);
 
 function Genders: occupantGender(OccupantIds: o) =
   occupantData[o].gender;
@@ -44,12 +47,12 @@ function int: occupantSkillRequired(OccupantIds: o, Days: d, ShiftTypes: s) =
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function bool: isPatientOfSurgeon(PatientIds: p, SurgeonIds: s) =
-  assignedSurgeon(p) == s;
+  patientSurgeon(p) == s;
   
 function bool: isPatientSurgeonAvailable(PatientIds: p, Days: d) =
-  isSurgeonAvailable(assignedSurgeon(p),d);
+  isSurgeonAvailable(patientSurgeon(p),d);
 
-function SurgeonIds: assignedSurgeon(PatientIds: p) =
+function SurgeonIds: patientSurgeon(PatientIds: p) =
   patientData[p].assignedSurgeon;
 
 function int: surgeryDuration(PatientIds: p) =
@@ -57,6 +60,9 @@ function int: surgeryDuration(PatientIds: p) =
 
 function AgeGroups: patientAgeGroup(PatientIds: p) =
   patientData[p].ageGroup;
+  
+function bool: isPatientAgeGroup(PatientIds: p, AgeGroups: g) =
+  g == patientAgeGroup(p);
 
 function Genders: patientGender(PatientIds: p) =
   patientData[p].gender;
@@ -82,8 +88,6 @@ function int: patientSkillRequired(PatientIds: p, int: currentDay, ShiftTypes: s
   else 
     0 
   endif;
-
-
 
 function int: patientLengthOfStay(PatientIds: p) =
   patientData[p].lengthOfStay;
@@ -114,11 +118,21 @@ function bool: withinStayWindow(PatientIds: p, Days: d) =
   endif;
   
 function bool: isPatientOpAvailable(PatientIds: p, Days: d) = 
-  isPatientSurgeonAvailable(p, d) /\ isAnyOTAvailable(d);
+  isPatientSurgeonAvailable(p,d) /\ isAnyOTAvailable(d);
 
-function bool: isPatientAdmittable(PatientIds: p, Days: d) =
-  (earliestAdmissionDay(p) <= d) /\ (card(compatibleRooms(p)) > 0) /\ isAnyOTAvailable(d) /\ isPatientSurgeonAvailable(p, d);
+function bool: canPatientBePresent(PatientIds: p, Days: d) =
+  withinStayWindow(p,d) /\ (card(compatibleRooms(p)) > 0);
 
+function bool: canPatientBePresent(PatientIds: p, Days: d, RoomIds: r) =
+  withinStayWindow(p,d) /\ (r in compatibleRooms(p));
+  
+function set of ExtendedDays: validAdmissionDays(PatientIds: p) =
+  if isPatientMandatory(p) then
+    { d | d in Days where (earliestAdmissionDay(p) <= d) /\ (d <= latestAdmissionDay(p)) /\ isPatientOpAvailable(p,d) }
+  else
+    { extendedDay } union % postponed day
+    { d | d in Days where (earliestAdmissionDay(p) <= d) /\ isPatientOpAvailable(p,d) }
+  endif;
 
 % NURSES
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -135,6 +149,8 @@ function bool: isNurseAvailable(NurseIds: n, Days: d, ShiftTypes: s) =
 function bool: isNurseAvailable(NurseIds: n, Days: d) =
   exists(s in ShiftTypes)(isNurseAvailable(n,d,s));
 
+function set of NurseIds: availableNurses(Days: d, ShiftTypes: s) =
+  { n | n in NurseIds where isNurseAvailable(n,d,s) };
 
 
 % SURGEONS
@@ -170,4 +186,7 @@ function int: roomCapacity(RoomIds: r) =
   
 function int: roomOccupants(RoomIds: r, Days: d) =
   sum(o in OccupantIds)(isOccupantInRoom(o,d,r));
+  
+function bool: roomHasOccupants(RoomIds: r, Days: d) =
+  roomOccupants(r,d) > 0;
  

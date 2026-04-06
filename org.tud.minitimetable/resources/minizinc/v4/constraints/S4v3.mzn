@@ -20,7 +20,7 @@ constraint forall(r in RoomIds, d in Days, s in ShiftTypes) (
           (patientAdmissionDay[p] == start) * patientWorkload(p,d,s,start)
         )
       } in 
-      (isPatientPresent[p,d] /\ isPatientInRoom[p,r]) * workload
+      isPatientPresentInRoom[p,r,d] * workload
     )
     + sum(o in OccupantIds where isOccupantInRoom(o,d,r))(occupantWorkload(o,d,s))
   ) :: "Con_S2_A \(r) \(d) \(s)"

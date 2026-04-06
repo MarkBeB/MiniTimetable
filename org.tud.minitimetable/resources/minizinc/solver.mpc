@@ -1,9 +1,5 @@
 {
-    "-a": true,
-    "backend-flags": {
-        "subsolver": "Gurobi"
-    },
     "intermediate-solutions": true,
-    "solver": "org.minizinc.findmus@0.7.0",
-    "subsolver-timelimit": 60000
+    "output-objective": true,
+    "solver": "org.minizinc.mip.gurobi@13.0.0"
 }

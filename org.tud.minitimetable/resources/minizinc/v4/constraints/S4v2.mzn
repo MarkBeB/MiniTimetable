@@ -6,6 +6,8 @@ include "../IHTP-Model.mzn";
 % The penalty is the amount by which the total workload exceeds the limit, or 0 if it does not exceed the maximum workload of the nurse.
 %
 
+% Bug: workload is not filtered by patient in room, no surprise that this is 'slightly' better thant he correcter v3 :D
+
 array[NurseIds, Days, ShiftTypes] of var 0..: nurseExcessiveWorkload;
 
 constraint forall(n in NurseIds, d in Days, s in ShiftTypes where n in activeNurses[d, s]) (

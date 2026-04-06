@@ -8,7 +8,7 @@ array[SurgeonIds, Days, OperatingTheaterIds] of var bool: isSurgeonInOT;
 array[SurgeonIds, Days] of var 0..length(OperatingTheaterIds): surgeonTransfers;
 
 constraint forall(p in PatientIds, ot in OperatingTheaterIds, d in Days) (
-  let { SurgeonIds: s = assignedSurgeon(p) } in
+  let { SurgeonIds: s = patientSurgeon(p) } in
   isSurgeonInOT[s,d,ot] >= (isPatientAdmittedAt[p,d] /\ isPatientInOT[p,ot])
   :: "Con_S6_A \(p) \(ot) \(d) \(s)"
 );

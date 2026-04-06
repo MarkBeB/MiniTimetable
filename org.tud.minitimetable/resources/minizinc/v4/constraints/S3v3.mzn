@@ -11,7 +11,7 @@ array[OccupantIds, NurseIds] of var bool: occupantCaredByNurse;
 
 constraint forall(p in PatientIds, n in NurseIds, r in compatibleRooms(p)) (
   forall(d in Days, s in ShiftTypes) (
-    patientCaredByNurse[p, n] >= (isPatientPresent[p,d] /\ isPatientInRoom[p,r] /\ isNurseInRoom[n,r,d,s])
+    patientCaredByNurse[p, n] >= (isPatientPresentInRoom[p,r,d] /\ isNurseInRoom[n,r,d,s])
     :: "Con_S3_A \(p) \(n) \(r) \(d) \(s)"
   ) 
 );
@@ -28,5 +28,5 @@ constraint forall(o in OccupantIds, n in NurseIds) (
 
 constraint penaltyContinuityOfCare = Weights.continuityOfCare * (
     sum(p in PatientIds, n in NurseIds) (patientCaredByNurse[p, n]) +
-    sum(occ in OccupantIds, n in NurseIds) (occupantCaredByNurse[occ, n])
+    sum(o in OccupantIds, n in NurseIds) (occupantCaredByNurse[o, n])
 ) :: "Con_S3_O";

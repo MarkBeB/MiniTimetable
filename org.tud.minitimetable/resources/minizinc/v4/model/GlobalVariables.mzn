@@ -49,6 +49,10 @@ constraint forall(p in PatientIds, d in Days) (
 );
 */
 
+array[PatientIds, RoomIds, Days] of var bool: isPatientPresentInRoom = [(p,r,d):
+  isPatientPresent[p,d] /\ isPatientInRoom[p,r]
+  | p in PatientIds, r in RoomIds, d in Days
+];
 
 array[NurseIds, RoomIds, Days, ShiftTypes] of var bool: isNurseInRoom;
 
@@ -62,16 +66,21 @@ array[RoomIds, Days, ShiftTypes] of var opt NurseIds: roomNurse;
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-array[Days, ShiftTypes] of set of NurseIds: activeNurses = [(d,s):
-    { n | n in NurseIds where isNurseAvailable(n,d,s) }
-    | d in Days, s in ShiftTypes
-];
+array[Days, ShiftTypes] of set of NurseIds: activeNurses = [(d,s): availableNurses(d,s) | d in Days, s in ShiftTypes ];
+array[PatientIds] of set of ExtendedDays: validAdmissionDays = [ validAdmissionDays(p) | p in PatientIds ];
 
-array[PatientIds] of set of int: validAdmissionDays = [
-  { extendedDay } % postponed
-  union
-  { d | d in earliestAdmissionDay(p)..latestAdmissionDay(p) where isPatientOpAvailable(p, d) }
-  | p in PatientIds
-];
+%array[Days, ShiftTypes] of set of NurseIds: activeNurses = [(d,s):
+%    { n | n in NurseIds where isNurseAvailable(n,d,s) }
+%    | d in Days, s in ShiftTypes
+%];
+
+
+
+%array[PatientIds] of set of int: validAdmissionDays = [
+%  { extendedDay } % postponed
+%  union
+%  { d | d in earliestAdmissionDay(p)..latestAdmissionDay(p) where isPatientOpAvailable(p, d) }
+%  | p in PatientIds
+%];
 
 

@@ -27,7 +27,7 @@ constraint forall(p in PatientIds, d in Days, s in ShiftTypes) (
           (patientAdmissionDay[p] == start) * patientSkillRequired(p, d, s, start)
       )
     } in
-    (isPatientPresent[p, d] /\ isPatientInRoom[p, r]) -> (
+    (isPatientPresentInRoom[p,r,d]) -> (
         patientSkillDifference[p, d, s] >= reqSkill - assignedNurseSkill[r, d, s]
     )
     :: "Con_S2_B \(p) \(d) \(s) \(r)"

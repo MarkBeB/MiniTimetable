@@ -12,7 +12,7 @@ constraint forall(r in RoomIds, d in Days, s in ShiftTypes)(
   let {
     int: occupantWorkload = sum(o in OccupantIds where isOccupantInRoom(o, d, r))
       (occupantWorkload(o,d,s));
-    var int: patientWorkload = sum(p in PatientIds where isPatientPresent[p,d] /\ isPatientInRoom[p,r])
+    var int: patientWorkload = sum(p in PatientIds where isPatientPresentInRoom[p,r,d])
       (patientWorkload(p,d-patientAdmissionDay[p],s));
   } in
   roomWorkload[r,d,s] = occupantWorkload + patientWorkload  

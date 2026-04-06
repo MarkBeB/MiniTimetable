@@ -11,24 +11,25 @@ array[RoomIds, Days] of var AgeGroups: maxRoomAge;
 array[RoomIds, Days] of var AgeGroups: minRoomAge;
 
 constraint forall(r in RoomIds, d in Days, g in AgeGroups) (
-  agePresent[r, d, g] <-> (
-    exists(p in PatientIds where patientAgeGroup(p) == g /\ r in compatibleRooms(p))(isPatientPresent[p,d] /\ isPatientInRoom[p,r])
-    \/
-    exists(o in OccupantIds where occupantAgeGroup(o) == g)(isOccupantInRoom(o,d,r))
-  ) :: "Con_S1_A \(r) \(d) \(g)"
+  if exists(o in OccupantIds where isOccupantAgeGroup(o,g))(isOccupantInRoom(o,d,r)) then
+    agePresent[r, d, g] = 1
+  else
+    agePresent[r, d, g] <-> exists(p in PatientIds where isPatientAgeGroup(p,g) /\ r in compatibleRooms(p))(isPatientPresentInRoom[p,r,d])
+  endif
+  :: "Con_S1_A \(r) \(d) \(g)"
 );
 
-constraint forall(r in RoomIds , d in Days, g in AgeGroups) (
+constraint forall(r in RoomIds, d in Days, g in AgeGroups) (
   maxRoomAge[r, d] >= agePresent[r,d,g] * enum2int(g)
   :: "Con_S1_B \(r) \(d) \(g)"
 );
 
-constraint forall(r in RoomIds , d in Days, g in AgeGroups) (
+constraint forall(r in RoomIds, d in Days, g in AgeGroups) (
   minRoomAge[r, d] <= enum2int(g) + (1-agePresent[r,d,g]) * length(AgeGroups)
   :: "Con_S1_C \(r) \(d) \(g)"
 );
 
-var int: agePenalty = sum(r in RoomIds , d in Days) (
+var int: agePenalty = sum(r in RoomIds, d in Days) (
   let {
       var bool: occupied = exists(g in AgeGroups) (agePresent[r,d,g]);
   } in 
@@ -37,7 +38,7 @@ var int: agePenalty = sum(r in RoomIds , d in Days) (
   else 
     0 
   endif
-) :: "Con_S1_C";
+) :: "Con_S1_D";
 
 constraint penaltyRoomMixedAge = Weights.roomMixedAge * (
  agePenalty
