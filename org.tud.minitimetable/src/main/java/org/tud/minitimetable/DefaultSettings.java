@@ -18,8 +18,8 @@ public class DefaultSettings {
 	public static final Integer DEFAULT_OPTIMIZE_LEVEL = 1;
 
 	public static void applyDefaultMiniZincConfiguration(MiniZinc minizinc) {
-		minizinc.getConfig().backendLog = new DefaultFileLog("%s-backend");
-		minizinc.getConfig().solverOutput = new DefaultFileLog("%s-solution");
+		minizinc.getConfig().backendLog = new DefaultFileLog("backend");
+		minizinc.getConfig().solverOutput = new DefaultFileLog("solution");
 //		minizinc.getConfig().solverModelLog = new DefaultFileLog("%s-lp.lp", true);
 
 		minizinc.getConfig().timeLimitMS = DefaultSettings.DEFAULT_TIME_LIMIT_IN_MS;

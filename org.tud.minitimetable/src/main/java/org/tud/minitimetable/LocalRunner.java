@@ -19,14 +19,14 @@ public class LocalRunner {
 	public static void main(String[] args) throws IOException, InterruptedException {
 //		Path modelFile = resourceDirectory.resolve("minizinc").resolve("v1").resolve("AllConstraintsV2.mzn");
 //		Path modelFile = resourceDirectory.resolve("minizinc").resolve("v2").resolve("AllConstraints.mzn");
-		Path modelFile = resourceDirectory.resolve("minizinc").resolve("v3").resolve("AllConstraints.mzn");
-		Path dataFile = resourceDirectory.resolve("input").resolve("ihtc").resolve("i03.json");
+		Path modelFile = resourceDirectory.resolve("minizinc").resolve("v4").resolve("AllConstraints.mzn");
+		Path dataFile = resourceDirectory.resolve("input").resolve("ihtc").resolve("i13.json");
 //		Path dataFile = resourceDirectory.resolve("minizinc").resolve("data").resolve("i03.json");
 		String fileName = PathUtils.getFileNameWithoutExtension(dataFile);
 
 //		Path outputFolder = resourceDirectory.resolve("out").resolve(fileName + "-test-v1-2");
 //		Path outputFolder = resourceDirectory.resolve("out").resolve(fileName +"-test-v2-3");
-		Path outputFolder = resourceDirectory.resolve("out").resolve(fileName + "-test-v3-2");
+		Path outputFolder = resourceDirectory.resolve("out").resolve(fileName + "-test-v4-1");
 
 		MiniZinc minizinc = new MiniZinc();
 		DefaultSettings.applyDefaultMiniZincConfiguration(minizinc);
@@ -35,7 +35,7 @@ public class LocalRunner {
 		minizinc.getConfig().logger = new MixedCodeLogger(
 				outputFolder.resolve(PathUtils.getFileNameWithoutExtension(dataFile) + "-log.txt"));
 		minizinc.getConfig().timeLimitMS = 15 * 60 * 1000l;
-		minizinc.getConfig().solverTimeLimitMS = 3 * 60 * 1000L;
+		minizinc.getConfig().solverTimeLimitMS = 1 * 60 * 1000L;
 //		minizinc.getConfig().gurobiParameterFile = resourceDirectory.resolve("minizinc").resolve("Gurobi.prm");
 //		minizinc.getConfig().optimizeLevel = 2;
 
