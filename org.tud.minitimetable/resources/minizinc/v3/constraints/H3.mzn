@@ -10,8 +10,8 @@ constraint forall(s in SurgeonIds, d in Days)(
   surgeonTime[s,d] = sum(p in PatientIds where isPatientOfSurgeon(p, s))(
     if patientAdmissionDay[p] == d then surgeryDuration(p) else 0 endif
   )    
-);
+) :: constraint_name("Con_H3_A");
 
 constraint forall(s in SurgeonIds, d in Days)(
   surgeonTime[s,d] <= surgeonSurgeryCapacity(s,d)
-);
+) :: constraint_name("Con_H3_B");

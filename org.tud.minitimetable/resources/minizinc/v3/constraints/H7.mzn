@@ -10,4 +10,4 @@ constraint forall(r in RoomIds, d in Days)(
     int: numberOfOccupants = sum(o in OccupantIds)(isOccupantInRoom(o,d,r));
   } in
   numberofPatients + numberOfOccupants <= roomCapacity(r)
-);
+) :: constraint_name("Con_H7_A");

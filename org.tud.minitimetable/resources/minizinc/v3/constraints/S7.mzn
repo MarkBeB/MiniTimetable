@@ -7,7 +7,9 @@ include "../IHTP-Model.mzn";
 array[PatientIds] of var int: patientAdmissionDelay;
 
 constraint forall(p in PatientIds)(
-  patientAdmissionDelay[p] = patientAdmissionDay[p] - earliestAdmissionDay(p)
+  patientAdmissionDelay[p] = patientAdmissionDay[p] - earliestAdmissionDay(p) :: "Con_S7_A \(p)"
 );
 
-constraint Penalties.patientDelay = Weights.patientDelay * sum(p in PatientIds where isPatientAdmitted[p])(patientAdmissionDelay[p]);
+constraint (
+  Penalties.patientDelay = Weights.patientDelay * sum(p in PatientIds where isPatientAdmitted[p])(patientAdmissionDelay[p])
+) :: "Con_S7_O";

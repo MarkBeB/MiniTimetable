@@ -18,7 +18,7 @@ constraint forall(p in PatientIds, d in Days)(
             roomMinAge[r, d] <= age
         )
     )
-);
+) :: constraint_name("Con_S1_A");
 
 constraint forall(r in RoomIds, d in Days)(
     let { 
@@ -28,10 +28,10 @@ constraint forall(r in RoomIds, d in Days)(
         roomMaxAge[r, d] >= max(occupantAges) /\
         roomMinAge[r, d] <= min(occupantAges)
     endif
-);
+) :: constraint_name("Con_S1_B");
 
 constraint forall(r in RoomIds, d in Days)(
     roomAgeDifference[r, d] = enum2int(roomMaxAge[r, d]) - enum2int(roomMinAge[r, d])
-);
+) :: constraint_name("Con_S1_C");
 
-constraint Penalties.roomMixedAge = Weights.roomMixedAge * sum(r in RoomIds, d in Days)(roomAgeDifference[r, d]);
+constraint Penalties.roomMixedAge = Weights.roomMixedAge * sum(r in RoomIds, d in Days)(roomAgeDifference[r, d])  :: constraint_name("Con_S1_O");

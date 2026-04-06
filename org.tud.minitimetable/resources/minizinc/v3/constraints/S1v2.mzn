@@ -11,6 +11,6 @@ var int: agePenalty = sum(d in Days, r in RoomIds) (
         var set of AgeGroups: allAges = patientAges union occupantAges;
     } in 
     if card(allAges) <= 1 then 0 else enum2int(max(allAges)) - enum2int(min(allAges)) endif
-);
+) :: constraint_name("Con_S1_A");
 
-constraint Penalties.roomMixedAge = Weights.roomMixedAge * agePenalty;
+constraint Penalties.roomMixedAge = Weights.roomMixedAge * agePenalty  :: constraint_name("Con_S1_O");

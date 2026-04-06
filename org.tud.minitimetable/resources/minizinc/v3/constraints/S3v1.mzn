@@ -11,18 +11,19 @@ constraint forall(p in PatientIds, d in Days where isPatientAdmitted[p])(
   forall(s in ShiftTypes, n in NurseIds)(
     isNurseInRoom[n,d,s,r] -> patientCaredByNurse[p,n]
   )
-);
+) :: constraint_name("Con_S3_A");
 
 constraint forall(o in OccupantIds, d in Days where isOccupantPresent(o, d))(
   let{ RoomIds: r = occupantRoom(o)} in
   forall(s in ShiftTypes, n in NurseIds)(
     isNurseInRoom[n,d,s,r] -> occupantCaredByNurse[o,n]
   )
-);
+) :: constraint_name("Con_S3_B");
 
 constraint Penalties.continuityOfCare = Weights.continuityOfCare * (
     count(p in PatientIds, n in NurseIds)(patientCaredByNurse[p,n])
   + count(o in OccupantIds, n in NurseIds)(occupantCaredByNurse[o,n])
-);
+) :: constraint_name("Con_S1_O");
 
-constraint Penalties.continuityOfCare >= Weights.continuityOfCare * length(ShiftTypes) * (count(p in PatientIds)(isPatientAdmitted[p]) + length(OccupantIds));
+constraint Penalties.continuityOfCare >= Weights.continuityOfCare * length(ShiftTypes) * (count(p in PatientIds)(isPatientAdmitted[p]) + length(OccupantIds)) 
+ :: constraint_name("Con_S1_C");

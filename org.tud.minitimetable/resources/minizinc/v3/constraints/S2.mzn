@@ -16,7 +16,7 @@ constraint forall(p in PatientIds, d in Days, s in ShiftTypes)(
       patientSkillDifference[p,d,s] = max(0, patientSkillRequired(p, d-patientAdmissionDay[p], s) - nurseSkillLevel(n))
     )
   ) 
-);
+) :: constraint_name("Con_S2_A");
 
 constraint forall(o in OccupantIds, d in Days, s in ShiftTypes)(
   forall(n in NurseIds, r in RoomIds where isNurseAvailable(n,d,s) /\ isOccupantInRoom(o,d,r))(
@@ -24,9 +24,9 @@ constraint forall(o in OccupantIds, d in Days, s in ShiftTypes)(
       occupantSkillDifference[o,d,s] = max(0, occupantSkillRequired(o,d,s) - nurseSkillLevel(n))
     )
   )
-);
+) :: constraint_name("Con_S2_B");
 
 constraint (Penalties.roomNurseSkill = 
     Weights.roomNurseSkill * sum(p in PatientIds, d in Days, s in ShiftTypes)(patientSkillDifference[p,d,s]) +
     Weights.roomNurseSkill * sum(o in OccupantIds, d in Days, s in ShiftTypes)(occupantSkillDifference[o,d,s])
-);
+) :: constraint_name("Con_S2_O");

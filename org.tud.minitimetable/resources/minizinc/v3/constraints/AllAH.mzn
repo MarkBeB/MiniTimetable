@@ -55,7 +55,7 @@ constraint forall(p in PatientIds where isPatientAdmitted[p])(
       endif
     )
   )
-);
+) :: constraint_name("Con_AH10_A");
 
 % Derived from competition rules.
 % AH11 Surgery on admission day: Patients undergo surgery on the day of their admission
@@ -65,11 +65,11 @@ constraint forall(p in PatientIds where isPatientAdmitted[p])(
 constraint forall(p in PatientIds)(
      isPatientAdmitted[p] -> patientOT[p] != <>
   /\ isPatientPostponed[p] -> patientOT[p] == <>
-);
+) :: constraint_name("Con_AH11_A");
 
 %  The assigned OT should be available on the day of admission.
 constraint forall(p in PatientIds where isPatientAdmitted[p])(
   exists(ot in operatingTheaterData where ot.availability[patientAdmissionDay[p]] > 0)(
     patientOT[p] = ot.id
   )
-);
+) :: constraint_name("Con_AH12_A");

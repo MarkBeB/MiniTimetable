@@ -7,8 +7,8 @@ include "../IHTP-Model.mzn";
 
 constraint forall(p in PatientIds where isPatientMandatory(p))(
     earliestAdmissionDay(p) <= patientAdmissionDay[p] /\ patientAdmissionDay[p] <= latestAdmissionDay(p)
-);
+) :: constraint_name("Con_H6_A");
 
 constraint forall(p in PatientIds where not isPatientMandatory(p))(
     earliestAdmissionDay(p) <= patientAdmissionDay[p] /\ patientAdmissionDay[p] <= lastDay + 1
-);
+) :: constraint_name("Con_H6_B");

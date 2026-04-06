@@ -5,5 +5,5 @@ include "../IHTP-Model.mzn";
 %
 
 constraint forall(p in PatientIds, d in Days)(
-  not (patientRoom[p,d] in incompatibleRooms(p))
+  (not (patientRoom[p,d] in incompatibleRooms(p)))  :: "Con_H2_A \(p) \(d)"
 );

@@ -11,7 +11,8 @@ constraint forall(p in PatientIds where isPatientAdmitted[p])(
   forall(ot in OperatingTheaterIds, d in Days)(
     (patientOT[p] == ot /\ patientAdmissionDay[p] == d) -> isSurgeonInOT[s,d,ot]
   )
-);
+) :: constraint_name("Con_S5_A");
 
-constraint Penalties.surgeonTransfer = Weights.surgeonTransfer * 
-  sum(d in Days, s in SurgeonIds)( max(0, sum(ot in OperatingTheaterIds)(isSurgeonInOT[s,d,ot])-1) );
+constraint (Penalties.surgeonTransfer = Weights.surgeonTransfer * 
+  sum(d in Days, s in SurgeonIds)( max(0, sum(ot in OperatingTheaterIds)(isSurgeonInOT[s,d,ot])-1) )
+) :: constraint_name("Con_S5_O");

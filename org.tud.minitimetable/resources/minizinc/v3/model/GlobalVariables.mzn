@@ -28,7 +28,7 @@ array[RoomIds, Days, ShiftTypes] of var opt NurseIds: roomNurseAssignment;
 
 constraint forall(p in PatientIds)( 
   patientAdmittedUntil[p] = patientAdmissionDay[p] + patientLengthOfStay(p) - 1
-);
+) :: constraint_name("VAR_ADMITTED_UNTIL");
 
 constraint forall(r in RoomIds, d in Days)(
   let {
@@ -36,4 +36,4 @@ constraint forall(r in RoomIds, d in Days)(
     var bool: hasPatients = exists(p in PatientIds)(patientRoom[p,d] == r);
   } in
   isRoomOccupied[r,d] <-> hasOccupants \/ hasPatients
-);
+) :: constraint_name("VAR_ROOM_OCCUPIED");

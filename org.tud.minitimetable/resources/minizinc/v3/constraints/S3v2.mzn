@@ -8,15 +8,15 @@ include "../IHTP-Model.mzn";
 
 constraint forall(p in PatientIds, d in Days, s in ShiftTypes, n in NurseIds where patientRoom[p,d] != <>)(
     patientCaredByNurse[p, n] >= isNurseInRoom[n, d, s, patientRoom[p,d]]
-);
+) :: constraint_name("Con_S3_A");
 
 constraint forall(o in OccupantIds, d in Days, s in ShiftTypes, n in NurseIds where isOccupantPresent(o,d))(
     occupantCaredByNurse[o, n] >= isNurseInRoom[n, d, s, occupantRoom(o)]
-);
+) :: constraint_name("Con_S3_B");
 
 constraint Penalties.continuityOfCare = Weights.continuityOfCare * (
     sum(p in PatientIds, n in NurseIds)(patientCaredByNurse[p,n])
   + sum(o in OccupantIds, n in NurseIds)(occupantCaredByNurse[o,n])
-);
+) :: constraint_name("Con_S3_O");
 
 %constraint Penalties.continuityOfCare >= Weights.continuityOfCare * length(ShiftTypes) * (count(p in patientVar)(p.isAdmitted) + length(OccupantIds));

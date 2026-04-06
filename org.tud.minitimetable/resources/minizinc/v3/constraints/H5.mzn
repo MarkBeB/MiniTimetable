@@ -6,11 +6,11 @@ include "../IHTP-Model.mzn";
 
 constraint forall(p in PatientIds where isPatientMandatory(p))(
   isPatientPostponed[p] = false
-);
+) :: constraint_name("Con_H5_A");
 
 constraint forall(p in PatientIds where not isPatientMandatory(p))(
   isPatientPostponed[p] = (lastDay < patientAdmissionDay[p])
-);
+) :: constraint_name("Con_H5_B");
 
 /*
 constraint forall(id in PatientIds)(

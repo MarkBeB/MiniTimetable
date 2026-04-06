@@ -16,9 +16,9 @@ constraint forall(r in RoomIds, d in Days, s in ShiftTypes)(
       (patientWorkload(p,d-patientAdmissionDay[p],s));
   } in
   roomWorkload[r,d,s] = occupantWorkload + patientWorkload  
-);
+) :: constraint_name("Con_S4_A");
 
 constraint Penalties.nurseEccessiveWorkload = Weights.nurseEccessiveWorkload * sum(n in NurseIds, d in Days, s in ShiftTypes where isNurseAvailable(n,d,s))(
   let { var 0..1000: workload = sum(r in RoomIds where isNurseInRoom[n,d,s,r])(roomWorkload[r,d,s]) } in
   max(0, workload - nurseWorkloadCapacity(n,d,s))
-);
+) :: constraint_name("Con_S4_O");

@@ -6,9 +6,9 @@
 
 int: minutesPerDay = 24 * 60;
 int: minPenaltyValue = 0;
-int: maxPenaltyValue = 10^4;
+int: maxPenaltyValue = 10^8;
 int: minScoreValue = 0;
-int: maxScoreValue = 10^5;
+int: maxScoreValue = 10^8;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -28,7 +28,7 @@ type WeightType = record(
   int: openOperatingTheater,
   int: surgeonTransfer,
   int: patientDelay,
-  int: unscheduledOptional,
+  int: unscheduledOptional
 );
 
 type PenalityType = record(
@@ -39,29 +39,28 @@ type PenalityType = record(
   var PenaltyRange: openOperatingTheater,
   var PenaltyRange: surgeonTransfer,
   var PenaltyRange: patientDelay,
-  var PenaltyRange: unscheduledOptional,
+  var PenaltyRange: unscheduledOptional
 );
 
 type Nurse = record(
   NurseIds: id,
   SkillLevels: skillLevel,
-  array[Days, ShiftTypes] of int: maxWorkloadPerShift,
+  array[Days, ShiftTypes] of int: maxWorkloadPerShift
 );
 
 type Surgeon = record(
   SurgeonIds: id,
-  array[Days] of DayTime: maxSurgeryTime,
+  array[Days] of DayTime: maxSurgeryTime
 );
 
 type OperatingTheater = record(
   OperatingTheaterIds: id,
-  array[Days] of DayTime: availability,
+  array[Days] of DayTime: availability
 );
 
 type Room = record(
   RoomIds: id,
-  int: capacity,
-  array[Days] of int: assignedOccupants,
+  int: capacity
 );
 
 type Occupant = record (
@@ -71,7 +70,7 @@ type Occupant = record (
   int: lengthOfStay,
   array[int] of int: workloadProduced, %length = lengthOfStay * length(ShiftType)
   array[int] of SkillLevels: skillLevelRequired, %length = lengthOfStay * length(ShiftType)
-  RoomIds: assignedRoom,
+  RoomIds: assignedRoom
 );
 
 type Patient = record (
@@ -86,7 +85,7 @@ type Patient = record (
   SurgeonIds: assignedSurgeon,
   array[int] of RoomIds: incompatibleRooms,
   array[int] of int: workloadProduced,
-  array[int] of SkillLevels: skillLevelRequired,
+  array[int] of SkillLevels: skillLevelRequired
 );
 
 

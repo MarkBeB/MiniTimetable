@@ -14,12 +14,12 @@ constraint forall(r in RoomIds, d in Days, g in AgeGroups) (
         \/
         exists(o in OccupantIds where occupantAgeGroup(o) == g)(isOccupantInRoom(o,d,r))
     )
-);
+) :: constraint_name("Con_S1_A");
 
 constraint forall(r in RoomIds , d in Days) (
     forall(g in AgeGroups) (agePresent[r,d,g] -> maxRoomAge[r,d] >= g) /\
     forall(g in AgeGroups) (agePresent[r,d,g] -> minRoomAge[r,d] <= g)
-);
+) :: constraint_name("Con_S1_B");
 
 var int: agePenalty = sum(r in RoomIds , d in Days) (
     let {
@@ -32,4 +32,4 @@ var int: agePenalty = sum(r in RoomIds , d in Days) (
     endif
 );
 
-constraint Penalties.roomMixedAge = Weights.roomMixedAge * agePenalty;
+constraint Penalties.roomMixedAge = Weights.roomMixedAge * agePenalty  :: constraint_name("Con_S1_O");

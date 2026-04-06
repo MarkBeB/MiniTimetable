@@ -8,7 +8,7 @@ include "../IHTP-Model.mzn";
 set of ExtendedDays: daysWithOTCapacity = {extendedDay} union { d | d in Days where exists(ot in OperatingTheaterIds)(isOTAvailable(ot, d))};
 constraint redundant_constraint(forall(p in PatientIds)(
   patientAdmissionDay[p] in daysWithOTCapacity 
-));
+)) :: constraint_name("Con_P_A");
 
 % Patients can only be admitted on days when their assigned surgeon is available.
 constraint redundant_constraint(forall(p in PatientIds)( 
@@ -17,4 +17,4 @@ constraint redundant_constraint(forall(p in PatientIds)(
     set of ExtendedDays: daysWithAvailableSurgeon = {extendedDay} union { d | d in Days where isSurgeonAvailable(s, d)};
   } in
   patientAdmissionDay[p] in daysWithAvailableSurgeon
-));
+)) :: constraint_name("Con_P_A");

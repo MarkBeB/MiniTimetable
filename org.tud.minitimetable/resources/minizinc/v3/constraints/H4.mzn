@@ -7,8 +7,8 @@ include "../IHTP-Model.mzn";
 constraint forall(ot in OperatingTheaterIds, d in Days where isOTAvailable(ot, d))(
   otTime[ot,d] = sum(p in PatientIds where patientOT[p] == ot /\ patientAdmissionDay[p] == d)
     (surgeryDuration(p))
-);
+) :: constraint_name("Con_H4_A");
 
 constraint forall(ot in OperatingTheaterIds, d in Days)(
   otTime[ot,d] <= otSurgeryCapacity(ot, d)
-);
+) :: constraint_name("Con_H4_B");
