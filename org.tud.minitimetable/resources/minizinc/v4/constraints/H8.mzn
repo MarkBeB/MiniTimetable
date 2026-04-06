@@ -15,11 +15,35 @@ constraint forall(r in RoomIds, d in Days)(
   :: "Var RoomOccupied \(r) \(d)"
 );
 
+
 constraint forall(r in RoomIds, d in Days, s in ShiftTypes)(
-  isRoomOccupied[r,d] -> roomNurse[r,d,s] in activeNurses[d,s] % occurs(roomNurse[r,d,s])
-%  /\ not isRoomOccupied[r,d] -> absent(roomNurse[r,d,s])
+     (isRoomOccupied[r,d] -> (roomNurse[r,d,s] in activeNurses[d,s]))
+  /\ (not isRoomOccupied[r,d] -> absent(roomNurse[r,d,s]))
   :: "Con_H8_A \(r) \(d) \(s)"
 );
+
+/*
+constraint forall(r in RoomIds, d in Days, s in ShiftTypes)(
+     (isRoomOccupied[r,d] -> occurs(roomNurse[r,d,s]))
+  /\ (not isRoomOccupied[r,d] -> absent(roomNurse[r,d,s]))
+  :: "Con_H8_A \(r) \(d) \(s)"
+);
+*/
+
+/*
+constraint forall(r in RoomIds, d in Days)(
+  (isRoomOccupied[r,d] -> sum(s in ShiftTypes)(occurs(roomNurse[r,d,s])) == length(ShiftTypes))
+  /\ (not isRoomOccupied[r,d] -> sum(s in ShiftTypes)(absent(roomNurse[r,d,s])) == length(ShiftTypes))
+  :: "Con_H8_A \(r) \(d)"
+);
+*/
+
+/*
+constraint forall(r in RoomIds, d in Days, s in ShiftTypes)(
+  (roomNurse[r,d,s] in activeNurses[d,s]) \/ absent(roomNurse[r,d,s])
+  :: "Con_H8_D \(r) \(d) \(s)"
+);
+*/
 
 constraint forall(r in RoomIds, d in Days, s in ShiftTypes) (
   sum(n in NurseIds)(isNurseInRoom[n,r,d,s]) <= 1

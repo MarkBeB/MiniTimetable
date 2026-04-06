@@ -10,6 +10,7 @@ include "../IHTP-Model.mzn";
 
 array[NurseIds, Days, ShiftTypes] of var 0..: nurseExcessiveWorkload;
 array[RoomIds, Days, ShiftTypes] of var 0..: roomWorkload;
+array[NurseIds, Days, ShiftTypes] of var 0..: nurseWorkload;
 
 constraint forall(r in RoomIds, d in Days, s in ShiftTypes) (
   roomWorkload[r,d,s] = (
@@ -25,10 +26,16 @@ constraint forall(r in RoomIds, d in Days, s in ShiftTypes) (
   ) :: "Con_S2_A \(r) \(d) \(s)"
 );
 
-constraint forall(n in NurseIds, d in Days, s in ShiftTypes where n in activeNurses[d,s]) (
-     sum(r in RoomIds) (isNurseInRoom[n,r,d,s] * roomWorkload[r,d,s]) 
-  <= nurseWorkloadCapacity(n,d,s) + nurseExcessiveWorkload[n,d,s]
+constraint forall(n in NurseIds, d in Days, s in ShiftTypes where n in activeNurses[d, s]) (
+  nurseWorkload[n,d,s] = sum(r in RoomIds) (
+    isNurseInRoom[n,r,d,s] * roomWorkload[r, d, s]
+  )
   :: "Con_S2_B \(n) \(d) \(s)"
+);
+
+constraint forall(n in NurseIds, d in Days, s in ShiftTypes where n in activeNurses[d,s]) (
+  nurseExcessiveWorkload[n,d,s] >= nurseWorkload[n,d,s] - nurseWorkloadCapacity(n,d,s)
+  :: "Con_S2_C \(n) \(d) \(s)"
 );
 
 constraint penaltyNurseEccessiveWorkload = Weights.nurseEccessiveWorkload * (

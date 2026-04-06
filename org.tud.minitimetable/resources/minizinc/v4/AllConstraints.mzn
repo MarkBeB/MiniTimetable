@@ -23,4 +23,5 @@ include "constraints/S8.mzn";
 
 solve minimize score;
 
+%output ["Patient 1 sieht Nurses: \( [n | n in NurseIds, p = min(PatientIds) where fix(patientCaredByNurse[p, n]) == true] )\n"];
 include "OutJsonFormat.mzn";

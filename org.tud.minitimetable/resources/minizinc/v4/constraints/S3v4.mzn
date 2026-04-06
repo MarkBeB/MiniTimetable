@@ -8,15 +8,7 @@ include "../IHTP-Model.mzn";
 
 % Huge improvement over v3
 
-array[PatientIds, NurseIds] of var bool: patientCaredByNurse;
-array[OccupantIds, NurseIds] of var bool: occupantCaredByNurse;
-array[NurseIds, RoomIds, Days] of var bool: nurseInRoomOnDay;
 
-constraint forall(n in NurseIds, r in RoomIds, d in Days where isNurseAvailable(n,d)) (
-  nurseInRoomOnDay[n,r,d] >= max(s in ShiftTypes) (
-    isNurseInRoom[n,r,d,s]
-  ) :: "Con_S3_A \(n) \(r) \(d)"
-);
 
 /*
 constraint forall(n in NurseIds, r in RoomIds, d in Days) (
@@ -46,10 +38,20 @@ constraint forall(n in NurseIds, r in RoomIds, d in Days) (
 );
 */
 
+array[PatientIds, NurseIds] of var bool: patientCaredByNurse;
+array[OccupantIds, NurseIds] of var bool: occupantCaredByNurse;
+array[NurseIds, RoomIds, Days] of var bool: nurseInRoomOnDay;
+
+constraint forall(n in NurseIds, r in RoomIds, d in Days where isNurseAvailable(n,d)) (
+  nurseInRoomOnDay[n,r,d] >= exists(s in ShiftTypes) (
+    isNurseInRoom[n,r,d,s]
+  ) :: "Con_S3_A \(n) \(r) \(d)"
+);
+
 constraint forall(p in PatientIds, n in NurseIds, r in compatibleRooms(p)) (
   patientCaredByNurse[p,n] >= (
     isPatientInRoom[p,r] /\ 
-    exists(d in Days where withinStayWindow(p,d) /\ isNurseAvailable(n,d)) (
+    exists(d in Days where withinStayWindow(p,d)) (
         nurseInRoomOnDay[n,r,d] /\ isPatientPresent[p,d]
     )
   ) :: "Con_S3_B \(p) \(n) \(r)"
@@ -63,6 +65,6 @@ constraint forall(o in OccupantIds, n in NurseIds) (
 );
 
 constraint penaltyContinuityOfCare = Weights.continuityOfCare * (
-  sum(p in PatientIds, n in NurseIds) (patientCaredByNurse[p, n]) +
-  sum(occ in OccupantIds, n in NurseIds) (occupantCaredByNurse[occ, n])
+    sum(p in PatientIds, n in NurseIds) (patientCaredByNurse[p,n])
+  + sum(o in OccupantIds, n in NurseIds) (occupantCaredByNurse[o,n])
 ) :: "Con_S3_O";

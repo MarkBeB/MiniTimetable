@@ -21,10 +21,12 @@ output :: "json"
 
 [ "  \("patients"): [\n" ] ++
 [ "    {\("id"): \("\(p)"), " ++
-%      "\("no_nurses"): \(count(n in NurseIds)(patientCaredByNurse[p, n])), " ++
+%     "\("no_nurses"): \(count(n in NurseIds)(patientCaredByNurse[p, n])), " ++
       "\("admission_day"): "++show_int(3, patientAdmissionDay[p])++", " ++ 
       "\("room"): \(format(patientRoom[p])), " ++
-      "\("operating_theater"): \("\(patientOT[p])")},\n" | p in PatientIds where fix(isPatientAdmitted[p]) ] ++
+      "\("operating_theater"): \("\(patientOT[p])"), "  ++
+      "\("nurses"): [" ++ join(", ", ["\(format(n))" | n in NurseIds where fix(patientCaredByNurse[p,n]) ]) ++ "]" ++
+      "},\n" | p in PatientIds where fix(isPatientAdmitted[p]) ] ++
 [ "  ],\n" ] ++
 /*
 [ "  \("occupants"): [\n" ] ++
@@ -34,8 +36,18 @@ output :: "json"
 [ "  ],\n" ] ++
 */
 
+[ "  \("rooms"): [\n" ] ++
+[ "    {\("id"): \("\(r)"),\n " ++
+  "      \("nursesPerDay"): [\n" ++
+  join(",\n",[
+  "        [ \(format(isRoomOccupied[r,d])), " ++ join(", ",[ "\(format(roomNurse[r,d,s]))" | s in ShiftTypes ]) ++ "]" 
+    | d in Days ]) ++ "\n" ++
+  "       ],\n" ++
+  "    },\n" | r in RoomIds ] ++
+[ "  ],\n" ] ++
+
 [ " \("postponedPatients"): [" ] ++
-[ "    \("\(p)")," | p in PatientIds where not fix(isPatientAdmitted[p]) ] ++
+[     "\("\(p)")," | p in PatientIds where not fix(isPatientAdmitted[p]) ] ++
 [ "  ],\n" ] ++
 
 
@@ -47,6 +59,13 @@ output :: "json"
   "        {\("day"): "++show_int(3,d)++", \("shift"): \(format(s)), \("rooms"): ["++join(", ",[ "\(format(r))" |r in RoomIds where fix(isNurseInRoom[n,r,d,s])])++"]}"
     | d in Days, s in ShiftTypes where isNurseAvailable(n,d,s)]) ++ "\n" ++
   "      ]\n" ++
+  
+  "      \("rooms"): [\n" ++
+  join(",\n",[
+  "        {\("day"): "++show_int(3,d)++", \("rooms"): ["++join(", ",[ "\(format(r))" | r in RoomIds where fix(nurseInRoomOnDay[n,r,d])])++"]}"
+    | d in Days]) ++ "\n" ++
+  "      ]\n" ++  
+  
   "    },\n" 
   | n in NurseIds ] ++
 [ "  ],\n" ] ++

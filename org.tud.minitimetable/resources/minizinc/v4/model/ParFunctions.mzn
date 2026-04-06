@@ -167,4 +167,7 @@ function int: otSurgeryCapacity(OperatingTheaterIds: ot, Days: d) =
 
 function int: roomCapacity(RoomIds: r) =
   roomData[r].capacity;
+  
+function int: roomOccupants(RoomIds: r, Days: d) =
+  sum(o in OccupantIds)(isOccupantInRoom(o,d,r));
  
