@@ -20,7 +20,7 @@ public class LocalRunner {
 //		Path modelFile = resourceDirectory.resolve("minizinc").resolve("v1").resolve("AllConstraintsV2.mzn");
 //		Path modelFile = resourceDirectory.resolve("minizinc").resolve("v2").resolve("AllConstraints.mzn");
 		Path modelFile = resourceDirectory.resolve("minizinc").resolve("v4").resolve("AllConstraints.mzn");
-		Path dataFile = resourceDirectory.resolve("input").resolve("ihtc").resolve("i13.json");
+		Path dataFile = resourceDirectory.resolve("input").resolve("ihtc").resolve("i01.json");
 //		Path dataFile = resourceDirectory.resolve("minizinc").resolve("data").resolve("i03.json");
 		String fileName = PathUtils.getFileNameWithoutExtension(dataFile);
 
@@ -32,10 +32,9 @@ public class LocalRunner {
 		DefaultSettings.applyDefaultMiniZincConfiguration(minizinc);
 
 //		minizinc.getConfig().solverModelLog = new DefaultFileLog("%s-ilp.ilp", true);
-		minizinc.getConfig().logger = new MixedCodeLogger(
-				outputFolder.resolve(PathUtils.getFileNameWithoutExtension(dataFile) + "-log.txt"));
+		minizinc.getConfig().logger = new MixedCodeLogger(outputFolder.resolve("log.txt"));
 		minizinc.getConfig().timeLimitMS = 15 * 60 * 1000l;
-		minizinc.getConfig().solverTimeLimitMS = 1 * 60 * 1000L;
+		minizinc.getConfig().solverTimeLimitMS = 30 * 60 * 1000L;
 //		minizinc.getConfig().gurobiParameterFile = resourceDirectory.resolve("minizinc").resolve("Gurobi.prm");
 //		minizinc.getConfig().optimizeLevel = 2;
 
