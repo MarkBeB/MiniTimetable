@@ -14,9 +14,9 @@ function bool: areRoomsIdentical(RoomIds: r1, RoomIds: r2) = (
 );
 
 % Symmetrie breaker: if r and r+1 are identical, fill r before r+1
-constraint forall(r in 1..length(RoomIds)-1) (
-  if areRoomsIdentical(r, r+1) then
-    roomUsage[r] >= roomUsage[r+1]
+constraint forall(r in min(RoomIds)..enum_prev(max(RoomIds))) (
+  if areRoomsIdentical(r, enum_next(r)) then
+    roomUsage[r] >= roomUsage[enum_next(r)]
   endif
 );
 

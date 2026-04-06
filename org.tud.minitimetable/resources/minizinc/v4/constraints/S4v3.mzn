@@ -33,8 +33,19 @@ constraint forall(n in NurseIds, d in Days, s in ShiftTypes where n in activeNur
   :: "Con_S2_B \(n) \(d) \(s)"
 );
 
+/*
 constraint forall(n in NurseIds, d in Days, s in ShiftTypes where n in activeNurses[d,s]) (
   nurseExcessiveWorkload[n,d,s] >= nurseWorkload[n,d,s] - nurseWorkloadCapacity(n,d,s)
+  :: "Con_S2_C \(n) \(d) \(s)"
+);
+*/
+
+constraint forall(n in NurseIds, d in Days, s in ShiftTypes) (
+  if n in activeNurses[d,s] then
+    nurseExcessiveWorkload[n,d,s] == max(0, nurseWorkload[n,d,s] - nurseWorkloadCapacity(n,d,s))
+  else
+    nurseExcessiveWorkload[n,d,s] == 0
+  endif
   :: "Con_S2_C \(n) \(d) \(s)"
 );
 
