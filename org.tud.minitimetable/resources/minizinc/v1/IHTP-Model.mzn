@@ -83,7 +83,6 @@ type OperatingTheater = OperatingTheaterFixData ++ OperatingTheaterVarData;
 type RoomFixData = record(
   RoomIds: id,
   int: capacity,
-  array[Days] of int: assignedOccupants,
 );
 type RoomVarData = record(
   array[Days] of var bool: isOccupied, % utility constraint

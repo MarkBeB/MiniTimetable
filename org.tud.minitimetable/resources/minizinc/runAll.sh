@@ -22,7 +22,7 @@ if [[ ! "$CONFIRM" =~ ^[yY]$ ]]; then
 fi
 
 
-modelFile="./model/v3/AllConstraints.mzn"
+modelFile="./model/v4/AllConstraints.mzn"
 gurobiParam="./model/Gurobi.prm"
 miniZincDir="/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64"
 
@@ -31,27 +31,27 @@ TOTAL_START=$SECONDS
 for i in {01..02};do
 	dataFile="./data/i${i}.json"
 	outDir="./out/i${i}-${RUN_ID}/"
-	
+
 	mkdir -p "$outDir"
-	
-    ARGS=(
-        "-m" "$modelFile"
-        "-e" "$miniZincDir"
-        "-gP" "$gurobiParam"
-        "-d" "$dataFile"
-        "-o" "$outDir"
-    )
-	
+
+	ARGS=(
+		"-m" "$modelFile"
+		"-e" "$miniZincDir"
+		"-gP" "$gurobiParam"
+		"-d" "$dataFile"
+		"-o" "$outDir"
+	)
+
 	echo ">>> Processing: $dataFile (Run: $RUN_ID)"
 	START=$SECONDS
-	
+
 	java -jar ./MiniZincRunner.jar "${ARGS[@]}" -O1 -p 4 -tm 60 -stm 60 &> "$outDir/run.log" || {
-        echo "ERROR after $((DURATION/3600))h $(( (DURATION%3600)/60 ))m $((DURATION%60))s at $dataFile!"
-        exit 1
-    }
-    
-    DURATION=$(( $SECONDS - $START ))
-    echo "Finished in $((DURATION/3600))h $(( (DURATION%3600)/60 ))m $((DURATION%60))s"
+		echo "ERROR after $((DURATION/3600))h $(( (DURATION%3600)/60 ))m $((DURATION%60))s at $dataFile!"
+		exit 1
+	}
+
+	DURATION=$(( $SECONDS - $START ))
+	echo "Finished in $((DURATION/3600))h $(( (DURATION%3600)/60 ))m $((DURATION%60))s"
 done
 
 TOTAL_DURATION=$(( SECONDS - TOTAL_START ))

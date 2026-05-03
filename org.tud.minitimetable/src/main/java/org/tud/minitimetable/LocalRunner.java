@@ -17,26 +17,26 @@ public class LocalRunner {
 	private static final Path resourceDirectory = Path.of("./", "resources").toAbsolutePath();
 
 	public static void main(String[] args) throws IOException, InterruptedException {
-//		Path modelFile = resourceDirectory.resolve("minizinc").resolve("v1").resolve("AllConstraintsV2.mzn");
+		Path modelFile = resourceDirectory.resolve("minizinc").resolve("v1").resolve("AllConstraints.mzn");
 //		Path modelFile = resourceDirectory.resolve("minizinc").resolve("v2").resolve("AllConstraints.mzn");
-		Path modelFile = resourceDirectory.resolve("minizinc").resolve("v4").resolve("AllConstraints.mzn");
-		Path dataFile = resourceDirectory.resolve("input").resolve("ihtc").resolve("i01.json");
+//		Path modelFile = resourceDirectory.resolve("minizinc").resolve("v4").resolve("AllConstraints.mzn");
+		Path dataFile = resourceDirectory.resolve("input").resolve("ihtc").resolve("i04.json");
 //		Path dataFile = resourceDirectory.resolve("minizinc").resolve("data").resolve("i03.json");
 
 		String fileName = PathUtils.getFileNameWithoutExtension(dataFile);
 		String version = modelFile.getParent().getFileName().toString();
 
-		Path outputFolder = resourceDirectory.resolve("out").resolve(fileName + "-" + version + "-3");
+		Path outputFolder = resourceDirectory.resolve("out").resolve("1-" + version + "-" + fileName);
 
 		MiniZinc minizinc = new MiniZinc();
 		DefaultSettings.applyDefaultMiniZincConfiguration(minizinc);
 
-//		minizinc.getConfig().solverModelLog = new DefaultFileLog("%s-ilp.ilp", true);
+		minizinc.getConfig().solverModelLog = new DefaultFileLog("%s-ilp.ilp", true);
 		minizinc.getConfig().logger = new MixedCodeLogger(outputFolder.resolve("log.txt"));
 		minizinc.getConfig().timeLimitMS = 15 * 60 * 1000l;
-		minizinc.getConfig().solverTimeLimitMS = 15 * 60 * 1000L;
+		minizinc.getConfig().solverTimeLimitMS = 1 * 1 * 1000L;
 		minizinc.getConfig().gurobiParameterFile = resourceDirectory.resolve("minizinc").resolve("Gurobi.prm");
-		minizinc.getConfig().optimizeLevel = 2;
+		minizinc.getConfig().optimizeLevel = 1;
 
 		minizinc.run(modelFile, dataFile, outputFolder).join();
 		((FileCodeLogger) minizinc.getConfig().logger).close();
@@ -48,8 +48,10 @@ public class LocalRunner {
 
 	public static void main2(String[] args) throws IOException, InterruptedException {
 		Path dataFile = resourceDirectory.resolve("input").resolve("ihtc").resolve("i01.json");
-		Path outputFolder = resourceDirectory.resolve("out").resolve("i01-long2");
-		Path solutionFile = outputFolder.resolve("i01-solution.json");
+		String fileName = PathUtils.getFileNameWithoutExtension(dataFile);
+		Path outputFolder = resourceDirectory.resolve("out").resolve("workstation").resolve("out")
+				.resolve(fileName + "-05");
+		Path solutionFile = outputFolder.resolve("solution.json");
 
 		processSoltions(solutionFile, dataFile);
 	}
