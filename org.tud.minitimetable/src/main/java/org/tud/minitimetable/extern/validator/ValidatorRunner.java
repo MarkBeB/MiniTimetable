@@ -10,6 +10,8 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
+import org.tud.minitimetable.util.Parser;
+
 public class ValidatorRunner {
 
 	private final Path _executable;
@@ -61,58 +63,53 @@ public class ValidatorRunner {
 		return result;
 	}
 
-	private static final class Parser {
-		private final BufferedReader reader;
-		private final ValidatorResult result;
-		private String currentLine;
+	private static final class InternalParser extends Parser<ValidatorResult> {
 
-		public Parser(InputStream input) {
-			reader = new BufferedReader(new InputStreamReader(input));
+		private final ValidatorResult result;
+
+		public InternalParser(InputStream input) {
+			super(new BufferedReader(new InputStreamReader(input)));
 			result = new ValidatorResult();
 		}
 
-		public void readFirstLine() throws IOException {
-			readNextLine();
-		}
-
-		public String readNextLine() throws IOException {
-			currentLine = reader.readLine();
-			if (currentLine != null) {
+		@Override
+		protected String readNextLine() throws IOException {
+			currentLine = super.readNextLine();
+			if (currentLine != null)
 				System.out.println(currentLine);
-			}
 			return currentLine;
 		}
 
-		public void start() throws IOException {
-			readFirstLine();
-			while (currentLine != null) {
-				if (currentLine.startsWith("VIOLATIONS:")) {
-					parseViolations();
-				} else if (currentLine.startsWith("COSTS")) {
-					parseCosts();
-				} else {
-					readNextLine();
-				}
+		@Override
+		protected boolean parseContent() throws IOException {
+			if (getCurrentLine().startsWith("VIOLATIONS:")) {
+				parseViolations();
+			} else if (getCurrentLine().startsWith("COSTS")) {
+				parseCosts();
+			} else {
+				readNextLine();
 			}
+
+			return true;
 		}
 
 		private void parseViolations() throws IOException {
 			readNextLine();
 
 			Pattern pattern = Pattern.compile("^(?<name>\\w+)\\.*(?<count>\\d+)$");
-			while (currentLine != null) {
-				boolean lastLine = currentLine.startsWith("Total violations");
+			while (getCurrentLine() != null) {
+				boolean lastLine = getCurrentLine().startsWith("Total violations");
 				if (lastLine)
 					return;
 
-				var matcher = pattern.matcher(currentLine);
+				var matcher = pattern.matcher(getCurrentLine());
 				if (matcher.find()) {
 					String name = matcher.group("name");
 					String count = matcher.group("count");
 					ValidatorViolation violation = new ValidatorViolation(name, Integer.parseInt(count));
 					result.violations.add(violation);
 				} else {
-					System.err.println("Unable to parse violation: " + currentLine);
+					System.err.println("Unable to parse violation: " + getCurrentLine());
 				}
 
 				readNextLine();
@@ -124,9 +121,10 @@ public class ValidatorRunner {
 			Pattern pattern = Pattern
 					.compile("^(?<name>\\w+)\\.*(?<total>\\d+) \\(\\s*(?<weight>\\d+) X \\s*(?<occurences>\\d+)\\)$");
 
-			while (currentLine != null) {
-				if (currentLine.startsWith("Total cost")) {
-					var expectedCost = Integer.parseInt(currentLine.substring(currentLine.lastIndexOf(" ") + 1));
+			while (getCurrentLine() != null) {
+				if (getCurrentLine().startsWith("Total cost")) {
+					var expectedCost = Integer
+							.parseInt(getCurrentLine().substring(getCurrentLine().lastIndexOf(" ") + 1));
 					var actualCost = result.getTotalCost();
 					if (expectedCost != actualCost) {
 						System.err.println(
@@ -135,7 +133,7 @@ public class ValidatorRunner {
 					return;
 				}
 
-				var matcher = pattern.matcher(currentLine);
+				var matcher = pattern.matcher(getCurrentLine());
 				if (matcher.find()) {
 					String name = matcher.group("name");
 					String total = matcher.group("total");
@@ -145,23 +143,23 @@ public class ValidatorRunner {
 							Integer.parseInt(occurences));
 					result.costs.add(cost);
 				} else {
-					System.err.println("Unable to parse cost: " + currentLine);
+					System.err.println("Unable to parse cost: " + getCurrentLine());
 				}
 
 				readNextLine();
 			}
 		}
 
-		public ValidatorResult getResult() {
+		@Override
+		public ValidatorResult getParseResult() {
 			return result;
 		}
 
 	}
 
 	private ValidatorResult parseOutput(InputStream outStream) throws IOException {
-		var parser = new Parser(outStream);
-		parser.start();
-		return parser.getResult();
+		var parser = new InternalParser(outStream);
+		return parser.parse();
 	}
 
 }
