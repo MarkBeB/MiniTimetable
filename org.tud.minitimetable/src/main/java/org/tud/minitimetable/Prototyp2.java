@@ -8,13 +8,13 @@ import java.time.Instant;
 import java.util.Comparator;
 import java.util.stream.Stream;
 
+import org.tud.minitimetable.eval.util.LpAnalyser;
 import org.tud.minitimetable.extern.solver.old.MiniZincRunner;
 import org.tud.minitimetable.extern.solver.old.SolverResult;
 import org.tud.minitimetable.extern.solver.old.MiniZincRunner.MiniZincConfig.Flag;
 import org.tud.minitimetable.extern.validator.ValidatorRunner;
 import org.tud.minitimetable.model.util.InputModelReader;
 import org.tud.minitimetable.model.util.OutputModelWriter;
-import org.tud.minitimetable.util.LpAnalyser;
 import org.tud.minitimetable.util.MiniZincLocator;
 import org.tud.minitimetable.util.PathUtils;
 

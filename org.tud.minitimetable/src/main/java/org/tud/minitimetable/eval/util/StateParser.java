@@ -1,4 +1,4 @@
-package org.tud.minitimetable.util;
+package org.tud.minitimetable.eval.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -1,8 +1,8 @@
-package org.tud.minitimetable.collector;
+package org.tud.minitimetable.eval.extract;
 
 import java.io.BufferedReader;
 
-import org.tud.minitimetable.util.StateParser;
+import org.tud.minitimetable.eval.util.StateParser;
 
 public class BackendParser2 extends StateParser {
 

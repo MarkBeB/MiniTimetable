@@ -7,19 +7,17 @@ import static org.tud.minitimetable.DefaultLocations.getResourceDirectory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.regex.Pattern;
 
-import org.tud.minitimetable.collector.BackendParser;
-import org.tud.minitimetable.collector.BackendParser.BackendData;
-import org.tud.minitimetable.collector.RunLogParser;
-import org.tud.minitimetable.collector.RunLogParser.RunData;
-import org.tud.minitimetable.collector.SolutionParser;
-import org.tud.minitimetable.collector.SolutionParser.SolutionData;
-import org.tud.minitimetable.collector.util.CSV;
+import org.tud.minitimetable.eval.extract.BackendParser;
+import org.tud.minitimetable.eval.extract.BackendParser.BackendData;
+import org.tud.minitimetable.eval.extract.MainCSV;
+import org.tud.minitimetable.eval.extract.RunLogParser;
+import org.tud.minitimetable.eval.extract.RunLogParser.RunData;
+import org.tud.minitimetable.eval.extract.SolutionParser;
+import org.tud.minitimetable.eval.extract.SolutionParser.SolutionData;
 import org.tud.minitimetable.extern.validator.ValidatorRunner;
 import org.tud.minitimetable.model.util.SolutionFileReader;
 
@@ -29,47 +27,26 @@ public class LogExtractor {
 	private static final String SOLUTION_FILE_NAME = "solution.json";
 	private static final String RUN_FILE_NAME = "run.log";
 
-	public static void main2(String[] args) throws IOException, InterruptedException {
-
-		Path folder = getResourceDirectory().resolve("workstation").resolve("out").resolve("i21-05");
-
-		Path backendFile = folder.resolve("backend.txt");
-		Path solutionFile = folder.resolve("solution.json");
-		String dataName = folder.getFileName().toString().substring(0, folder.getFileName().toString().indexOf("-"));
-		Path dataFile = getResourceDirectory().resolve("input").resolve("ihtc").resolve(dataName + ".json");
-
-		try (var reader = Files.newBufferedReader(backendFile)) {
-			var parser = new BackendParser(reader);
-			parser.parse();
-		}
-
-		validateSolution(solutionFile, dataFile);
-
-	}
-
 	public static void main(String[] args) throws IOException, InterruptedException {
 		Path runtimeDirectory = getResourceDirectory().resolve("workstation");
 		Path dataDirectory = getDataDirectory();
 
-		LocalDateTime today = LocalDateTime.now();
-		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm");
-		Path extractionDirectory = runtimeDirectory.resolve("extracted").resolve(today.format(dateTimeFormatter));
+		Path extractionDirectory = runtimeDirectory.resolve("extracted");// .resolve(Util.getFileNameTimeStampNow());
 
-		if (!Files.exists(extractionDirectory))
+		if (!Files.exists(extractionDirectory)) {
 			Files.createDirectories(extractionDirectory);
 
-		Path dataFolder = runtimeDirectory.resolve("out");
+		} else {
+
+		}
+
+		Path dataFolder = runtimeDirectory.resolve("raw");
 		Collection<ModelSelection> selectData = selectData(dataFolder).stream() //
-				.filter(m -> 5 <= m.run && m.run <= 8) //
+				.filter(m -> 5 <= m.run) //
+				.sorted() //
 				.toList();
 
-		CSV mainCSV = CSV.loadOrCreate(extractionDirectory.resolve("main.csv"));
-		mainCSV.setColumns(new String[] { //
-				"model", "modelversion", "instance", "run", //
-				"modelSizeMB", //
-				"constraints", "variables", "coefficients", //
-				"p-constraints", "p-variables", "p-coefficients" //
-		});
+		MainCSV mainCSV = new MainCSV();
 
 		for (var m : selectData) {
 			Path runFile = m.folder().resolve(RUN_FILE_NAME);
@@ -88,38 +65,108 @@ public class LogExtractor {
 			var dataFile = dataDirectory.resolve(runLog.dataName() + ".json");
 			var solutionLog = readSolutionLog(solutionFile, dataFile);
 
-			var csvIndex = mainCSV.addRecord();
-			mainCSV.setField(csvIndex, "model", runLog.modelName());
-			mainCSV.setField(csvIndex, "modelversion", runLog.modelVersion());
-			mainCSV.setField(csvIndex, "instance", runLog.dataName());
-			mainCSV.setField(csvIndex, "run", m.run());
+			var csvRowIndex = mainCSV.addNewRow();
+			mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.Model, runLog.modelName());
+			mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.Version, runLog.modelVersion());
+			mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.Instance, runLog.dataName());
+			mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.Run, m.run());
+
+			mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.PreprocessingTime, runLog.preprocessingTime());
 
 			if (backendLog != null) {
-				if (backendLog.modelSize() != null) {
-					mainCSV.setField(csvIndex, "modelSizeMB", backendLog.modelSize().megabytes());
 
-					if (backendLog.modelSize().original() != null) {
-						mainCSV.setField(csvIndex, "constraints", backendLog.modelSize().original().columns());
-						mainCSV.setField(csvIndex, "variables", backendLog.modelSize().original().rows());
-						mainCSV.setField(csvIndex, "coefficients", backendLog.modelSize().original().nonzeros());
+				if (backendLog.modelSize() instanceof BackendParser.ModelSize model) {
+					mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.MemorySize, model.megabytes());
+
+					mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.CompileCrash, //
+							model.original() == null);
+					if (model.original() instanceof BackendParser.ElementCount elements) {
+						mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.OriginalConstraints, //
+								elements.columns());
+						mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.OriginalVariables, //
+								elements.rows());
+						mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.OriginalCoefficients, //
+								elements.nonzeros());
+
 					}
 
-					if (backendLog.modelSize().presolve() != null) {
-						mainCSV.setField(csvIndex, "p-constraints", backendLog.modelSize().presolve().columns());
-						mainCSV.setField(csvIndex, "p-variables", backendLog.modelSize().presolve().rows());
-						mainCSV.setField(csvIndex, "p-coefficients", backendLog.modelSize().presolve().nonzeros());
+					if (model.presolve() instanceof BackendParser.ElementCount elements) {
+						mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.PresolveTime, //
+								model.presolveTime());
+
+						mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.PresolvedConstraints, //
+								elements.columns());
+						mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.PresolvedVariables, //
+								elements.rows());
+						mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.PresolvedCoefficients, //
+								elements.nonzeros());
 					}
+
 				}
+
+				if (backendLog.compile() instanceof BackendParser.CompileData data) {
+					var firstPass = data.firstPass() != null ? data.firstPass().doubleValue() : 0;
+					var secondPass = data.secondPass() != null ? data.secondPass().doubleValue() : 0;
+					var totalCompileTime = secondPass > 0 ? secondPass : firstPass;
+
+					mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.CompileTimePassOne, //
+							firstPass);
+					mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.CompileTimePassTwo, //
+							secondPass);
+					mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.TotalCompileTime, //
+							totalCompileTime);
+					mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.CompileOptimized, //
+							data.secondPass() != null);
+
+				}
+
+				if (backendLog.solutions() instanceof BackendParser.SolutionData data) {
+					var hasSolutions = data.numberOfSolutions() > 0;
+					mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.NumberOfSolutions, //
+							data.numberOfSolutions());
+
+					if (hasSolutions) {
+						mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.BestBound, //
+								data.bestBound());
+						mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.BestObjective, //
+								data.bestObjective());
+						mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.MIPGap, //
+								data.gap());
+					} else {
+						mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.BestBound, //
+								data.bestBound());
+						mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.BestObjective, //
+								data.bestObjective());
+						mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.MIPGap, //
+								data.gap());
+					}
+
+				}
+
+				mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.SolveCrash, //
+						backendLog.logComplete());
+			}
+
+			if (solutionLog != null) {
+//				if(solutionLog.)
 			}
 
 //			System.out.println(m.folder);
 		}
 
-		mainCSV.save();
+		mainCSV.write(extractionDirectory.resolve("main.csv"));
 
 	}
 
-	public static record ModelSelection(String instance, int run, Path folder) {
+	public static record ModelSelection(String instance, int run, Path folder) implements Comparable<ModelSelection> {
+
+		@Override
+		public int compareTo(ModelSelection o) {
+			var compare = instance.compareToIgnoreCase(o.instance);
+			if (compare != 0)
+				return compare;
+			return run - o.run;
+		}
 	}
 
 	private static Collection<ModelSelection> selectData(Path dataFolder) throws IOException {

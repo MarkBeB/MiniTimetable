@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
-import org.tud.minitimetable.util.Parser;
+import org.tud.minitimetable.eval.util.Parser;
 
 public class ValidatorRunner {
 
@@ -75,8 +75,8 @@ public class ValidatorRunner {
 		@Override
 		protected String readNextLine() throws IOException {
 			currentLine = super.readNextLine();
-			if (currentLine != null)
-				System.out.println(currentLine);
+//			if (currentLine != null)
+//				System.out.println(currentLine);
 			return currentLine;
 		}
 

@@ -1,36 +1,57 @@
-package org.tud.minitimetable.collector;
+package org.tud.minitimetable.eval.extract;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 import java.util.regex.Pattern;
 
-import org.tud.minitimetable.util.Parser;
+import org.tud.minitimetable.eval.util.Parser;
+import org.tud.minitimetable.eval.util.Util;
 
 public class BackendParser extends Parser<BackendParser.BackendData> {
 
-	public static record BackendData(ModelSize modelSize) {
+	public static record BackendData(ModelSize modelSize, SolutionData solutions, CompileData compile,
+			boolean logComplete) {
 	}
 
-	public static record ModelSize(int megabytes, ElementCount original, ElementCount presolve) {
+	public static record ModelSize(int megabytes, ElementCount original, Double presolveTime, ElementCount presolve) {
+	}
+
+	/**
+	 * @param firstPass  duration in seconds or null
+	 * @param secondPass duration in seconds or null
+	 */
+	public static record CompileData(Double firstPass, Double secondPass) {
 	}
 
 	public static record ElementCount(int rows, int columns, int nonzeros) {
 	}
 
-	public static record SolutionData(BigDecimal bestObjective, BigDecimal bestBound, Double gap) {
+	public static record SolutionData(int numberOfSolutions, BigDecimal bestObjective, BigDecimal bestBound,
+			Double gap) {
 	}
 
-	private Collection<Double> convertTimeS;
+	private Double compileFirstPass;
+	private Double compileSecondPass;
+
 	private int modelSizeInMB;
 
 	private ElementCount start;
 	private ElementCount presolve;
 
-	private int solutionsFound;
-	private SolutionData bestSolution;
+	private Double presolveTime;
+
+	private int solutionsFound = 0;
+	private BigDecimal bestObjective;
+	private BigDecimal bestBound;
+	private Double mipGap;
+
+	private boolean timeLimitReached;
+	private double totalTimeS;
+
+	private boolean logComplete = false;
 
 	public BackendParser(BufferedReader reader) {
 		super(reader);
@@ -46,16 +67,27 @@ public class BackendParser extends Parser<BackendParser.BackendData> {
 		parseModelSize();
 
 		while (currentLineNotNull()) {
-			if (currentLineNotNull() && getCurrentLine().equals("Starting NoRel heuristic"))
+			if (currentLineNotNull() && getCurrentLine().equals("Starting NoRel heuristic")) {
 				parseNoRelHeuristic();
 
-			if (currentLineNotNull() && getCurrentLine().startsWith("Solution count"))
+			} else if (currentLineNotNull() && getCurrentLine().startsWith("Solution count")) {
 				parseSolutionCount();
 
-			if (currentLineNotNull() && getCurrentLine().startsWith("Best objective"))
+			} else if (currentLineNotNull() && getCurrentLine().startsWith("Time limit reached")) {
+				this.timeLimitReached = true;
+				readNextLine();
+
+			} else if (currentLineNotNull() && getCurrentLine().startsWith("Best objective")) {
 				parseBestSolution();
 
-			readNextLine();
+			} else if (currentLineNotNull() && getCurrentLine().startsWith("   Done (overall")) {
+				parseOverallTime();
+				logComplete = true;
+
+			} else {
+				readNextLine();
+
+			}
 		}
 
 // Converting to old FlatZinc ... done (41.77 s)
@@ -100,23 +132,14 @@ public class BackendParser extends Parser<BackendParser.BackendData> {
 			String v2 = data[1].substring(data[1].lastIndexOf(" ")).trim();
 			String v3 = data[2].substring(data[2].lastIndexOf(" ")).replace("%", "").trim();
 
-			BigDecimal bestObjective = v1.equals("-") ? null : new BigDecimal(v1);
-			BigDecimal bestBound = v2.equals("-") ? null : new BigDecimal(v2);
-			Double gap = parseToDouble(v3);
-			if (gap != null)
-				gap = gap * 0.01d;
-
-			this.bestSolution = new SolutionData(bestObjective, bestBound, gap);
+			this.bestObjective = v1.equals("-") ? null : new BigDecimal(v1);
+			this.bestBound = v2.equals("-") ? null : new BigDecimal(v2);
+			this.mipGap = parseToDouble(v3);
+			if (mipGap != null)
+				mipGap = mipGap * 0.01d;
 
 			readNextLine();
 		}
-	}
-
-	private void parseConverter() throws IOException {
-		parseMiniZincToFlatZincTIme();
-		parseModelSize();
-
-		System.out.println("ui!");
 	}
 
 	private void parseModelSize() throws NumberFormatException, IOException {
@@ -145,6 +168,11 @@ public class BackendParser extends Parser<BackendParser.BackendData> {
 		}
 
 		while (readNextLine() != null) {
+			if (getCurrentLine().startsWith("Presolve time:")) {
+				var presolveTime = getCurrentLine().substring(getCurrentLine().lastIndexOf(" ") + 1);
+				this.presolveTime = Util.convertToSeconds(presolveTime);
+			}
+
 			if (getCurrentLine().startsWith("Presolved")) {
 				Pattern pattern = Pattern
 						.compile("(?<rows>\\d+) rows, (?<columns>\\d+) columns, (?<nonzeros>\\d+) nonzeros");
@@ -161,11 +189,12 @@ public class BackendParser extends Parser<BackendParser.BackendData> {
 	private void parseMiniZincToFlatZincTIme() throws IOException {
 		Pattern pattern = Pattern.compile("^\\s*done\\s*\\((?<time>\\d+\\.\\d+\\s*\\w+)\\)(?<last>, max stack depth)?");
 
-		Collection<String> times = new ArrayList<>(2);
+		List<String> times = new ArrayList<>(2);
 
 		while (getCurrentLine() != null) {
 			if (getCurrentLine().startsWith("Converting to old FlatZinc")) {
 				var matcher = pattern.matcher(readNextLine());
+
 				if (!matcher.find())
 					throw new IllegalStateException();
 				var time = matcher.group("time");
@@ -181,15 +210,42 @@ public class BackendParser extends Parser<BackendParser.BackendData> {
 
 				} else {
 					times.add(time);
+
 				}
 
 			}
+
 			readNextLine();
 		}
 
-		convertTimeS = times.stream().map(this::secondsToMS).toList();
+		if (times.size() > 0)
+			this.compileFirstPass = secondsToMS(times.get(0));
+
+		if (times.size() > 1)
+			this.compileSecondPass = secondsToMS(times.get(1));
+
+		if (times.size() > 2)
+			throw new IllegalStateException();
+
+//		convertTimeS = times.stream().map(this::secondsToMS).toList();
 	}
 
+	private void parseOverallTime() throws IOException {
+		if (getCurrentLine().startsWith("   Done (overall")) {
+			Pattern pattern = Pattern.compile("^\s+Done\\s+\\(overall time\\s+(?<time>\\d+(\\.\\d+)?)\\s+s\\)\\.$");
+			var matcher = pattern.matcher(getCurrentLine());
+			if (!matcher.find())
+				throw new IllegalStateException();
+			this.totalTimeS = Double.parseDouble(matcher.group("time"));
+			readNextLine();
+		}
+	}
+
+	/**
+	 *
+	 * @param input
+	 * @return
+	 */
 	private Double secondsToMS(String input) {
 		String cleanInput = input.trim().toLowerCase().replace(" ", "");
 		Double seconds;
@@ -222,7 +278,12 @@ public class BackendParser extends Parser<BackendParser.BackendData> {
 //		if (convertTimeS == null || start == null || presolve == null || bestSolution == null)
 //			return null;
 
-		return new BackendData(new ModelSize(this.modelSizeInMB, start, presolve));
+		return new BackendData( //
+				new ModelSize(this.modelSizeInMB, start, presolveTime, presolve), //
+				new SolutionData(solutionsFound, bestObjective, bestBound, mipGap), //
+				new CompileData(compileFirstPass, compileSecondPass), //
+				logComplete //
+		);
 	}
 
 }

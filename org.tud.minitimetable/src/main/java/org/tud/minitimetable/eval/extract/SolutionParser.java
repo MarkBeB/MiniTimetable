@@ -1,10 +1,14 @@
-package org.tud.minitimetable.collector;
+package org.tud.minitimetable.eval.extract;
+
+import static org.tud.minitimetable.DefaultLocations.getIHTPValidatorFile;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
+import org.tud.minitimetable.extern.validator.ValidatorResult;
+import org.tud.minitimetable.extern.validator.ValidatorRunner;
 import org.tud.minitimetable.model.util.SolutionFileReader;
 
 public class SolutionParser {
@@ -34,27 +38,25 @@ public class SolutionParser {
 		var reader = new SolutionFileReader();
 		var solutions = reader.parseSolutionFile(solutionFile);
 
-		if (solutions.size() == 0) {
-			counter++;
-			System.out.println("NO SOLUTION: " + counter);
+		if (solutions.size() == 0)
+			return null;
+
+		var best = solutions.getLast();
+		var file = solutionFile.resolveSibling(reader.constructNameForSolution(best));
+		if (!Files.exists(file))
+			reader.writeToFile(best, file);
+
+		ValidatorRunner validator = new ValidatorRunner(getIHTPValidatorFile(), solutionFile.getParent());
+		ValidatorResult validatorResult = null;
+
+		try {
+			validatorResult = validator.run(dataFile, file);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			return null; // TODO
 		}
 
-//			return null;
-
-//		var best = solutions.getLast();
-//		var file = solutionFile.resolveSibling(reader.constructNameForSolution(best));
-//		if (!Files.exists(file))
-//			reader.writeToFile(best, file);
-//
-//		ValidatorRunner validator = new ValidatorRunner(getIHTPValidatorFile(), solutionFile.getParent());
-//		ValidatorResult validatorResult = null;
-//
-//		try {
-//			validatorResult = validator.run(dataFile, file);
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//			return null; // TODO
-//		}
+		// TODO
 
 		return null;
 	}

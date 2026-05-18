@@ -1,4 +1,4 @@
-package org.tud.minitimetable.collector.util;
+package org.tud.minitimetable.eval.util;
 
 import java.util.List;
 import java.util.function.ToDoubleFunction;

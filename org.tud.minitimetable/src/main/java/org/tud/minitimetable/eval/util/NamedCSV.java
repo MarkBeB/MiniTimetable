@@ -1,18 +1,26 @@
-package org.tud.minitimetable.collector.util;
+package org.tud.minitimetable.eval.util;
 
 import java.text.DecimalFormat;
 import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-public class NamedCSV<H extends Enum<H> & org.tud.minitimetable.collector.util.NamedCSV.CSVHeader> extends CSV {
+public class NamedCSV<H extends Enum<H> & org.tud.minitimetable.eval.util.NamedCSV.CSVHeader> extends CSV {
 
 	public static interface CSVHeader {
 		String getColumnName();
 	}
 
 	public static interface NamedRecord<H> extends CSVRecord {
-		String getField(H column);
+		String getCell(H column);
 
-		void setField(H name, Object value);
+		void setCell(H name, Object value);
+	}
+
+	public NamedCSV(Class<H> headerRef) {
+		this(headerRef, null);
 	}
 
 	public NamedCSV(Class<H> headerRef, DecimalFormat formatter) {
@@ -37,6 +45,12 @@ public class NamedCSV<H extends Enum<H> & org.tud.minitimetable.collector.util.N
 		setCellValue(row, column.getColumnName(), value);
 	}
 
+	@Override
+	public Stream<NamedRecord<H>> stream() {
+		return StreamSupport.stream(
+				Spliterators.spliterator(iteratorNamed(), data.size(), Spliterator.ORDERED & Spliterator.SIZED), false);
+	}
+
 	public Iterator<NamedRecord<H>> iteratorNamed() {
 		return new Iterator<>() {
 			private final Iterator<CSVRecord> superIterator = NamedCSV.super.iterator();
@@ -58,33 +72,33 @@ public class NamedCSV<H extends Enum<H> & org.tud.minitimetable.collector.util.N
 					}
 
 					@Override
-					public String getField(String name) {
-						return record.getField(name);
+					public String getCell(String name) {
+						return record.getCell(name);
 					}
 
 					@Override
-					public String getField(H column) {
-						return record.getField(column.getColumnName());
+					public String getCell(H column) {
+						return record.getCell(column.getColumnName());
 					}
 
 					@Override
-					public String getField(int colIndex) {
-						return record.getField(colIndex);
+					public String getCell(int colIndex) {
+						return record.getCell(colIndex);
 					}
 
 					@Override
-					public void setField(String name, Object value) {
-						record.setField(name, value);
+					public void setCell(String name, Object value) {
+						record.setCell(name, value);
 					}
 
 					@Override
-					public void setField(H column, Object value) {
-						record.setField(column.getColumnName(), value);
+					public void setCell(H column, Object value) {
+						record.setCell(column.getColumnName(), value);
 					}
 
 					@Override
-					public void setField(int colIndex, Object value) {
-						record.setField(colIndex, value);
+					public void setCell(int colIndex, Object value) {
+						record.setCell(colIndex, value);
 					}
 
 				};

@@ -1,4 +1,4 @@
-package org.tud.minitimetable.collector.util;
+package org.tud.minitimetable.eval.util;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -28,17 +28,17 @@ public class CSV implements Iterable<CSV.CSVRecord> {
 
 		String[] getRow();
 
-		String getField(String name);
+		String getCell(String name);
 
-		String getField(int colIndex);
+		String getCell(int colIndex);
 
-		void setField(String name, Object value);
+		void setCell(String name, Object value);
 
-		void setField(int colIndex, Object value);
+		void setCell(int colIndex, Object value);
 	}
 
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
-	public static final String DEFAULT_DELIMITER = ",";
+	public static final String DEFAULT_DELIMITER = ";";
 
 	private String[] columnHeader = new String[0];
 	private final Map<String, Integer> headerToIndex = new HashMap<>();
@@ -52,6 +52,10 @@ public class CSV implements Iterable<CSV.CSVRecord> {
 			formatter = getDefaultDecimalFormatter();
 
 		this.numberFormat = Objects.requireNonNull(formatter, "formatter");
+	}
+
+	public void read(Path file, boolean hasHeader) throws IOException {
+		this.read(file, DEFAULT_CHARSET, DEFAULT_DELIMITER, hasHeader);
 	}
 
 	public void read(Path file, Charset charset, String delimiter, boolean hasHeader) throws IOException {
@@ -89,6 +93,10 @@ public class CSV implements Iterable<CSV.CSVRecord> {
 		}
 	}
 
+	public void write(Path file) throws IOException {
+		this.write(file, DEFAULT_CHARSET, DEFAULT_DELIMITER);
+	}
+
 	public void write(Path file, Charset charset, String delimiter) throws IOException {
 		Files.createDirectories(file.getParent());
 
@@ -103,6 +111,9 @@ public class CSV implements Iterable<CSV.CSVRecord> {
 
 			StringBuilder builder = new StringBuilder();
 			for (String[] record : this.data) {
+				if (builder.length() > 0)
+					writer.newLine();
+
 				builder.setLength(0);
 
 				if (record == null) {
@@ -123,7 +134,6 @@ public class CSV implements Iterable<CSV.CSVRecord> {
 				if (builder.length() > 0) {
 					builder.delete(builder.length() - delimiter.length(), builder.length());
 					writer.append(builder.toString());
-					writer.newLine();
 				}
 			}
 		}
@@ -176,6 +186,10 @@ public class CSV implements Iterable<CSV.CSVRecord> {
 		return columnHeader[col];
 	}
 
+	public String[] getColumnNames() {
+		return Arrays.copyOf(this.columnHeader, this.columnHeader.length);
+	}
+
 	public void clearColumnNames() {
 		this.columnHeader = new String[0];
 		updateHeaderIndex();
@@ -185,12 +199,16 @@ public class CSV implements Iterable<CSV.CSVRecord> {
 		if (colIndex < 0 || this.numberOfColumns <= colIndex)
 			throw new IllegalArgumentException();
 
+		if (rowIndex < 0)
+			throw new IllegalArgumentException();
+
 		if (rowIndex > data.size())
 			return null;
 
 		String[] row = data.get(rowIndex);
 		if (row == null)
 			return null;
+
 		return row[colIndex];
 	}
 
@@ -198,14 +216,17 @@ public class CSV implements Iterable<CSV.CSVRecord> {
 		if (colIndex < 0 || this.numberOfColumns <= colIndex)
 			throw new IllegalArgumentException();
 
-		if (rowIndex > data.size()) {
+		if (rowIndex < 0)
+			throw new IllegalArgumentException();
+
+		if (rowIndex >= data.size()) {
 			for (var i = data.size(); i <= rowIndex; ++i)
 				data.add(null);
 		}
 
 		String[] row = data.get(rowIndex);
 		if (row == null) {
-			row = new String[numberOfColumns];
+			row = buildEntry();
 			data.set(rowIndex, row);
 		}
 
@@ -218,6 +239,9 @@ public class CSV implements Iterable<CSV.CSVRecord> {
 	}
 
 	protected String[] getRow(int rowIndex) {
+		if (rowIndex < 0)
+			throw new IllegalArgumentException();
+
 		if (rowIndex > data.size()) {
 			for (var i = data.size(); i <= rowIndex; ++i)
 				data.add(null);
@@ -225,11 +249,52 @@ public class CSV implements Iterable<CSV.CSVRecord> {
 
 		String[] row = data.get(rowIndex);
 		if (row == null) {
-			row = new String[numberOfColumns];
+			row = buildEntry();
 			data.set(rowIndex, row);
 		}
 
 		return row;
+	}
+
+	public int addNewRow() {
+		var row = buildEntry();
+		var index = data.size();
+		data.add(row);
+		return index;
+	}
+
+	public void clearRow(int rowIndex) {
+		if (rowIndex < 0)
+			throw new IllegalArgumentException();
+
+		if (data.size() < rowIndex)
+			return;
+
+		data.remove(rowIndex);
+	}
+
+	public void clearCellValue(int rowIndex, int colIndex) {
+		if (colIndex < 0 || this.numberOfColumns <= colIndex)
+			throw new IllegalArgumentException();
+
+		if (rowIndex < 0)
+			throw new IllegalArgumentException();
+
+		if (data.size() < rowIndex)
+			return;
+
+		String[] row = data.get(rowIndex);
+		if (row == null)
+			return;
+
+		row[colIndex] = null;
+
+		boolean allNull = true;
+		for (var n : row)
+			allNull &= n == null;
+
+		if (allNull)
+			data.remove(rowIndex);
 	}
 
 	public void setCellValue(int rowIndex, String colName, Object value) {
@@ -254,7 +319,8 @@ public class CSV implements Iterable<CSV.CSVRecord> {
 	}
 
 	public Stream<? extends CSVRecord> stream() {
-		return StreamSupport.stream(Spliterators.spliterator(iterator(), data.size(), Spliterator.ORDERED), false);
+		return StreamSupport.stream(
+				Spliterators.spliterator(iterator(), data.size(), Spliterator.ORDERED & Spliterator.SIZED), false);
 	}
 
 	@Override
@@ -265,8 +331,9 @@ public class CSV implements Iterable<CSV.CSVRecord> {
 	protected Iterator<CSVRecord> buildIterator() {
 		return new Iterator<>() {
 
-			private final Iterator<String[]> iterator = data.iterator();
+//			private final Iterator<String[]> iterator = data.iterator();
 			private int currentRowIndex = 0;
+			private final int maxRow = CSV.this.data.size();
 
 			@Override
 			public CSVRecord next() {
@@ -285,22 +352,22 @@ public class CSV implements Iterable<CSV.CSVRecord> {
 					}
 
 					@Override
-					public String getField(String name) {
+					public String getCell(String name) {
 						return CSV.this.getCellValue(rowIndex, name);
 					}
 
 					@Override
-					public String getField(int colIndex) {
+					public String getCell(int colIndex) {
 						return CSV.this.getCellValue(rowIndex, colIndex);
 					}
 
 					@Override
-					public void setField(String name, Object value) {
+					public void setCell(String name, Object value) {
 						CSV.this.setCellValue(rowIndex, name, value);
 					}
 
 					@Override
-					public void setField(int colIndex, Object value) {
+					public void setCell(int colIndex, Object value) {
 						CSV.this.setCellValue(rowIndex, colIndex, value);
 					}
 
@@ -309,7 +376,7 @@ public class CSV implements Iterable<CSV.CSVRecord> {
 
 			@Override
 			public boolean hasNext() {
-				return iterator.hasNext();
+				return currentRowIndex < maxRow;
 			}
 		};
 	}
@@ -347,6 +414,12 @@ public class CSV implements Iterable<CSV.CSVRecord> {
 					String.join(", ", this.columnHeader), String.join(", ", header) //
 			));
 		}
+	}
+
+	protected String[] buildEntry() {
+		if (numberOfColumns <= 0)
+			throw new IllegalStateException();
+		return new String[numberOfColumns];
 	}
 
 	protected void readEntry(int rowIndex, String[] record) throws IOException {
