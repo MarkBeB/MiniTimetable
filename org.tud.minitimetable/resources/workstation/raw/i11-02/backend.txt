@@ -1,0 +1,712 @@
+MiniZinc to FlatZinc converter, version 2.9.5, build 2281171821
+Copyright (C) 2014-2026 Monash University, NICTA, Data61
+Parsing file(s) /home/mblank/experiments/model/v4/AllConstraints.mzn', 'cmd:/QuadrIntSolverConfig=true', 'cmd:/QuadrFloatSolverConfig=true', '/home/mblank/experiments/out/i11-02/i11.dzn' ...
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/stdlib.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/stdlib/stdlib_internal.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/output.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/output/array2d_bool.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/output/gantt.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/stdlib/stdlib_random.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/stdlib/stdlib_debug.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/stdlib/stdlib_reflect.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/stdlib/stdlib_ite.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/stdlib/stdlib_language.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/stdlib/stdlib_sort.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/stdlib/stdlib_opt.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/stdlib/stdlib_ann.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/stdlib/stdlib_enum.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/stdlib/stdlib_string.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/stdlib/stdlib_set.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/stdlib/stdlib_logic.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/stdlib/stdlib_array.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/stdlib/stdlib_coercion.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/stdlib/stdlib_math.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/stdlib/stdlib_compare.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/flatzinc_builtins.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/solver_redefinitions.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/table.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_table_int_opt.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_table_int_reif.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/linear/fzn_table_int.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_table_bool_reif.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_table_bool.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_array_set_intersect.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_array_set_union.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_array_opt_int_union.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_array_int_union.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/lex_lesseq.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_lex_lesseq_set_reif.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_lex_lesseq_set.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_lex_lesseq_int_reif.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/linear/fzn_lex_lesseq_int.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_lex_lesseq_float_reif.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/linear/fzn_lex_lesseq_float.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_lex_lesseq_bool_reif.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/linear/fzn_lex_lesseq_bool.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/lex_less.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_lex_less_set_reif.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_lex_less_set.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_lex_less_int_reif.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/linear/fzn_lex_less_int.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_lex_less_float_reif.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/linear/fzn_lex_less_float.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_lex_less_bool_reif.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/linear/fzn_lex_less_bool.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_if_then_else_partiality.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_if_then_else_var_set.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_if_then_else_set.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_if_then_else_var_opt_float.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_if_then_else_var_float.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_if_then_else_opt_float.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/linear/fzn_if_then_else_float.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_if_then_else_var_opt_bool.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_if_then_else_var_bool.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_if_then_else_opt_bool.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_if_then_else_bool.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_if_then_else_var_opt_int.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_if_then_else_var_int.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_if_then_else_opt_int.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/linear/fzn_if_then_else_int.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/count_fn.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/count_lt.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_count_lt_par_reif.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_count_lt_reif.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_count_lt_par.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_count_lt.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/count_gt.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_count_gt_reif.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_count_gt_par_reif.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_count_gt.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_count_gt_par.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/count_neq.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_count_neq_reif.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_count_neq_par_reif.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_count_neq.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_count_neq_par.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/count_leq.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_count_leq_reif.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_count_leq_par_reif.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_count_leq.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_count_leq_par.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/count_geq.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_count_geq_reif.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_count_geq_par_reif.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_count_geq.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_count_geq_par.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/count_eq.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_count_eq_par_reif.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_count_eq_reif.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_count_eq_par.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/fzn_count_eq.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/redefinitions-2.7.1.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/redefinitions-2.5.2.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/redefinitions-2.3.3.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/linear/redefinitions-2.2.1.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/redefinitions-2.1.1.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/redefinitions-2.1.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/linear/redefinitions-2.0.2.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/linear/redefinitions-2.0.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/linear/redefinitions.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/std/nosets.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/linear/redefs_lin_halfreifs.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/linear/redefs_lin_imp.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/linear/redefs_lin_reifs.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/linear/domain_encodings.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/linear/redefs_bool_imp.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/linear/redefs_bool_reifs.mzn'
+processing file '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/linear/options.mzn'
+processing file '/home/mblank/experiments/model/v4/AllConstraints.mzn'
+processing file '/home/mblank/experiments/model/v4/OutJsonFormat.mzn'
+processing file '/home/mblank/experiments/model/v4/constraints/S8.mzn'
+processing file '/home/mblank/experiments/model/v4/constraints/S7.mzn'
+processing file '/home/mblank/experiments/model/v4/constraints/S6.mzn'
+processing file '/home/mblank/experiments/model/v4/constraints/S5.mzn'
+processing file '/home/mblank/experiments/model/v4/constraints/S4v2.mzn'
+processing file '/home/mblank/experiments/model/v4/constraints/S3v4.mzn'
+processing file '/home/mblank/experiments/model/v4/constraints/S2v3.mzn'
+processing file '/home/mblank/experiments/model/v4/constraints/S1v4.mzn'
+processing file '/home/mblank/experiments/model/v4/constraints/H8.mzn'
+processing file '/home/mblank/experiments/model/v4/constraints/H7.mzn'
+processing file '/home/mblank/experiments/model/v4/constraints/H6.mzn'
+processing file '/home/mblank/experiments/model/v4/constraints/H5.mzn'
+processing file '/home/mblank/experiments/model/v4/constraints/H4.mzn'
+processing file '/home/mblank/experiments/model/v4/constraints/H3.mzn'
+processing file '/home/mblank/experiments/model/v4/constraints/H2.mzn'
+processing file '/home/mblank/experiments/model/v4/constraints/H1.mzn'
+processing file '/home/mblank/experiments/model/v4/IHTP-Model.mzn'
+processing file '/home/mblank/experiments/model/v4/model/VarFunctions.mzn'
+processing file '/home/mblank/experiments/model/v4/model/ParFunctions.mzn'
+processing file '/home/mblank/experiments/model/v4/model/GlobalVariables.mzn'
+processing file '/home/mblank/experiments/model/v4/model/Parameters.mzn'
+processing data file '/home/mblank/experiments/out/i11-02/i11.dzn'
+ done parsing (0.03 s)
+Flattening ...
+	CompilePass: Flatten with '/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64/share/minizinc/linear' library ...
+MIP domains ...
+ 27311 POSTs [ 26588,0,0,0,0,93,0,0,0,0, ], LINEQ [ 29,0,0,0,0,0,0,0,630, ], 965 / 994 vars, 965 cliques, 2 / 26.172 / 35 NSubIntv m/a/m, 0 / 0 / 0 SubIntvSize m/a/m, 630+335(335) clq eq_encoded 0.5--2 abs coefs
+ done (143.62 s)
+Optimizing ... done (161.18 s)
+Converting to old FlatZinc ... done (165.42 s)
+ done (165.42 s)
+ done (165.45 s), max stack depth 36
+Maximum memory 2965 Mbytes.
+Set parameter Username
+Set parameter LicenseID to value 2799693
+Academic license - for non-commercial use only - expires 2027-03-29
+      % SOLVING PHASE
+MIP solver plugin, compiled Jan 23 2026, using: MIP wrapper for Gurobi library 13.0.1.  Compiled  Jan 23 2026  08:26:40
+  MIP: objective variable index (0-based): 8
+  MIPWrapper: adding the 738998 Phase-1 variables... done.
+  MIPSolverinstance: adding constraints... done, 950796 rows && 738998 columns in total.
+    MIPSolverinstance: this is a MINimization problem.
+    MIPSolverinstance: bounds for the objective function: 0, 8e+08
+Gurobi Optimizer version 13.0.1 build v13.0.1rc0 (linux64 - "Debian GNU/Linux 12 (bookworm)")
+
+CPU model: AMD EPYC 7763 64-Core Processor, instruction set [SSE2|AVX|AVX2]
+Thread count: 64 physical cores, 128 logical processors, using up to 4 threads
+
+Non-default parameters:
+TimeLimit  7200
+FeasibilityTol  1e-08
+IntFeasTol  1e-08
+MIPGap  1e-08
+NodefileStart  0.5
+NoRelHeurTime  180
+NonConvex  2
+Threads  4
+OutputFlag  0
+
+Optimize a model with 950796 rows, 738998 columns and 3386498 nonzeros (Min)
+Model fingerprint: 0xb3147ea1
+Model has 1 linear objective coefficients
+Model has 4575 quadratic constraints
+Variable types: 0 continuous, 738998 integer (508594 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 5e+02]
+  QMatrix range    [1e+00, 1e+00]
+  QLMatrix range   [1e+00, 1e+00]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 8e+08]
+  RHS range        [1e+00, 4e+04]
+
+Presolve removed 332758 rows and 573945 columns (presolve time = 5s)...
+Presolve removed 335557 rows and 575678 columns (presolve time = 10s)...
+Presolve removed 340558 rows and 581920 columns (presolve time = 15s)...
+Presolve removed 396835 rows and 619768 columns
+Presolve time: 15.79s
+Presolved: 572261 rows, 123805 columns, 2132454 nonzeros
+Variable types: 0 continuous, 123805 integer (110461 binary)
+Performing another presolve...
+Starting NoRel heuristic
+Found phase-1 solution: relaxation 2778
+Found phase-1 solution: relaxation 2457
+Found phase-1 solution: relaxation 1349
+Found phase-1 solution: relaxation 960
+Found phase-1 solution: relaxation 932
+Found phase-1 solution: relaxation 761
+Found phase-1 solution: relaxation 754
+Found phase-1 solution: relaxation 603
+Found phase-1 solution: relaxation 447
+Found phase-1 solution: relaxation 396
+Found phase-1 solution: relaxation 310
+Found phase-1 solution: relaxation 271
+Found phase-1 solution: relaxation 270
+Found phase-1 solution: relaxation 233
+Found phase-1 solution: relaxation 224
+Found phase-1 solution: relaxation 211
+Elapsed time for NoRel heuristic: 6s (best bound 24520.3)
+Found phase-1 solution: relaxation 195
+Found phase-1 solution: relaxation 187
+Found phase-1 solution: relaxation 185
+Found phase-1 solution: relaxation 176
+Found phase-1 solution: relaxation 163
+Found phase-1 solution: relaxation 155
+Found phase-1 solution: relaxation 148
+Found phase-1 solution: relaxation 142
+Found phase-1 solution: relaxation 126
+Found phase-1 solution: relaxation 125
+Elapsed time for NoRel heuristic: 11s (best bound 24571.5)
+Found phase-1 solution: relaxation 110
+Found phase-1 solution: relaxation 103
+Found phase-1 solution: relaxation 99
+Found phase-1 solution: relaxation 98
+Found phase-1 solution: relaxation 97
+Found phase-1 solution: relaxation 96
+Found phase-1 solution: relaxation 94
+Found phase-1 solution: relaxation 89
+Elapsed time for NoRel heuristic: 17s (best bound 24690.6)
+Found phase-1 solution: relaxation 86
+Found phase-1 solution: relaxation 85
+Found phase-1 solution: relaxation 81
+Found phase-1 solution: relaxation 77
+Found phase-1 solution: relaxation 76
+Found phase-1 solution: relaxation 75
+Found phase-1 solution: relaxation 74
+Found phase-1 solution: relaxation 73
+Found phase-1 solution: relaxation 72
+Elapsed time for NoRel heuristic: 23s (best bound 24766.3)
+Found phase-1 solution: relaxation 71
+Found phase-1 solution: relaxation 66
+Found phase-1 solution: relaxation 65
+Elapsed time for NoRel heuristic: 28s (best bound 24857.8)
+Found phase-1 solution: relaxation 64
+Found phase-1 solution: relaxation 57
+Elapsed time for NoRel heuristic: 34s (best bound 24935.9)
+Elapsed time for NoRel heuristic: 43s (best bound 24937.3)
+Elapsed time for NoRel heuristic: 53s (best bound 24937.3)
+Found phase-1 solution: relaxation 45
+Elapsed time for NoRel heuristic: 59s (best bound 24937.3)
+Found phase-1 solution: relaxation 44
+Elapsed time for NoRel heuristic: 65s (best bound 24937.4)
+Found phase-1 solution: relaxation 32
+Found phase-1 solution: relaxation 31
+Elapsed time for NoRel heuristic: 74s (best bound 24937.7)
+Elapsed time for NoRel heuristic: 82s (best bound 24939.1)
+Found phase-1 solution: relaxation 28
+Found phase-1 solution: relaxation 25
+Elapsed time for NoRel heuristic: 93s (best bound 24940.7)
+Found phase-1 solution: relaxation 14
+Found phase-1 solution: relaxation 8
+Elapsed time for NoRel heuristic: 103s (best bound 24940.7)
+Found phase-1 solution: relaxation 3
+Elapsed time for NoRel heuristic: 109s (best bound 24940.7)
+Found phase-1 solution: relaxation 1
+Found phase-1 solution: relaxation 0
+Found heuristic solution: objective 1.000489e+08
+Transition to phase 2
+Elapsed time for NoRel heuristic: 118s (best bound 24940.7)
+Found heuristic solution: objective 1.000378e+08
+Found heuristic solution: objective 99044.000000
+Found heuristic solution: objective 91337.000000
+Found heuristic solution: objective 91224.000000
+Found heuristic solution: objective 91100.000000
+Found heuristic solution: objective 90997.000000
+Found heuristic solution: objective 89285.000000
+Found heuristic solution: objective 89211.000000
+Found heuristic solution: objective 89202.000000
+Found heuristic solution: objective 89008.000000
+Found heuristic solution: objective 88955.000000
+Found heuristic solution: objective 88902.000000
+Found heuristic solution: objective 88439.000000
+Found heuristic solution: objective 88427.000000
+Found heuristic solution: objective 88299.000000
+Found heuristic solution: objective 88288.000000
+Found heuristic solution: objective 88079.000000
+Found heuristic solution: objective 86773.000000
+Found heuristic solution: objective 86424.000000
+Found heuristic solution: objective 86399.000000
+Found heuristic solution: objective 85003.000000
+Found heuristic solution: objective 84246.000000
+Elapsed time for NoRel heuristic: 123s (best bound 24940.7)
+Found heuristic solution: objective 84153.000000
+Found heuristic solution: objective 84101.000000
+Found heuristic solution: objective 84051.000000
+Found heuristic solution: objective 83943.000000
+Found heuristic solution: objective 83928.000000
+Found heuristic solution: objective 83822.000000
+Found heuristic solution: objective 83803.000000
+Found heuristic solution: objective 83787.000000
+Found heuristic solution: objective 83323.000000
+Found heuristic solution: objective 83317.000000
+Found heuristic solution: objective 83316.000000
+Found heuristic solution: objective 83246.000000
+Found heuristic solution: objective 83244.000000
+Found heuristic solution: objective 83222.000000
+Found heuristic solution: objective 83220.000000
+Found heuristic solution: objective 83171.000000
+Found heuristic solution: objective 83080.000000
+Found heuristic solution: objective 83077.000000
+Found heuristic solution: objective 82857.000000
+Found heuristic solution: objective 82265.000000
+Found heuristic solution: objective 81365.000000
+Elapsed time for NoRel heuristic: 129s (best bound 24940.7)
+Found heuristic solution: objective 81333.000000
+Found heuristic solution: objective 80889.000000
+Found heuristic solution: objective 80789.000000
+Found heuristic solution: objective 80773.000000
+Found heuristic solution: objective 80768.000000
+Found heuristic solution: objective 80676.000000
+Found heuristic solution: objective 80674.000000
+Found heuristic solution: objective 80671.000000
+Found heuristic solution: objective 80550.000000
+Found heuristic solution: objective 80419.000000
+Found heuristic solution: objective 80416.000000
+Found heuristic solution: objective 80185.000000
+Found heuristic solution: objective 80174.000000
+Found heuristic solution: objective 80173.000000
+Found heuristic solution: objective 80171.000000
+Found heuristic solution: objective 80170.000000
+Found heuristic solution: objective 80166.000000
+Found heuristic solution: objective 80164.000000
+Elapsed time for NoRel heuristic: 134s (best bound 24940.7)
+Found heuristic solution: objective 80162.000000
+Found heuristic solution: objective 80161.000000
+Found heuristic solution: objective 80151.000000
+Found heuristic solution: objective 79109.000000
+Found heuristic solution: objective 79092.000000
+Found heuristic solution: objective 79089.000000
+Found heuristic solution: objective 79088.000000
+Found heuristic solution: objective 79087.000000
+Found heuristic solution: objective 79041.000000
+Found heuristic solution: objective 78988.000000
+Elapsed time for NoRel heuristic: 140s (best bound 24940.7)
+Found heuristic solution: objective 78980.000000
+Found heuristic solution: objective 78930.000000
+Found heuristic solution: objective 78926.000000
+Found heuristic solution: objective 78925.000000
+Found heuristic solution: objective 78923.000000
+Found heuristic solution: objective 78902.000000
+Found heuristic solution: objective 78901.000000
+Found heuristic solution: objective 78899.000000
+Found heuristic solution: objective 78803.000000
+Found heuristic solution: objective 78799.000000
+Elapsed time for NoRel heuristic: 145s (best bound 24940.7)
+Found heuristic solution: objective 78798.000000
+Found heuristic solution: objective 78795.000000
+Found heuristic solution: objective 78794.000000
+Found heuristic solution: objective 78793.000000
+Found heuristic solution: objective 78790.000000
+Found heuristic solution: objective 78695.000000
+Found heuristic solution: objective 78692.000000
+Found heuristic solution: objective 78691.000000
+Found heuristic solution: objective 78577.000000
+Elapsed time for NoRel heuristic: 151s (best bound 24940.7)
+Found heuristic solution: objective 78576.000000
+Found heuristic solution: objective 78574.000000
+Found heuristic solution: objective 78573.000000
+Found heuristic solution: objective 78475.000000
+Found heuristic solution: objective 78474.000000
+Found heuristic solution: objective 78466.000000
+Found heuristic solution: objective 78463.000000
+Found heuristic solution: objective 78461.000000
+Found heuristic solution: objective 78449.000000
+Found heuristic solution: objective 78447.000000
+Found heuristic solution: objective 78444.000000
+Found heuristic solution: objective 78443.000000
+Found heuristic solution: objective 78442.000000
+Found heuristic solution: objective 78441.000000
+Elapsed time for NoRel heuristic: 157s (best bound 24940.7)
+Found heuristic solution: objective 78436.000000
+Found heuristic solution: objective 78435.000000
+Found heuristic solution: objective 78432.000000
+Found heuristic solution: objective 78431.000000
+Found heuristic solution: objective 78430.000000
+Found heuristic solution: objective 78429.000000
+Found heuristic solution: objective 78428.000000
+Found heuristic solution: objective 78426.000000
+Elapsed time for NoRel heuristic: 162s (best bound 24940.7)
+Found heuristic solution: objective 78425.000000
+Found heuristic solution: objective 78422.000000
+Found heuristic solution: objective 78421.000000
+Found heuristic solution: objective 78088.000000
+Elapsed time for NoRel heuristic: 168s (best bound 24940.7)
+Found heuristic solution: objective 77946.000000
+Found heuristic solution: objective 77935.000000
+Found heuristic solution: objective 77892.000000
+Found heuristic solution: objective 77890.000000
+Found heuristic solution: objective 77888.000000
+Elapsed time for NoRel heuristic: 174s (best bound 24940.7)
+Found heuristic solution: objective 77886.000000
+Found heuristic solution: objective 77885.000000
+Found heuristic solution: objective 77878.000000
+Found heuristic solution: objective 77517.000000
+Found heuristic solution: objective 77415.000000
+Found heuristic solution: objective 77410.000000
+Found heuristic solution: objective 77384.000000
+Elapsed time for NoRel heuristic: 181s (best bound 24940.7)
+NoRel heuristic complete
+
+Deterministic concurrent LP optimizer: primal simplex, dual simplex, and barrier
+Showing barrier log only...
+
+Root barrier log...
+
+Elapsed ordering time = 5s
+Elapsed ordering time = 10s
+Elapsed ordering time = 15s
+Elapsed ordering time = 20s
+Elapsed ordering time = 25s
+Elapsed ordering time = 30s
+Elapsed ordering time = 35s
+Elapsed ordering time = 40s
+Elapsed ordering time = 45s
+Elapsed ordering time = 50s
+Elapsed ordering time = 55s
+Elapsed ordering time = 60s
+Elapsed ordering time = 65s
+Elapsed ordering time = 70s
+Elapsed ordering time = 75s
+Elapsed ordering time = 80s
+Elapsed ordering time = 85s
+Elapsed ordering time = 90s
+Elapsed ordering time = 95s
+Elapsed ordering time = 100s
+Elapsed ordering time = 105s
+Elapsed ordering time = 110s
+Elapsed ordering time = 115s
+Elapsed ordering time = 120s
+Elapsed ordering time = 125s
+Elapsed ordering time = 130s
+Elapsed ordering time = 135s
+Elapsed ordering time = 140s
+Elapsed ordering time = 145s
+Elapsed ordering time = 150s
+Elapsed ordering time = 155s
+Elapsed ordering time = 160s
+Elapsed ordering time = 165s
+Elapsed ordering time = 170s
+Elapsed ordering time = 175s
+Elapsed ordering time = 180s
+Elapsed ordering time = 185s
+Elapsed ordering time = 190s
+Elapsed ordering time = 194s
+Elapsed ordering time = 195s
+Elapsed ordering time = 200s
+Elapsed ordering time = 205s
+Elapsed ordering time = 210s
+Elapsed ordering time = 215s
+Elapsed ordering time = 220s
+Elapsed ordering time = 225s
+Elapsed ordering time = 230s
+Elapsed ordering time = 235s
+Elapsed ordering time = 240s
+Elapsed ordering time = 245s
+Elapsed ordering time = 250s
+Elapsed ordering time = 255s
+Elapsed ordering time = 260s
+Elapsed ordering time = 265s
+Elapsed ordering time = 270s
+Elapsed ordering time = 275s
+Elapsed ordering time = 280s
+Elapsed ordering time = 285s
+Elapsed ordering time = 290s
+Elapsed ordering time = 295s
+Elapsed ordering time = 300s
+Elapsed ordering time = 305s
+Elapsed ordering time = 309s
+Elapsed ordering time = 310s
+Elapsed ordering time = 315s
+Elapsed ordering time = 320s
+Elapsed ordering time = 325s
+Elapsed ordering time = 330s
+Elapsed ordering time = 335s
+Elapsed ordering time = 340s
+Elapsed ordering time = 345s
+Elapsed ordering time = 350s
+Elapsed ordering time = 355s
+Elapsed ordering time = 360s
+Elapsed ordering time = 365s
+Elapsed ordering time = 370s
+Elapsed ordering time = 375s
+Elapsed ordering time = 380s
+Elapsed ordering time = 385s
+Elapsed ordering time = 390s
+Elapsed ordering time = 395s
+Elapsed ordering time = 400s
+Elapsed ordering time = 405s
+Elapsed ordering time = 410s
+Elapsed ordering time = 415s
+Elapsed ordering time = 420s
+Elapsed ordering time = 425s
+Elapsed ordering time = 425s
+Elapsed ordering time = 430s
+Elapsed ordering time = 435s
+Elapsed ordering time = 440s
+Elapsed ordering time = 445s
+Elapsed ordering time = 450s
+Elapsed ordering time = 455s
+Elapsed ordering time = 460s
+Elapsed ordering time = 465s
+Elapsed ordering time = 470s
+Elapsed ordering time = 475s
+Elapsed ordering time = 480s
+Elapsed ordering time = 485s
+Elapsed ordering time = 490s
+Elapsed ordering time = 495s
+Elapsed ordering time = 500s
+Ordering time: 499.59s
+
+Barrier performed 0 iterations in 713.33 seconds (1385.57 work units)
+Barrier solve interrupted - model solved by another algorithm
+
+Waiting for other threads to finish...         778s
+Waiting for other threads to finish...         842s
+Waiting for other threads to finish...         907s
+Waiting for other threads to finish...         971s
+Waiting for other threads to finish...        1035s
+Concurrent spin time: 350.99s (can be avoided by choosing Method=3)
+
+Solved with dual simplex
+
+Root relaxation: objective 2.494089e+04, 309656 iterations, 852.45 seconds (812.67 work units)
+Total elapsed time = 1063.35s (DegenMoves)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 24940.8915    0 5835 77384.0000 24940.8915  67.8%     - 1075s
+H    0     0                    77382.000000 24940.8915  67.8%     - 1075s
+     0     0 25451.1709    0 8884 77382.0000 25451.1709  67.1%     - 1225s
+     0     0 25452.0682    0 8731 77382.0000 25452.0682  67.1%     - 1245s
+     0     0 25535.4407    0 9545 77382.0000 25535.4407  67.0%     - 1320s
+     0     0 25593.9997    0 8753 77382.0000 25593.9997  66.9%     - 1355s
+     0     0 25597.9016    0 8545 77382.0000 25597.9016  66.9%     - 1368s
+     0     0 25598.2252    0 8681 77382.0000 25598.2252  66.9%     - 1372s
+     0     0 25748.4598    0 10096 77382.0000 25748.4598  66.7%     - 1528s
+     0     0 25773.3514    0 9100 77382.0000 25773.3514  66.7%     - 1573s
+     0     0 25773.5180    0 8804 77382.0000 25773.5180  66.7%     - 1582s
+     0     0 26190.4620    0 9538 77382.0000 26190.4620  66.2%     - 1723s
+     0     0 26234.7831    0 9428 77382.0000 26234.7831  66.1%     - 1777s
+     0     0 26240.5665    0 8762 77382.0000 26240.5665  66.1%     - 1800s
+     0     0 26283.6338    0 8569 77382.0000 26283.6338  66.0%     - 1864s
+     0     0 26284.6617    0 8557 77382.0000 26284.6617  66.0%     - 1884s
+     0     0 26309.1562    0 9683 77382.0000 26309.1562  66.0%     - 2010s
+     0     0 26315.3777    0 9444 77382.0000 26315.3777  66.0%     - 2034s
+     0     0 26328.9210    0 9424 77382.0000 26328.9210  66.0%     - 2086s
+     0     0 26329.6138    0 9521 77382.0000 26329.6138  66.0%     - 2102s
+     0     0 26330.3528    0 9855 77382.0000 26330.3528  66.0%     - 2130s
+     0     0 26330.6932    0 9659 77382.0000 26330.6932  66.0%     - 2143s
+     0     0 26412.5157    0 10714 77382.0000 26412.5157  65.9%     - 2270s
+     0     0 26412.5482    0 9849 77382.0000 26412.5482  65.9%     - 2289s
+     0     0 26412.5482    0 9840 77382.0000 26412.5482  65.9%     - 2352s
+H    0     0                    61410.000000 26412.6423  57.0%     - 2389s
+H    0     0                    61390.000000 26412.6423  57.0%     - 2393s
+H    0     0                    61265.000000 26412.6423  56.9%     - 2393s
+H    0     0                    61252.000000 26412.6423  56.9%     - 2393s
+H    0     0                    61251.000000 26412.6423  56.9%     - 2393s
+     0     2 26412.6423    0 9829 61251.0000 26412.6423  56.9%     - 2456s
+     1     3 26416.0323    1 10410 61251.0000 26412.7006  56.9% 53002 2514s
+     2     4 26454.4185    1 11289 61251.0000 26416.0989  56.9% 61502 2591s
+     3     6 26451.6902    2 9370 61251.0000 26416.2032  56.9% 52325 2633s
+     5     7 26474.6770    3 10474 61251.0000 26432.5077  56.8% 50424 2682s
+     6    10 26486.5428    4 11014 61251.0000 26432.5077  56.8% 51351 2739s
+     9    13 26491.9647    5 10992 61251.0000 26432.5077  56.8% 45531 2803s
+    12    17 26496.4778    6 10518 61251.0000 26432.5077  56.8% 43792 2856s
+    16    18 26458.2980    4 11163 61251.0000 26449.8223  56.8% 37719 3079s
+    17    20 26453.7213    4 11579 61251.0000 26452.5476  56.8% 35928 3132s
+    19    23 26458.0958    5 11869 61251.0000 26455.0555  56.8% 35084 3224s
+    22    27 26467.8230    8 11131 61251.0000 26455.0555  56.8% 32227 3303s
+H   26    32                    61230.000000 26455.1332  56.8% 29387 3385s
+H   28    32                    61154.000000 26455.1332  56.7% 29978 3385s
+H   31    39                    61094.000000 26455.1332  56.7% 31483 3469s
+H   31    39                    61056.000000 26455.1332  56.7% 31483 3469s
+    38    43 26498.1761    7 12475 61056.0000 26455.1332  56.7% 32928 3541s
+H   41    43                    61026.000000 26455.1332  56.6% 32240 3541s
+H   42    48                    60976.000000 26455.1332  56.6% 32017 3610s
+    47    51 26517.6302    8 11374 60976.0000 26455.1332  56.6% 31759 3670s
+H   50    55                    60956.000000 26455.1332  56.6% 31574 3789s
+    54    58 26505.0409    9 10694 60956.0000 26455.1332  56.6% 31552 3855s
+H   57    62                    60758.000000 26455.1332  56.5% 31045 3927s
+H   59    62                    60716.000000 26455.1332  56.4% 30701 3927s
+H   61    75                    60711.000000 26455.1332  56.4% 30903 4002s
+H   62    75                    60685.000000 26455.1332  56.4% 31097 4002s
+H   67    75                    60684.000000 26455.1332  56.4% 29295 4002s
+H   72    75                    60498.000000 26455.1332  56.3% 27780 4002s
+    74    79 26517.8489   18 11033 60498.0000 26455.1332  56.3% 28364 4054s
+H   75    79                    60497.000000 26455.1332  56.3% 27986 4054s
+    78    87 26539.1210   19 10187 60497.0000 26455.1332  56.3% 28124 4111s
+H   79    87                    60487.000000 26455.1332  56.3% 27768 4111s
+    86    92 26559.8330   12 10930 60487.0000 26455.1332  56.3% 27068 4160s
+    91    96 26560.6531   13 10038 60487.0000 26455.1332  56.3% 26117 4209s
+H   92    96                    60449.000000 26455.1332  56.2% 25833 4209s
+H   95    99                    60350.000000 26455.1332  56.2% 25905 4260s
+H   98   102                    60329.000000 26455.1332  56.1% 25742 4308s
+H  101   112                    60160.000000 26455.1332  56.0% 25978 4369s
+H  111   122                    60079.000000 26455.1332  56.0% 24402 4434s
+H  121   137                    59888.000000 26455.1332  55.8% 23561 4500s
+H  125   137                    59735.000000 26455.1332  55.7% 23156 4500s
+H  136   151                    59712.000000 26455.1332  55.7% 22513 4561s
+   150   157 26781.2145   47 10819 59712.0000 26455.1332  55.7% 21731 4618s
+H  151   157                    59642.000000 26455.1332  55.6% 21588 4618s
+H  153   157                    57847.000000 26455.1332  54.3% 21536 4618s
+H  156   170                    57307.000000 26455.1332  53.8% 21736 4686s
+H  169   184                    57090.000000 26455.1332  53.7% 20927 4759s
+H  177   184                    56904.000000 26455.1332  53.5% 20459 4759s
+H  183   200                    56899.000000 26455.1332  53.5% 20054 4835s
+H  183   200                    56896.000000 26455.1332  53.5% 20054 4835s
+H  189   200                    56571.000000 26455.1332  53.2% 19758 4835s
+H  195   200                    56373.000000 26455.1332  53.1% 19273 4835s
+H  199   213                    56368.000000 26455.1332  53.1% 19198 4914s
+H  199   213                    56363.000000 26455.1332  53.1% 19198 4914s
+H  199   213                    55877.000000 26455.1332  52.7% 19198 4914s
+H  212   222                    55874.000000 26455.1332  52.7% 18597 4978s
+H  212   222                    55849.000000 26455.1332  52.6% 18597 4978s
+H  215   222                    55129.000000 26455.1332  52.0% 18679 4978s
+H  221   233                    55123.000000 26455.1332  52.0% 18594 5048s
+H  221   233                    55121.000000 26455.1332  52.0% 18594 5048s
+H  223   233                    55120.000000 26455.1332  52.0% 18634 5048s
+H  232   247                    55119.000000 26455.1332  52.0% 18570 5140s
+H  232   247                    53698.000000 26455.1332  50.7% 18570 5140s
+H  243   247                    53455.000000 26455.1332  50.5% 18093 5140s
+H  246   268                    53452.000000 26455.1332  50.5% 17970 5220s
+H  246   268                    53450.000000 26455.1332  50.5% 17970 5220s
+H  247   268                    52927.000000 26455.1332  50.0% 18049 5220s
+H  252   268                    52474.000000 26455.1332  49.6% 17808 5220s
+H  254   268                    52267.000000 26455.1332  49.4% 17834 5220s
+H  267   285                    52262.000000 26455.1332  49.4% 17117 5308s
+H  267   285                    52257.000000 26455.1332  49.4% 17117 5308s
+H  275   285                    52196.000000 26455.1332  49.3% 16819 5308s
+H  280   285                    51914.000000 26455.1332  49.0% 16619 5308s
+H  284   298                    51908.000000 26455.1332  49.0% 16570 5410s
+H  284   298                    51907.000000 26455.1332  49.0% 16570 5410s
+H  288   298                    51294.000000 26455.1332  48.4% 16443 5410s
+H  297   321                    51293.000000 26455.1332  48.4% 16213 5520s
+H  305   321                    51292.000000 26455.1332  48.4% 15971 5521s
+H  305   321                    50221.000000 26455.1332  47.3% 15971 5521s
+H  320   333                    50219.000000 26455.1332  47.3% 15495 5626s
+H  320   333                    50196.000000 26455.1332  47.3% 15495 5626s
+H  320   333                    49236.000000 26455.1332  46.3% 15495 5626s
+H  331   333                    49106.000000 26455.1332  46.1% 15259 5626s
+H  332   360                    49104.000000 26455.1332  46.1% 15216 5733s
+H  335   360                    48711.000000 26455.1332  45.7% 15167 5733s
+H  347   360                    48403.000000 26455.1332  45.3% 14850 5733s
+H  359   374                    48402.000000 26455.1332  45.3% 14581 5847s
+H  359   374                    48381.000000 26455.1332  45.3% 14581 5847s
+H  366   374                    47968.000000 26455.1332  44.8% 14459 5847s
+H  373   404                    47967.000000 26455.1332  44.8% 14304 5960s
+H  379   404                    47965.000000 26455.1332  44.8% 14175 5960s
+H  385   404                    47826.000000 26455.1332  44.7% 14078 5960s
+H  403   451                    47795.000000 26455.1332  44.6% 13692 6068s
+H  440   451                    47793.000000 26455.1332  44.6% 12891 6068s
+   450   464 28672.1132  108 9149 47793.0000 26455.1332  44.6% 12780 6211s
+   463   468 28707.4428  111 9538 47793.0000 26455.1332  44.6% 12663 6338s
+H  467   472                    47612.000000 26455.1332  44.4% 12639 6480s
+   471   527 28708.0381  113 9222 47612.0000 26455.1332  44.4% 12572 6592s
+H  473   527                    47593.000000 26455.1332  44.4% 12519 6592s
+H  519   527                    47592.000000 26455.1332  44.4% 11695 6592s
+   526   582 29055.2364  137 7980 47592.0000 26455.1332  44.4% 11699 6703s
+H  576   582                    47591.000000 26455.1332  44.4% 11018 6703s
+   586   633 29449.0091  164 9129 47591.0000 26455.1332  44.4% 10965 6811s
+H  625   633                    46789.000000 26455.1332  43.5% 10499 6811s
+   653   677 30223.7371  183 7474 46789.0000 26455.1332  43.5% 10308 6920s
+   707   756 30857.6272  206 7844 46789.0000 26455.1332  43.5%  9835 7028s
+   786   876 31051.7628  242 7528 46789.0000 26455.1332  43.5%  9130 7140s
+   913   940 31654.1709  282 6715 46789.0000 26455.1332  43.5%  8082 7200s
+
+Cutting planes:
+  Learned: 583
+  Gomory: 26
+  Cover: 1334
+  Implied bound: 6385
+  Clique: 4065
+  MIR: 1298
+  Knapsack: 1
+  StrongCG: 117
+  Flow cover: 1099
+  GUB cover: 4
+  Zero half: 1192
+  RLT: 1579
+  Relax-and-lift: 591
+  BQP: 1426
+  PSD: 19
+
+Explored 983 nodes (8544615 simplex iterations) in 7200.03 seconds (16696.52 work units)
+Thread count was 4 (of 128 available processors)
+
+Solution count 10: 46789 47591 47592 ... 47967
+
+Time limit reached
+Best objective 4.678900000000e+04, best bound 2.645600000000e+04, gap 43.4568%
+
+User-callback calls 1569784, time in user-callback 2.21 sec
+   Done (overall time 7376.42 s).
