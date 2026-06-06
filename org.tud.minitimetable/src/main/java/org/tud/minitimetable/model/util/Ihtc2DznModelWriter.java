@@ -189,10 +189,10 @@ public class Ihtc2DznModelWriter {
 		writer.indentation().write("surgeryDuration").write(": ").write(obj.surgeryDuration).write(", ").newLine();
 		writer.indentation().write("assignedSurgeon").write(": ").write(obj.surgeonId).write(", ").newLine();
 		writer.indentation().write("incompatibleRooms").write(": ") //
-				.write("[") //
+				.write("{") //
 				.write(obj.incompatibleRooms, (value, hasMore) -> {
 					writer.write(value).write(", ", hasMore);
-				}).write("]").write(",").newLine();
+				}).write("}").write(",").newLine();
 		writer.decreaseIndentation().indentation().write(")");
 	}
 

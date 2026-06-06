@@ -13,7 +13,7 @@ public class DefaultSettings {
 	/**
 	 * 4 Threads
 	 */
-	public static final Integer DEFAULT_NUMBER_OF_THREADS = 4;
+	public static final Integer DEFAULT_NUMBER_OF_THREADS = 32;
 
 	public static final Integer DEFAULT_OPTIMIZE_LEVEL = 1;
 

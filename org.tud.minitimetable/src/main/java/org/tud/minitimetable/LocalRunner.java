@@ -17,24 +17,24 @@ public class LocalRunner {
 	private static final Path resourceDirectory = Path.of("./", "resources").toAbsolutePath();
 
 	public static void main(String[] args) throws IOException, InterruptedException {
-		Path modelFile = resourceDirectory.resolve("minizinc").resolve("v1").resolve("AllConstraints.mzn");
+//		Path modelFile = resourceDirectory.resolve("minizinc").resolve("v1").resolve("AllConstraints.mzn");
 //		Path modelFile = resourceDirectory.resolve("minizinc").resolve("v2").resolve("AllConstraints.mzn");
-//		Path modelFile = resourceDirectory.resolve("minizinc").resolve("v4").resolve("AllConstraints.mzn");
-		Path dataFile = resourceDirectory.resolve("input").resolve("ihtc").resolve("i04.json");
+		Path modelFile = resourceDirectory.resolve("minizinc").resolve("v4").resolve("AllConstraints.mzn");
+		Path dataFile = resourceDirectory.resolve("input").resolve("ihtc").resolve("i01.json");
 //		Path dataFile = resourceDirectory.resolve("minizinc").resolve("data").resolve("i03.json");
 
 		String fileName = PathUtils.getFileNameWithoutExtension(dataFile);
 		String version = modelFile.getParent().getFileName().toString();
 
-		Path outputFolder = resourceDirectory.resolve("out").resolve("1-" + version + "-" + fileName);
+		Path outputFolder = resourceDirectory.resolve("out").resolve("11-" + version + "-" + fileName);
 
 		MiniZinc minizinc = new MiniZinc();
 		DefaultSettings.applyDefaultMiniZincConfiguration(minizinc);
 
-		minizinc.getConfig().solverModelLog = new DefaultFileLog("%s-ilp.ilp", true);
+//		minizinc.getConfig().solverModelLog = new DefaultFileLog("%s-ilp.ilp", true);
 		minizinc.getConfig().logger = new MixedCodeLogger(outputFolder.resolve("log.txt"));
 		minizinc.getConfig().timeLimitMS = 15 * 60 * 1000l;
-		minizinc.getConfig().solverTimeLimitMS = 1 * 1 * 1000L;
+		minizinc.getConfig().solverTimeLimitMS = 1 * 30 * 1000L;
 		minizinc.getConfig().gurobiParameterFile = resourceDirectory.resolve("minizinc").resolve("Gurobi.prm");
 		minizinc.getConfig().optimizeLevel = 1;
 
@@ -67,8 +67,13 @@ public class LocalRunner {
 
 			System.out.println(String.format("Validating file '%s' with solution '%s'", dataFile, file));
 			ValidatorRunner validator = new ValidatorRunner(resourceDirectory.resolve("IHTP_Validator_Win11.exe"),
-					solutionFile.getParent());
-			validator.run(dataFile, file);
+					solutionFile.getParent()) {
+
+			};
+			var result = validator.run(dataFile, file);
+			if (!result.violations.isEmpty()) {
+				System.out.println("EHO!");
+			}
 		}
 
 	}
