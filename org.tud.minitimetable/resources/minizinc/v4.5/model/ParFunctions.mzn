@@ -33,9 +33,6 @@ function bool: isOccupantAgeGroup(OccupantIds: o, AgeGroups: g) =
 function Genders: occupantGender(OccupantIds: o) =
   occupantData[o].gender;
 
-function bool: isOccupantGender(OccupantIds: o, Gender: g) =
- occupantGender(o) == g;
-
 function int: occupantLengthOfStay(OccupantIds: o) =
   occupantData[o].lengthOfStay;
   
@@ -69,9 +66,6 @@ function bool: isPatientAgeGroup(PatientIds: p, AgeGroups: g) =
 
 function Genders: patientGender(PatientIds: p) =
   patientData[p].gender;
-
-function bool: isPatientGender(PatientIds: p, Gender: g) =
-  patientGender(p) == g;
 
 function int: patientWorkload(PatientIds: p, int: currentDay, ShiftTypes: s, int: admissionDay) =
   let {
@@ -157,6 +151,9 @@ function bool: isNurseAvailable(NurseIds: n, Days: d) =
 
 function set of NurseIds: availableNurses(Days: d, ShiftTypes: s) =
   { n | n in NurseIds where isNurseAvailable(n,d,s) };
+
+function set of NurseIds: unavailableNurses(Days: d, ShiftTypes: s) =
+  NurseIds diff availableNurses(d,s);
 
 
 % SURGEONS

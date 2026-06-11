@@ -3,15 +3,11 @@ include "ParFunctions.mzn";
 
 
 array[PatientIds] of var bool: isPatientAdmitted;
-array[PatientIds] of var ExtendedDays: patientAdmissionDay;
-array[PatientIds, ExtendedDays] of var bool: isPatientAdmittedAt;
-constraint forall(p in PatientIds, d in ExtendedDays)(
-  isPatientAdmittedAt[p,d] -> (patientAdmissionDay[p]==d)
+array[PatientIds] of var opt Days: patientAdmissionDay;
+array[PatientIds, Days] of var bool: isPatientAdmittedAt;
+constraint forall(p in PatientIds, d in Days)(
+  isPatientAdmittedAt[p,d] <-> (patientAdmissionDay[p] == d)
   :: "Var isPatientAdmittedAt \(p) \(d)"
-);
-constraint forall(p in PatientIds) (
-  sum(d in ExtendedDays)(isPatientAdmittedAt[p, d]) == 1
-  :: "Con isPatientAdmittedAt \(p) == 1"
 );
 
 
@@ -31,7 +27,7 @@ constraint forall(p in PatientIds, r in RoomIds)(
   isPatientInRoom[p,r] <-> (patientRoom[p]==r)
 );
 
-array[PatientIds, ExtendedDays] of var bool: isPatientPresent;
+array[PatientIds, Days] of var bool: isPatientPresent;
 constraint forall(p in PatientIds, d in Days) (
   (isPatientPresent[p, d] <-> (
        (patientAdmissionDay[p] <= d)
