@@ -19,7 +19,8 @@ public class LocalRunner {
 	public static void main(String[] args) throws IOException, InterruptedException {
 //		Path modelFile = resourceDirectory.resolve("minizinc").resolve("v1").resolve("AllConstraints.mzn");
 //		Path modelFile = resourceDirectory.resolve("minizinc").resolve("v2").resolve("AllConstraints.mzn");
-		Path modelFile = resourceDirectory.resolve("minizinc").resolve("v4").resolve("AllConstraints.mzn");
+//		Path modelFile = resourceDirectory.resolve("minizinc").resolve("v4").resolve("AllConstraints.mzn");
+		Path modelFile = resourceDirectory.resolve("minizinc").resolve("v4.5").resolve("AllConstraints.mzn");
 		Path dataFile = resourceDirectory.resolve("input").resolve("ihtc").resolve("i01.json");
 //		Path dataFile = resourceDirectory.resolve("minizinc").resolve("data").resolve("i03.json");
 
@@ -71,8 +72,16 @@ public class LocalRunner {
 
 			};
 			var result = validator.run(dataFile, file);
-			if (!result.violations.isEmpty()) {
-				System.out.println("EHO!");
+			var violationsFound = result.violations.stream().filter(v -> v.violations > 0).findAny().isPresent();
+			if (violationsFound) {
+				System.out.println("Violations found:");
+				for (var violation : result.violations) {
+					if (violation.violations > 0)
+						System.out.println(
+								String.format("%d violations of type %s", violation.violations, violation.type));
+				}
+			} else {
+				System.out.println("All good!");
 			}
 		}
 

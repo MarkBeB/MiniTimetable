@@ -57,8 +57,8 @@ type Occupant = record (
   Genders: gender,
   AgeGroups: ageGroup,
   int: lengthOfStay,
-  array[int] of int: workloadProduced, %length = lengthOfStay * length(ShiftType)
-  array[int] of SkillLevels: skillLevelRequired, %length = lengthOfStay * length(ShiftType)
+  array[int] of int: workloadProduced,
+  array[int] of SkillLevels: skillLevelRequired,
   RoomIds: assignedRoom
 );
 

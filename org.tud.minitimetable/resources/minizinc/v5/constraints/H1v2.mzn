@@ -8,8 +8,8 @@ array[RoomIds, Days, Genders] of var bool: roomGender;
 
 constraint forall(r in RoomIds, d in Days, g in Genders)(
   totalIndividuals * roomGender[r,d,g] >= 
-      sum(o in OccupantIds where occupantGender(o) == g)(isOccupantInRoom(o,d,r))
-    + sum(p in PatientIds where patientGender(p) == g)(isPatientPresentInRoom[p,r,d])
+      sum(o in OccupantIds where isOccupantGender(o,g))(isOccupantInRoom(o,d,r))
+    + sum(p in PatientIds where isPatientGender(p,g))(isPatientPresentInRoom[p,r,d])
   :: "CON_H1_A \(r) \(d) \(g)"
 );
 

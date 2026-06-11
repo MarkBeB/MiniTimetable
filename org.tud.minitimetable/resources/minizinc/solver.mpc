@@ -1,5 +1,8 @@
 {
     "intermediate-solutions": true,
     "output-objective": true,
-    "solver": "org.minizinc.mip.gurobi@13.0.0"
+    "solver": "org.minizinc.mip.gurobi@13.0.0",
+    "solver-statistics": true,
+    "verbose-compilation": true,
+    "verbose-solving": true
 }
