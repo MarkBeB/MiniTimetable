@@ -10,6 +10,7 @@ import org.tud.minitimetable.model.IhtcModel;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 
+@Deprecated
 public class IhtcFromJsonReader {
 
 	private final static String JSON_FILE_ENDING = "json";

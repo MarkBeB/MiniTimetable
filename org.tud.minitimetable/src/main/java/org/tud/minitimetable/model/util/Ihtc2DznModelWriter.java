@@ -117,37 +117,37 @@ public class Ihtc2DznModelWriter {
 //				.write("0.." + (model.skillLevels - 1)).write(";").newLine();
 		writer.newLine();
 
-		writer.write("nurseData").write(" = ").write("[").newLine().increaseIndentation()
+		writer.write("nurses").write(" = ").write("[").newLine().increaseIndentation()
 				.write(model.nurses, (value, hasMore) -> {
 					write(value, writer);
 					writer.write(",", hasMore).newLine();
 				}).decreaseIndentation().write("];").newLine().newLine();
 
-		writer.write("surgeonData").write(" = ").write("[").newLine().increaseIndentation()
+		writer.write("surgeons").write(" = ").write("[").newLine().increaseIndentation()
 				.write(model.surgeons, (value, hasMore) -> {
 					write(value, writer);
 					writer.write(",", hasMore).newLine();
 				}).decreaseIndentation().write("];").newLine().newLine();
 
-		writer.write("patientData").write(" = ").write("[").newLine().increaseIndentation()
+		writer.write("patients").write(" = ").write("[").newLine().increaseIndentation()
 				.write(model.patients, (value, hasMore) -> {
 					write(value, writer);
 					writer.write(",", hasMore).newLine();
 				}).decreaseIndentation().write("];").newLine().newLine();
 
-		writer.write("occupantData").write(" = ").write("[").newLine().increaseIndentation()
+		writer.write("occupants").write(" = ").write("[").newLine().increaseIndentation()
 				.write(model.occupants, (value, hasMore) -> {
 					write(value, writer);
 					writer.write(",", hasMore).newLine();
 				}).decreaseIndentation().write("];").newLine().newLine();
 
-		writer.write("operatingTheaterData").write(" = ").write("[").newLine().increaseIndentation()
+		writer.write("operatingTheaters").write(" = ").write("[").newLine().increaseIndentation()
 				.write(model.operatingTheaters, (value, hasMore) -> {
 					write(value, writer);
 					writer.write(",", hasMore).newLine();
 				}).decreaseIndentation().write("];").newLine().newLine();
 
-		writer.write("roomData").write(" = ").write("[").newLine().increaseIndentation()
+		writer.write("rooms").write(" = ").write("[").newLine().increaseIndentation()
 				.write(model.rooms, (value, hasMore) -> {
 					write(value, writer);
 					writer.write(",", hasMore).newLine();

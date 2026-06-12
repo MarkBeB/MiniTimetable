@@ -47,15 +47,13 @@ constraint forall(r in RoomIds, d in Days, s in ShiftTypes)(
 */
 
 constraint forall(r in RoomIds, d in Days, s in ShiftTypes)(
-  isRoomOccupied[r,d] == sum(n in activeNurses[d,s])(isNurseInRoom[n,r,d,s])
+  isRoomOccupied[r,d] == sum(n in availableNurses(d,s))(isNurseInRoom[n,r,d,s])
   :: "Con_H8_A \(r) \(d) \(s)"
 );
 
-constraint forall(d in Days, s in ShiftTypes, n in NurseIds where not (n in activeNurses[d,s])) (
-  forall(r in RoomIds)(
-    isNurseInRoom[n,r,d,s] = 0
-    :: "Con_H8_B \(r) \(d) \(s) \(n)"
-  )
+constraint forall(r in RoomIds, d in Days, s in ShiftTypes, n in availableNurses(d,s)) (
+  isNurseInRoom[n,r,d,s] = 0
+  :: "Con_H8_B \(r) \(d) \(s) \(n)"
 );
 
 /*

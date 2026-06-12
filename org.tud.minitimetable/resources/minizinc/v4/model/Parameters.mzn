@@ -109,12 +109,12 @@ set of int: Days = 0..lastDay;
 set of int: ExtendedDays = 0..extendedDay;
 set of int: MaxDays = 0..maxDay;
 
-array[NurseIds] of Nurse: nurseData;
-array[SurgeonIds] of Surgeon: surgeonData;
-array[PatientIds] of Patient: patientData;
-array[OccupantIds] of Occupant: occupantData;
-array[OperatingTheaterIds] of OperatingTheater: operatingTheaterData;
-array[RoomIds] of Room: roomData;
+array[NurseIds] of Nurse: nurses;
+array[SurgeonIds] of Surgeon: surgeons;
+array[PatientIds] of Patient: patients;
+array[OccupantIds] of Occupant: occupants;
+array[OperatingTheaterIds] of OperatingTheater: operatingTheaters;
+array[RoomIds] of Room: rooms;
 
 int: totalIndividuals = length(PatientIds) + length(OccupantIds);
 
