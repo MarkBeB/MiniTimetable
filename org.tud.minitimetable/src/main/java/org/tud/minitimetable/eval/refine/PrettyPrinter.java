@@ -1,8 +1,7 @@
 package org.tud.minitimetable.eval.refine;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -26,20 +25,22 @@ public class PrettyPrinter {
 
 	}
 
-	public static class PrettyNumber implements PrettyCell {
+	public static class PrettyNumberFormat implements PrettyCell {
 
-		private final DecimalFormat format;
+		private final NumberFormat oldFormat;
+		private final NumberFormat newFormat;
 
-		public PrettyNumber(DecimalFormat format) {
-			this.format = format;
+		public PrettyNumberFormat(NumberFormat oldFormat, NumberFormat newFormat) {
+			this.oldFormat = Objects.requireNonNull(oldFormat);
+			this.newFormat = Objects.requireNonNull(newFormat);
 		}
 
 		@Override
 		public String pretty(String value) {
 			try {
-				BigDecimal parsed = new BigDecimal(value);
-				return format.format(parsed);
-			} catch (NumberFormatException e) {
+				var number = oldFormat.parse(value);
+				return newFormat.format(number);
+			} catch (NumberFormatException | ParseException e) {
 				var s = new NumberFormatException("Failed to parse: " + value);
 				s.addSuppressed(e);
 				throw s;
@@ -57,7 +58,7 @@ public class PrettyPrinter {
 		this.columns = columns;
 	}
 
-	public CSV pretty(CSV csv) throws IOException {
+	public CSV pretty(CSV csv) {
 		if (columns.length != csv.getNumberOfColumns())
 			throw new IllegalArgumentException();
 

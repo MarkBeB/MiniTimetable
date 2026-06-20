@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
 
@@ -21,11 +22,12 @@ public class RefineHelper {
 		private final String columnNameStdDev;
 		private final ToDoubleFunction<String> convertToDouble;
 
-		public StdDevRefinement(String columnName, ToDoubleFunction<String> convertToDouble) {
-			this.columnName = columnName;
-			this.columnNameMean = this.columnName + " mean";
-			this.columnNameStdDev = this.columnName + " stddev";
-			this.convertToDouble = convertToDouble;
+		public StdDevRefinement(String columnName, String meanColumnName, String stddevColumnName,
+				ToDoubleFunction<String> convertToDouble) {
+			this.columnName = Objects.requireNonNull(columnName);
+			this.columnNameMean = Objects.requireNonNull(meanColumnName);
+			this.columnNameStdDev = Objects.requireNonNull(stddevColumnName);
+			this.convertToDouble = Objects.requireNonNull(convertToDouble);
 		}
 
 		@Override
@@ -112,12 +114,15 @@ public class RefineHelper {
 		}
 	}
 
-	public static Refinement stdDeviation(String column, ToDoubleFunction<String> convertToDouble) {
-		return new StdDevRefinement(column, convertToDouble);
+	public static Refinement stdDeviation(String column, String meanColumn, String devColumn,
+			ToDoubleFunction<String> convertToDouble) {
+		return new StdDevRefinement(column, meanColumn, devColumn, convertToDouble);
 	}
 
 	public static Refinement stdDeviation(NamedCSV.CSVHeader column, ToDoubleFunction<String> convertToDouble) {
-		return stdDeviation(column.getColumnName(), convertToDouble);
+		var meanColumn = String.format("%s (m)", column.getColumnName());
+		var devColumn = String.format("%s (sd)", column.getColumnName());
+		return stdDeviation(column.getColumnName(), meanColumn, devColumn, convertToDouble);
 	}
 
 	public static Refinement copy(String column, CopyRefinement.CopyElement target) {

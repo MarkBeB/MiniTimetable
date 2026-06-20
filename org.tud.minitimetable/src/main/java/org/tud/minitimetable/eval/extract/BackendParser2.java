@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 
 import org.tud.minitimetable.eval.util.StateParser;
 
+@Deprecated
 public class BackendParser2 extends StateParser {
 
 	public BackendParser2(BufferedReader reader) {

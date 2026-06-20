@@ -36,6 +36,7 @@ public class SolutionFileReader {
 			}
 		}
 
+		solutions.sort((a, b) -> a.score - b.score);
 		return solutions;
 	}
 

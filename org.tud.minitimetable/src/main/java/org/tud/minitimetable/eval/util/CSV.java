@@ -1,6 +1,7 @@
 package org.tud.minitimetable.eval.util;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -386,6 +387,8 @@ public class CSV implements Iterable<CSV.CSVRecord> {
 			return value.toString();
 		} else if (value instanceof Float || value instanceof Double) {
 			return numberFormat.format(value);
+		} else if (value instanceof BigDecimal decimal) {
+			return numberFormat.format(decimal);
 		} else {
 			if (value == null) {
 				return null;

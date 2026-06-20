@@ -3,6 +3,7 @@ package org.tud.minitimetable.eval.extract;
 import java.util.Objects;
 
 import org.tud.minitimetable.eval.util.NamedCSV;
+import org.tud.minitimetable.eval.util.Util;
 
 public class MainCSV extends NamedCSV<MainCSV.Columns> {
 
@@ -28,6 +29,8 @@ public class MainCSV extends NamedCSV<MainCSV.Columns> {
 		BestObjective("bestObjective"), //
 		BestBound("bestBound"), //
 		MIPGap("mipGap"), //
+		IsSolutionValid("isSolutionValid"), //
+		RealObjective("objectiveByValidator"), //
 		CompileCrash("isCrashedCompile"), //
 		SolveCrash("isCrashedSolve"); //
 
@@ -44,7 +47,7 @@ public class MainCSV extends NamedCSV<MainCSV.Columns> {
 	}
 
 	public MainCSV() {
-		super(Columns.class);
+		super(Columns.class, Util.getDecimalFormat());
 	}
 
 }

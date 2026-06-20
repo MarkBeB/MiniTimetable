@@ -2,8 +2,10 @@ package org.tud.minitimetable.eval.util;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.function.ToDoubleFunction;
 import java.util.regex.Pattern;
 
 public class Util {
@@ -49,10 +51,10 @@ public class Util {
 		DecimalFormatSymbols decimalFormatSymbol = new DecimalFormatSymbols();
 		decimalFormatSymbol.setDecimalSeparator('.');
 		decimalFormatSymbol.setGroupingSeparator(',');
-		DecimalFormat doubleFormatter = new DecimalFormat("#,###.####", decimalFormatSymbol);
+		DecimalFormat doubleFormatter = new DecimalFormat("#,###.##", decimalFormatSymbol);
 		doubleFormatter.setGroupingUsed(true);
-		doubleFormatter.setMaximumFractionDigits(4);
-		doubleFormatter.setMinimumFractionDigits(4);
+		doubleFormatter.setMaximumFractionDigits(2);
+		doubleFormatter.setMinimumFractionDigits(2);
 		return doubleFormatter;
 	}
 
@@ -89,6 +91,21 @@ public class Util {
 
 	public static <R extends CSV.CSVRecord> boolean toBool(R record, String column) {
 		return Boolean.parseBoolean(record.getCell(column));
+	}
+
+	public static ToDoubleFunction<String> getDoubleParser(DecimalFormat format) {
+		return (ToDoubleFunction<String>) value -> {
+			if (value == null || value.trim().equals("-") || value.isBlank())
+				return 0;
+
+			try {
+				var number = format.parse(value);
+				return number.doubleValue();
+			} catch (ParseException e) {
+				e.printStackTrace();
+				return 0;
+			}
+		};
 	}
 
 	public static <H> double toDouble(String value) {
