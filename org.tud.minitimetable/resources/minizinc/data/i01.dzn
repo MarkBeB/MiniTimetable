@@ -23,7 +23,7 @@ lastDay = 13;
 maxDay = 21;
 maxSkillLevel = 2;
 
-nurseData = [
+nurses = [
 	(
 		id: n00,
 		skillLevel: 2,
@@ -266,11 +266,11 @@ nurseData = [
 	)
 ];
 
-surgeonData = [
+surgeons = [
 	(id: s0, maxSurgeryTime: [0:0, 0, 600, 480, 480, 0, 0, 480, 600, 480, 600, 0, 360, 0])
 ];
 
-patientData = [
+patients = [
 	(
 		id: p00, 
 		gender: A, 
@@ -665,7 +665,7 @@ patientData = [
 	)
 ];
 
-occupantData = [
+occupants = [
 	(
 		id: a0, 
 		gender: B, 
@@ -695,7 +695,7 @@ occupantData = [
 	)
 ];
 
-operatingTheaterData = [
+operatingTheaters = [
 	(
 		id: t0, 
 		availability: [0:480, 600, 600, 600, 720, 0, 0, 0, 720, 480, 0, 720, 0, 600],
@@ -706,7 +706,7 @@ operatingTheaterData = [
 	)
 ];
 
-roomData = [
+rooms = [
 	(id: r0, capacity: 3, ),
 	(id: r1, capacity: 2, ),
 	(id: r2, capacity: 2, ),
