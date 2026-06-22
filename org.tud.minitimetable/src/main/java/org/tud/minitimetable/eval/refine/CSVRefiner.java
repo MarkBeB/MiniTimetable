@@ -2,9 +2,11 @@ package org.tud.minitimetable.eval.refine;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.SequencedCollection;
 import java.util.function.Supplier;
 
 import org.tud.minitimetable.eval.util.CSV;
@@ -31,7 +33,8 @@ public class CSVRefiner {
 
 	public CSV refine(Map<String, List<CSV.CSVRecord>> groups, Iterable<String> groupOrder) {
 
-		List<String> headers = new ArrayList<>(1 + refinements.size());
+//		List<String> headers = new ArrayList<>(1 + refinements.size());
+		SequencedCollection<String> headers = new LinkedHashSet<>(1 + refinements.size());
 
 		for (Refinement refinement : refinements)
 			headers.addAll(refinement.headers());

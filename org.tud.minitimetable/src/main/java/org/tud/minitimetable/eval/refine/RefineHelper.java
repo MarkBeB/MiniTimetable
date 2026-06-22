@@ -10,6 +10,7 @@ import java.util.function.ToDoubleFunction;
 
 import org.tud.minitimetable.eval.refine.CSVRefiner.Refinement;
 import org.tud.minitimetable.eval.util.CSV;
+import org.tud.minitimetable.eval.util.CSV.CSVRecord;
 import org.tud.minitimetable.eval.util.NamedCSV;
 import org.tud.minitimetable.eval.util.StatisticsHelper;
 
@@ -42,6 +43,41 @@ public class RefineHelper {
 			var point = StatisticsHelper.calculateMeanAndVariance(datapoints, converter, false);
 			output.setCellValue(rowIndex, columnNameMean, point.mean());
 			output.setCellValue(rowIndex, columnNameStdDev, point.standardDeviation());
+		}
+	}
+
+	public static class StdDevRefinementZeroAndBelowInvalid implements Refinement {
+
+		private final String columnName;
+		private final String columnNameMean;
+		private final String columnNameStdDev;
+		private final ToDoubleFunction<String> convertToDouble;
+
+		public StdDevRefinementZeroAndBelowInvalid(String columnName, String meanColumnName, String stddevColumnName,
+				ToDoubleFunction<String> convertToDouble) {
+			this.columnName = Objects.requireNonNull(columnName);
+			this.columnNameMean = Objects.requireNonNull(meanColumnName);
+			this.columnNameStdDev = Objects.requireNonNull(stddevColumnName);
+			this.convertToDouble = Objects.requireNonNull(convertToDouble);
+		}
+
+		@Override
+		public List<String> headers() {
+			return Arrays.asList(columnNameMean, columnNameStdDev);
+		}
+
+		@Override
+		public void refine(CSV output, String groupName, int rowIndex, List<CSV.CSVRecord> datapoints) {
+			ToDoubleFunction<CSV.CSVRecord> converter = record -> StdDevRefinementZeroAndBelowInvalid.this.convertToDouble
+					.applyAsDouble(record.getCell(columnName));
+			var point = StatisticsHelper.calculateMeanAndVariance(datapoints, converter, false);
+			if (Double.compare(point.mean(), 0) <= 0) {
+				output.setCellValue(rowIndex, columnNameMean, -1d);
+				output.setCellValue(rowIndex, columnNameStdDev, -1d);
+			} else {
+				output.setCellValue(rowIndex, columnNameMean, point.mean());
+				output.setCellValue(rowIndex, columnNameStdDev, point.standardDeviation());
+			}
 		}
 	}
 
@@ -114,6 +150,53 @@ public class RefineHelper {
 		}
 	}
 
+//	public static class RefineFurther implements Refinement {
+//
+//		private final Refinement refinement;
+//		private final Function<Object, Object> refine;
+//
+//		public RefineFurther(Refinement refinement) {
+//			this.refinement = Objects.requireNonNull(refinement);
+//		}
+//
+//		@Override
+//		public Collection<String> headers() {
+//			return refinement.headers();
+//		}
+//
+//		@Override
+//		public void refine(CSV output, String groupName, int rowIndex, List<CSVRecord> datapoints) {
+//			refinement.refine(output, groupName, rowIndex, datapoints);
+//
+//			output.setCellValue(rowIndex, columnName, result);
+//		}
+//
+//	}
+
+	public static class ReplaceOutputRefinement implements Refinement {
+
+		private final String columnName;
+		private final Function<String, Object> replace;
+
+		public ReplaceOutputRefinement(String columnName, Function<String, Object> replace) {
+			this.columnName = Objects.requireNonNull(columnName);
+			this.replace = Objects.requireNonNull(replace);
+		}
+
+		@Override
+		public Collection<String> headers() {
+			return Collections.singleton(columnName);
+		}
+
+		@Override
+		public void refine(CSV output, String groupName, int rowIndex, List<CSVRecord> datapoints) {
+			var original = output.getCellValue(rowIndex, columnName);
+			var result = replace.apply(original);
+			output.setCellValue(rowIndex, columnName, result);
+		}
+
+	}
+
 	public static Refinement stdDeviation(String column, String meanColumn, String devColumn,
 			ToDoubleFunction<String> convertToDouble) {
 		return new StdDevRefinement(column, meanColumn, devColumn, convertToDouble);
@@ -143,6 +226,14 @@ public class RefineHelper {
 
 	public static Refinement groupName(String column) {
 		return new GroupNameRefinement(column);
+	}
+
+	public static Refinement replace(String column, Function<String, Object> replace) {
+		return new ReplaceOutputRefinement(column, replace);
+	}
+
+	public static Refinement replace(NamedCSV.CSVHeader column, Function<String, Object> replace) {
+		return replace(column.getColumnName(), replace);
 	}
 
 }

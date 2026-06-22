@@ -101,8 +101,8 @@ public class LogExtractor {
 				}
 
 				if (backendLog.compile() instanceof BackendParser.CompileData data) {
-					var firstPass = data.firstPass() != null ? data.firstPass().doubleValue() : 0;
-					var secondPass = data.secondPass() != null ? data.secondPass().doubleValue() : 0;
+					var firstPass = data.firstPass() != null ? data.firstPass().doubleValue() : -1;
+					var secondPass = data.secondPass() != null ? data.secondPass().doubleValue() : -1;
 					var totalCompileTime = secondPass > 0 ? secondPass : firstPass;
 
 					mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.CompileTimePassOne, //

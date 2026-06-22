@@ -196,6 +196,10 @@ public class CSV implements Iterable<CSV.CSVRecord> {
 		updateHeaderIndex();
 	}
 
+	public boolean hasColumnWithName(String name) {
+		return headerToIndex.containsKey(name);
+	}
+
 	public String getCellValue(int rowIndex, int colIndex) {
 		if (colIndex < 0 || this.numberOfColumns <= colIndex)
 			throw new IllegalArgumentException();

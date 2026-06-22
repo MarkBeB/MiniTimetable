@@ -59,9 +59,6 @@ public class PrettyPrinter {
 	}
 
 	public CSV pretty(CSV csv) {
-		if (columns.length != csv.getNumberOfColumns())
-			throw new IllegalArgumentException();
-
 		CSV formatted = csvSupplier.get();
 
 		var originalColumns = csv.getColumnNames();
@@ -75,25 +72,34 @@ public class PrettyPrinter {
 		var nCol = csv.getNumberOfColumns();
 		var nRow = csv.getNumberOfRows();
 
-		for (var c = 0; c < nCol; c++) {
-			if (columns[c] instanceof PrettyColumn pcolumn) {
-				String[] allRows = new String[(int) nRow];
-				for (var r = 0; r < nRow; ++r)
-					allRows[r] = csv.getCellValue(r, c);
+		if (columns != null) {
+			if (columns.length != csv.getNumberOfColumns())
+				throw new IllegalArgumentException();
 
-				String[] prettyRows = pcolumn.pretty(allRows);
-				for (var r = 0; r < nRow; ++r)
-					formatted.setCellValue(r, c, prettyRows[r]);
+			for (var c = 0; c < nCol; c++) {
+				if (columns[c] instanceof PrettyColumn pcolumn) {
+					String[] allRows = new String[(int) nRow];
+					for (var r = 0; r < nRow; ++r)
+						allRows[r] = csv.getCellValue(r, c);
 
-			} else if (columns[c] instanceof PrettyCell pcell) {
-				for (var r = 0; r < nRow; ++r)
-					formatted.setCellValue(r, c, pcell.pretty(csv.getCellValue(r, c)));
+					String[] prettyRows = pcolumn.pretty(allRows);
+					for (var r = 0; r < nRow; ++r)
+						formatted.setCellValue(r, c, prettyRows[r]);
 
-			} else {
+				} else if (columns[c] instanceof PrettyCell pcell) {
+					for (var r = 0; r < nRow; ++r)
+						formatted.setCellValue(r, c, pcell.pretty(csv.getCellValue(r, c)));
+
+				} else {
+					for (var r = 0; r < nRow; ++r)
+						formatted.setCellValue(r, c, csv.getCellValue(r, c));
+
+				}
+			}
+		} else {
+			for (var c = 0; c < nCol; c++)
 				for (var r = 0; r < nRow; ++r)
 					formatted.setCellValue(r, c, csv.getCellValue(r, c));
-
-			}
 		}
 
 		return formatted;
