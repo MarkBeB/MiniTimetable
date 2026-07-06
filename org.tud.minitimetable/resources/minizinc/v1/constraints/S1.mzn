@@ -6,10 +6,10 @@ include "../IHTP-model.mzn";
 
 constraint forall(roomId in RoomIds, day in Days)(
   let {
-    array[int] of AgeGroups: occupantAges = [ occupant.ageGroup | occupant in occupantData 
+    array[int] of AgeGroups: occupantAges = [ occupant.ageGroup | occupant in occupants 
       where occupant.assignedRoom == roomId /\ day < occupant.lengthOfStay ];
     
-    array[int] of var opt AgeGroups: patientAges = [ patientData[id].ageGroup | id in PatientIds 
+    array[int] of var opt AgeGroups: patientAges = [ patients[id].ageGroup | id in PatientIds 
       where patientVar[id].assignedRoom[day] == roomId ];
     
     var opt AgeGroups: maxAge = max_weak(occupantAges ++ patientAges);

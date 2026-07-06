@@ -187,12 +187,12 @@ enum RoomIdOrNotAssigned = {RoomNotAssigned} ++ C_room(RoomIds);
 enum GenderOrNotAssigned = {GenderNotAssigned} ++ C_gender(Genders);
 
 
-array[NurseIds] of NurseFixData: nurseData;
-array[SurgeonIds] of SurgeonFixData: surgeonData;
-array[PatientIds] of PatientFixData: patientData;
-array[OccupantIds] of OccupantFixData: occupantData;
-array[OperatingTheaterIds] of OperatingTheaterFixData: operatingTheaterData;
-array[RoomIds] of RoomFixData: roomData;
+array[NurseIds] of NurseFixData: nurses;
+array[SurgeonIds] of SurgeonFixData: surgeons;
+array[PatientIds] of PatientFixData: patients;
+array[OccupantIds] of OccupantFixData: occupants;
+array[OperatingTheaterIds] of OperatingTheaterFixData: operatingTheaters;
+array[RoomIds] of RoomFixData: rooms;
 
 
 array[NurseIds] of NurseVarData: nurseVar;
@@ -203,9 +203,9 @@ array[OperatingTheaterIds] of OperatingTheaterVarData: operatingTheaterVar;
 array[RoomIds] of RoomVarData: roomVar;
 
 %deprecated
-int: numberOfPatients = length(patientData);
+int: numberOfPatients = length(patients);
 %deprecated
-int: numberOfOccupants = length(occupantData);
+int: numberOfOccupants = length(occupants);
 
 % Usage may cause memory segmentation fault since version 2.9.5, was fine before. Seems to happen when a combined Type has 'too many' fields.
 %
@@ -216,12 +216,12 @@ int: numberOfOccupants = length(occupantData);
 %array[OperatingTheaterIds] of OperatingTheater: operatingTheaters ::output = [id: operatingTheaterData[id] ++ operatingTheaterVar[id] | id in OperatingTheaterIds];
 %array[RoomIds] of Room: rooms ::output = [id: roomData[id] ++ roomVar[id] | id in RoomIds];
 
-array[NurseIds] of NurseFixData: nurses = nurseData;
-array[SurgeonIds] of SurgeonFixData: surgeons = surgeonData;
-array[PatientIds] of PatientFixData: patients = patientData;
-array[OccupantIds] of OccupantFixData: occupants = occupantData;
-array[OperatingTheaterIds] of OperatingTheaterFixData: operatingTheaters = operatingTheaterData;
-array[RoomIds] of RoomFixData: rooms = roomData;
+%array[NurseIds] of NurseFixData: nurses = nurseData;
+%array[SurgeonIds] of SurgeonFixData: surgeons = surgeonData;
+%array[PatientIds] of PatientFixData: patients = patientData;
+%array[OccupantIds] of OccupantFixData: occupants = occupantData;
+%array[OperatingTheaterIds] of OperatingTheaterFixData: operatingTheaters = operatingTheaterData;
+%array[RoomIds] of RoomFixData: rooms = roomData;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -230,13 +230,13 @@ array[RoomIds] of RoomFixData: rooms = roomData;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function bool: occupantIsInRoom(OccupantIds: id, Days: day, RoomIds: roomId) = 
-  (occupantData[id].assignedRoom == roomId) /\ (day < occupantData[id].lengthOfStay);
+  (occupants[id].assignedRoom == roomId) /\ (day < occupants[id].lengthOfStay);
 
 function var bool: patientIsInRoom(PatientIds: id, Days: day, RoomIds: roomId) = 
   patientVar[id].assignedRoom[day] == roomId;
 
 function var bool: occupantIsPresent(OccupantIds: id, Days: day) = 
-  day < occupantData[id].lengthOfStay;
+  day < occupants[id].lengthOfStay;
 
 function var bool: patientIsPresent(PatientIds: id, Days: day) = 
   patientVar[id].admissionDay <= day /\ day <= patientVar[id].admittedUntil;
@@ -303,4 +303,4 @@ function int: indexOf(Days: day, ShiftTypes: shift) =
 
 
 function bool: isNurseWorking(NurseIds: n, Days: d, ShiftTypes: s) =
-  nurseData[n].maxWorkloadPerShift[d, s] > 0; 
+  nurses[n].maxWorkloadPerShift[d, s] > 0; 

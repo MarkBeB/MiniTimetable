@@ -7,19 +7,19 @@ include "../IHTP-model.mzn";
 % Note that a nurse with a skill level greater than the minimum required can be assigned to the room at no additional cost.
 %
 
-function int: occupantSkillLevel(OccupantIds: id, Days: day, ShiftTypes: shift) = occupantData[id].skillLevelRequired[indexOf(day, shift)];
-function var int: patientSkillLevel(PatientIds: id, Days: day, ShiftTypes: shift) = patientData[id].skillLevelRequired[indexOf(id, day, shift)];
+function int: occupantSkillLevel(OccupantIds: id, Days: day, ShiftTypes: shift) = occupants[id].skillLevelRequired[indexOf(day, shift)];
+function var int: patientSkillLevel(PatientIds: id, Days: day, ShiftTypes: shift) = patients[id].skillLevelRequired[indexOf(id, day, shift)];
 
 constraint forall(day in Days, shift in ShiftTypes)(
   forall(nurseId in NurseIds)(
     if nurseVar[nurseId].isWorking[day, shift] then
       nurseVar[nurseId].penaltySkillLevel[day, shift] = sum(roomId in RoomIds where nurseVar[nurseId].assignedRooms[day, shift, roomId])(
         let { 
-          int: nurseLevel = nurseData[nurseId].skillLevel;
-          array[_] of int: occupants = [ occupantSkillLevel(id, day, shift) | id in OccupantIds where occupantIsInRoom(id, day, roomId)];
-          array[_] of var opt int: patients = [ patientSkillLevel(id, day, shift) | id in PatientIds where patientIsInRoom(id, day, roomId)];
+          int: nurseLevel = nurses[nurseId].skillLevel;
+          array[_] of int: olevels = [ occupantSkillLevel(id, day, shift) | id in OccupantIds where occupantIsInRoom(id, day, roomId)];
+          array[_] of var opt int: plevels = [ patientSkillLevel(id, day, shift) | id in PatientIds where patientIsInRoom(id, day, roomId)];
         } in
-        sum([max(0, -nurseLevel + level) | level in occupants]) + sum([max(0, -nurseLevel + level) | level in patients])
+        sum([max(0, -nurseLevel + level) | level in olevels]) + sum([max(0, -nurseLevel + level) | level in plevels])
       )
     else
       nurseVar[nurseId].penaltySkillLevel[day, shift] = 0

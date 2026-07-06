@@ -10,7 +10,7 @@ array[RoomIds, Days] of var 0..card(AgeGroups): roomAgeDifference;
 
 constraint forall(p in PatientIds, d in Days)(
     let { 
-        AgeGroups: age = patientData[p].ageGroup
+        AgeGroups: age = patients[p].ageGroup
     } in
     forall(r in RoomIds)(
         patientVar[p].assignedRoom[d] == r -> (
@@ -22,7 +22,7 @@ constraint forall(p in PatientIds, d in Days)(
 
 constraint forall(r in RoomIds, d in Days)(
     let { 
-        array[int] of AgeGroups: occupantAges = [ occupantData[o].ageGroup | o in OccupantIds where isOccupantInRoom(o,d,r)] 
+        array[int] of AgeGroups: occupantAges = [ occupants[o].ageGroup | o in OccupantIds where isOccupantInRoom(o,d,r)] 
     } in
     if length(occupantAges) > 0 then
         roomMaxAge[r, d] >= max(occupantAges) /\

@@ -10,7 +10,7 @@ constraint forall(roomId in RoomIds, day in Days)(
 
 constraint forall(roomId in RoomIds, day in Days)( 
   let { int: occupantsInRoom = sum(o in OccupantIds)(isOccupantInRoom(o,day,roomId)) } in
-  roomVar[roomId].assignedPatients[day] + occupantsInRoom <= roomData[roomId].capacity
+  roomVar[roomId].assignedPatients[day] + occupantsInRoom <= rooms[roomId].capacity
 );
 
 %constraint forall(roomId in RoomIds, day in Days)(

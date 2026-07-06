@@ -26,7 +26,7 @@ output :: "json"
 [ "  \("occupants"): [\n" ] ++
 [ "    {\("id"): \("\(id)"), "  ++
       "\("no_nurses"): \(count(nurseId in NurseIds)(o.caredByNurse[nurseId])), " ++ 
-      "\("room"): \(format(occupantData[id].assignedRoom))},\n" | id in OccupantIds, o = occupantVar[id] ] ++
+      "\("room"): \(format(occupants[id].assignedRoom))},\n" | id in OccupantIds, o = occupantVar[id] ] ++
 [ "  ],\n" ] ++
 
 [ " \("postponedPatients"): [" ] ++
@@ -43,7 +43,7 @@ output :: "json"
     | day in Days, shift in ShiftTypes where fix(n.isWorking[day, shift])]) ++ "\n" ++
   "      ]\n" ++
   "    },\n" 
-  | id in NurseIds, n = nurseVar[id], nF = nurseData[id] ] ++
+  | id in NurseIds, n = nurseVar[id], nF = nurses[id] ] ++
 [ "  ],\n" ] ++
 
 [ "}" ]

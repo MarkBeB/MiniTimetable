@@ -6,9 +6,9 @@ include "../IHTP-model.mzn";
 
 constraint forall(otId in OperatingTheaterIds, day in Days where isOTAvailable(otId, day))(
   operatingTheaterVar[otId].usedTime[day] = sum(patientId in PatientIds where patientVar[patientId].assignedOT == otId /\ patientVar[patientId].admissionDay == day)
-    (patientData[patientId].surgeryDuration)
+    (patients[patientId].surgeryDuration)
 );
 
 constraint forall(otId in OperatingTheaterIds, day in Days)(
-  operatingTheaterVar[otId].usedTime[day] <= operatingTheaterData[otId].availability[day]
+  operatingTheaterVar[otId].usedTime[day] <= operatingTheaters[otId].availability[day]
 );

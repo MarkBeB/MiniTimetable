@@ -14,7 +14,7 @@ constraint forall(patient in patientVar, day in Days where patient.isAdmitted)(
 );
 
 constraint forall(occupantId in OccupantIds, day in Days where occupantIsPresent(occupantId, day))(
-  let{ RoomIds: roomId = occupantData[occupantId].assignedRoom } in
+  let{ RoomIds: roomId = occupants[occupantId].assignedRoom } in
   forall(shift in ShiftTypes, nurseId in NurseIds)(
     nurseVar[nurseId].assignedRooms[day, shift, roomId] -> occupantVar[occupantId].caredByNurse[nurseId]
   )

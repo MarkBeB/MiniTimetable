@@ -5,5 +5,5 @@ include "../IHTP-model.mzn";
 %
 
 constraint forall(id in PatientIds, day in Days)(
-  not (patientVar[id].assignedRoom[day] in patientData[id].incompatibleRooms)
+  not (patientVar[id].assignedRoom[day] in patients[id].incompatibleRooms)
 );

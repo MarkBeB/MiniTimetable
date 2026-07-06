@@ -5,9 +5,9 @@ include "../IHTP-model.mzn";
 %
 
 constraint forall(roomId in RoomIds)(
-  forall(occupantId in OccupantIds where occupantData[occupantId].assignedRoom == roomId)(
-    forall(day in Days where day <= occupantData[occupantId].lengthOfStay)(
-      roomVar[roomId].assignedGender[day] = occupantData[occupantId].gender
+  forall(occupantId in OccupantIds where occupants[occupantId].assignedRoom == roomId)(
+    forall(day in Days where day <= occupants[occupantId].lengthOfStay)(
+      roomVar[roomId].assignedGender[day] = occupants[occupantId].gender
     )
   )
 );
@@ -15,7 +15,7 @@ constraint forall(roomId in RoomIds)(
 constraint forall(roomId in RoomIds)(
   forall(patientId in PatientIds)(
     forall(day in Days where patientVar[patientId].assignedRoom[day] == roomId)(
-      roomVar[roomId].assignedGender[day] == patientData[patientId].gender
+      roomVar[roomId].assignedGender[day] == patients[patientId].gender
     )
   )
 );

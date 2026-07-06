@@ -5,7 +5,7 @@ include "../IHTP-model.mzn";
 %
 
 constraint forall(patientId in PatientIds where patientVar[patientId].isAdmitted)(
-  let { SurgeonIds: surgeonId = patientData[patientId].assignedSurgeon } in
+  let { SurgeonIds: surgeonId = patients[patientId].assignedSurgeon } in
   forall(otId in OperatingTheaterIds, day in Days)(
     (patientVar[patientId].assignedOT == otId /\ patientVar[patientId].admissionDay == day) -> surgeonVar[surgeonId].worksInOT[day, otId]
   )

@@ -5,7 +5,7 @@ include "../IHTP-model.mzn";
 %
 
 % Admissions should only be allowed on days when at least one OT is available.
-set of ExtendedDays: daysWithOTCapacity = {postponedDay} union { day | day in Days where exists(ot in operatingTheaterData)(isOTAvailable(ot.id, day))};
+set of ExtendedDays: daysWithOTCapacity = {postponedDay} union { day | day in Days where exists(ot in operatingTheaters)(isOTAvailable(ot.id, day))};
 constraint redundant_constraint(forall(patient in patientVar)(
   patient.admissionDay in daysWithOTCapacity 
 ));

@@ -5,11 +5,11 @@ include "../IHTP-model.mzn";
 %
 
 constraint forall(surgeonId in SurgeonIds, day in Days)(
-  surgeonVar[surgeonId].usedTime[day] = sum(patientId in PatientIds where patientData[patientId].assignedSurgeon == surgeonId)(
-    if patientVar[patientId].admissionDay == day then patientData[patientId].surgeryDuration else 0 endif
+  surgeonVar[surgeonId].usedTime[day] = sum(patientId in PatientIds where patients[patientId].assignedSurgeon == surgeonId)(
+    if patientVar[patientId].admissionDay == day then patients[patientId].surgeryDuration else 0 endif
   )    
 );
 
 constraint forall(surgeonId in SurgeonIds, day in Days)(
-  surgeonVar[surgeonId].usedTime[day] <= surgeonData[surgeonId].maxSurgeryTime[day]
+  surgeonVar[surgeonId].usedTime[day] <= surgeons[surgeonId].maxSurgeryTime[day]
 );

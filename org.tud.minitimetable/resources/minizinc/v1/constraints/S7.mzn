@@ -5,7 +5,7 @@ include "../IHTP-model.mzn";
 %
 
 constraint forall(id in PatientIds)(
-  patientVar[id].penaltyAdmissionDelay = patientVar[id].admissionDay - patientData[id].earliestPossibleAdmission
+  patientVar[id].penaltyAdmissionDelay = patientVar[id].admissionDay - patients[id].earliestPossibleAdmission
 );
 
 constraint Penalties.patientDelay = Weights.patientDelay * sum(patient in patientVar where patient.isAdmitted)(patient.penaltyAdmissionDelay);
