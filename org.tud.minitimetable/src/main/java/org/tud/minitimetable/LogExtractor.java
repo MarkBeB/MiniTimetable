@@ -46,6 +46,7 @@ public class LogExtractor {
 
 		Collection<ModelSelection> selectedRuns = collectRunFolders(inputDirectory).stream() //
 				.filter(m -> 5 <= m.runId && m.runId <= 8) //
+//				.filter(m -> 1 == m.runId) //
 				.sorted() //
 				.toList();
 
