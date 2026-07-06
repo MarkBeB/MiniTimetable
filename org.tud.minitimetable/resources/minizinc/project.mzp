@@ -9,13 +9,14 @@
         "v4/model/Parameters.mzn",
         "v4/model/VarFunctions.mzn",
         "v4/model/GlobalVariables.mzn",
-        "v4/model/ParFunctions.mzn",
         "data/i01.dzn",
         "v4/OutJsonFormat.mzn",
         "v4/OutJsonFormat2.mzn",
-        "v4/AllConstraints.mzn"
+        "v4/AllConstraints.mzn",
+        "v4/constraints/H1.mzn",
+        "v3/constraints/H1.mzn"
     ],
-    "openTab": 12,
+    "openTab": 13,
     "projectFiles": [
         "data/i01.dzn",
         "data/i02.dzn",
