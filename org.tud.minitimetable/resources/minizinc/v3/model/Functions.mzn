@@ -1,4 +1,4 @@
-%include "Parameters.mzn";
+include "Parameters.mzn";
 %include "Variables.mzn";
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -12,31 +12,31 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function bool: isOccupantInRoom(OccupantIds: o, RoomIds: r) = 
-  occupantData[o].assignedRoom == r;
+  occupants[o].assignedRoom == r;
 
 function bool: isOccupantInRoom(OccupantIds: o, Days: d, RoomIds: r) = 
   isOccupantInRoom(o,r) /\ isOccupantPresent(o,d);
 
 function bool: isOccupantPresent(OccupantIds: id, Days: day) = 
-  day < occupantData[id].lengthOfStay;
+  day < occupants[id].lengthOfStay;
 
 function RoomIds: occupantRoom(OccupantIds: o) =
-  occupantData[o].assignedRoom;
+  occupants[o].assignedRoom;
 
 function AgeGroups: occupantAgeGroup(OccupantIds: o) =
-  occupantData[o].ageGroup;
+  occupants[o].ageGroup;
 
 function Genders: occupantGender(OccupantIds: o) =
-  occupantData[o].gender;
+  occupants[o].gender;
 
 function int: occupantLengthOfStay(OccupantIds: o) =
-  occupantData[o].lengthOfStay;
+  occupants[o].lengthOfStay;
   
 function int: occupantWorkload(OccupantIds: o, Days: d, ShiftTypes: s) =
-  occupantData[o].workloadProduced[occupantIndex(d,s)];
+  occupants[o].workloadProduced[occupantIndex(d,s)];
 
 function int: occupantSkillRequired(OccupantIds: o, Days: d, ShiftTypes: s) =
-  occupantData[o].skillLevelRequired[occupantIndex(d,s)];
+  occupants[o].skillLevelRequired[occupantIndex(d,s)];
 
 function int: occupantIndex(Days: d, ShiftTypes: s) =
   enum2int(s) - 1 + enum2int(d) * length(ShiftTypes);
@@ -56,46 +56,46 @@ function bool: isPatientSurgeonAvailable(PatientIds: p, Days: d) =
   isSurgeonAvailable(assignedSurgeon(p),d);
 
 function SurgeonIds: assignedSurgeon(PatientIds: p) =
-  patientData[p].assignedSurgeon;
+  patients[p].assignedSurgeon;
 
 function int: surgeryDuration(PatientIds: p) =
-  patientData[p].surgeryDuration;
+  patients[p].surgeryDuration;
 
 function AgeGroups: patientAgeGroup(PatientIds: p) =
-  patientData[p].ageGroup;
+  patients[p].ageGroup;
 
 function Genders: patientGender(PatientIds: p) =
-  patientData[p].gender;
+  patients[p].gender;
 
 function var int: patientWorkload(PatientIds: p, var int: relativeDay, ShiftTypes: s) =
-  patientData[p].workloadProduced[toIndex(relativeDay,s)];
+  patients[p].workloadProduced[toIndex(relativeDay,s)];
 
 function var int: patientSkillRequired(PatientIds: p, var int: relativeDay, ShiftTypes: s) =
-  patientData[p].skillLevelRequired[toIndex(relativeDay,s)];
+  patients[p].skillLevelRequired[toIndex(relativeDay,s)];
 
 function var int: toIndex(var int: d, ShiftTypes: s) =
   enum2int(s) - 1 + d * length(ShiftTypes);
 
 function int: patientLengthOfStay(PatientIds: p) =
-  patientData[p].lengthOfStay;
+  patients[p].lengthOfStay;
 
 function set of RoomIds: incompatibleRooms(PatientIds: p) =
-  array2set(patientData[p].incompatibleRooms);
+  array2set(patients[p].incompatibleRooms);
 
 function set of RoomIds: compatibleRooms(PatientIds: p) =
   RoomIds diff incompatibleRooms(p);
 
 function bool: isPatientMandatory(PatientIds: p) = 
-  patientData[p].mandatory;
+  patients[p].mandatory;
 
 function bool: isPatientOptional(PatientIds: p) = 
-  not patientData[p].mandatory;
+  not patients[p].mandatory;
   
 function Days: earliestAdmissionDay(PatientIds: p) =
-  patientData[p].earliestPossibleAdmission;
+  patients[p].earliestPossibleAdmission;
 
 function Days: latestAdmissionDay(PatientIds: p) =
-  patientData[p].latestPossibleAdmission;
+  patients[p].latestPossibleAdmission;
 
 function bool: isPatientAdmittable(PatientIds: p, Days: d) = true;
 %  (earliestAdmissionDay(p) <= d) /\ (card(compatibleRooms(p)) > 0) /\ isAnyOTAvailable(d) /\ isPatientSurgeonAvailable(p, d);
@@ -105,10 +105,10 @@ function bool: isPatientAdmittable(PatientIds: p, Days: d) = true;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function int: nurseWorkloadCapacity(NurseIds: n, Days: d, ShiftTypes: s) =
-  nurseData[n].maxWorkloadPerShift[d, s];
+  nurses[n].maxWorkloadPerShift[d, s];
 
 function int: nurseSkillLevel(NurseIds: n) =
-  nurseData[n].skillLevel;
+  nurses[n].skillLevel;
 
 function bool: isNurseAvailable(NurseIds: n, Days: d, ShiftTypes: s) =
   nurseWorkloadCapacity(n,d,s) > 0;
@@ -125,7 +125,7 @@ function bool: isSurgeonAvailable(SurgeonIds: s, Days: d) =
   surgeonSurgeryCapacity(s,d) > 0;
 
 function int: surgeonSurgeryCapacity(SurgeonIds: s, Days: d) = 
-  surgeonData[s].maxSurgeryTime[d];
+  surgeons[s].maxSurgeryTime[d];
 
   
 
@@ -139,7 +139,7 @@ function bool: isAnyOTAvailable(Days: d) =
   exists(ot in OperatingTheaterIds)(isOTAvailable(ot,d));
 
 function int: otSurgeryCapacity(OperatingTheaterIds: ot, Days: d) = 
-  operatingTheaterData[ot].availability[d];
+  operatingTheaters[ot].availability[d];
 
 
 
@@ -147,5 +147,5 @@ function int: otSurgeryCapacity(OperatingTheaterIds: ot, Days: d) =
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function int: roomCapacity(RoomIds: r) =
-  roomData[r].capacity;
+  rooms[r].capacity;
  
