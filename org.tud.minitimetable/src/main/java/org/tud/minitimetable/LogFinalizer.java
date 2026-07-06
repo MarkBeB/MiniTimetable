@@ -63,7 +63,7 @@ public class LogFinalizer {
 
 		buildTable_MiniZincNaiveComparison(mzAllOld, mzAll, outputDirectory, "comparison-mz-naive.csv");
 
-		buildTable_MiniZincGipsSolutionComparison(gips, mzAll, outputDirectory, "comparison-mz-gips.csv");
+		buildTable_MiniZincGipsSolutionComparison(gips, mzAll, outputDirectory, "comparison-mz-gips-solutions.csv");
 
 //		buildObjectiveDiscrepancy(mzAll, outputDirectory, "design-objective.csv");
 //		compareGipsSize(gips, mzAll, outputDirectory);
