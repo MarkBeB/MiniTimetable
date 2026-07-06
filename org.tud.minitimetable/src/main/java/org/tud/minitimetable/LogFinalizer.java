@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import org.tud.minitimetable.eval.util.CSV;
 import org.tud.minitimetable.eval.util.CSV.CSVRecord;
@@ -23,6 +24,11 @@ public class LogFinalizer {
 
 	private static final String InvalidNumberPlaceholder = "--";
 
+	private static final Function<String, String> zeroInvalid = replaceInvalidNumbers(Util.getDecimalFormat(), 0,
+			InvalidNumberPlaceholder);
+	private static final Function<String, String> minusOneInvalid = replaceInvalidNumbers(Util.getDecimalFormat(), -1,
+			InvalidNumberPlaceholder);
+
 	public static void main(String[] args) throws IOException, ParseException {
 
 		Path outputDirectory = getResourceDirectory().resolve("workstation").resolve("finalized");
@@ -31,25 +37,39 @@ public class LogFinalizer {
 
 		Path refinedDirectory = getResourceDirectory().resolve("workstation").resolve("refined");
 
+		CSV competition = new CSV(Util.getDecimalFormat());
+		competition.read(getResourceDirectory().resolve("input").resolve("ihtc-competition.csv"),
+				StandardCharsets.UTF_8, ";", true);
+
 		CSV gips = new CSV(Util.getDecimalFormat());
 		gips.read(refinedDirectory.resolve("gips-data.csv"), StandardCharsets.UTF_8, ";", true);
 
 		CSV mzAll = new CSV(Util.getDecimalFormat());
 		mzAll.read(refinedDirectory.resolve("minizinc-data-all.csv"), StandardCharsets.UTF_8, ";", true);
 
+		CSV mzAllOld = new CSV(Util.getDecimalFormat());
+		mzAllOld.read(refinedDirectory.resolve("minizinc-data-all.v3.csv"), StandardCharsets.UTF_8, ";", true);
+
 		var mzSizeCsv = buildTable_MiniZincModelSize(mzAll, outputDirectory);
 		var gipsSizeCsv = buildTable_GipsModelSize(gips, outputDirectory);
-		buildTable_MiniZincGipsSizeComparison(mzSizeCsv, gipsSizeCsv, outputDirectory);
 
-		designObjective(mzAll, outputDirectory);
-		compareGipsSize(gips, mzAll, outputDirectory);
-		compareGipsPresolveSize(gips, mzAll, outputDirectory);
-		compareGipsCompileTime(gips, mzAll, outputDirectory);
-		compareGipsSolutions(gips, mzAll, outputDirectory);
+		buildTable_MiniZincGipsSizeComparison(mzSizeCsv, gipsSizeCsv, outputDirectory,
+				"compare-mz-gips-model-size.csv");
+
+		buildTable_MiniZincCompetitionComparison(competition, mzAll, outputDirectory, "performance-solutions.csv");
+		buildTable_MiniZincSize(mzAll, outputDirectory, "performance-size.csv");
+		buildTable_MiniZincTime(mzAll, outputDirectory, "performance-time.csv");
+
+//		buildObjectiveDiscrepancy(mzAll, outputDirectory, "design-objective.csv");
+//		compareGipsSize(gips, mzAll, outputDirectory);
+//		compareGipsPresolveSize(gips, mzAll, outputDirectory);
+//		compareGipsCompileTime(gips, mzAll, outputDirectory);
+//		compareGipsSolutions(gips, mzAll, outputDirectory);
+//		compareOldModel(mzAll, mzAllOld, outputDirectory);
 	}
 
-	private static record PairedLookupTable(Set<String> allKeys, Map<String, CSVRecord> gips,
-			Map<String, CSVRecord> mz) {
+	private static record PairedLookupTable(Set<String> allKeys, Map<String, CSVRecord> left,
+			Map<String, CSVRecord> right) {
 	}
 
 	private static Map<String, CSVRecord> buildLookup(CSV csv, String byKey) {
@@ -63,15 +83,15 @@ public class LogFinalizer {
 		return lookup;
 	}
 
-	private static PairedLookupTable mergePairs(CSV gips, CSV mz, String byKey) {
-		Map<String, CSVRecord> gipsLookup = buildLookup(gips, byKey);
-		Map<String, CSVRecord> mzLookup = buildLookup(mz, byKey);
+	private static PairedLookupTable mergePairs(CSV left, CSV right, String byKey) {
+		Map<String, CSVRecord> leftLookup = buildLookup(left, byKey);
+		Map<String, CSVRecord> rightLookup = buildLookup(right, byKey);
 
 		Set<String> keys = new HashSet<>();
-		keys.addAll(gipsLookup.keySet());
-		keys.addAll(mzLookup.keySet());
+		keys.addAll(leftLookup.keySet());
+		keys.addAll(rightLookup.keySet());
 
-		return new PairedLookupTable(keys, gipsLookup, mzLookup);
+		return new PairedLookupTable(keys, leftLookup, rightLookup);
 	}
 
 	private static Function<String, String> replaceInvalidNumbers(DecimalFormat format, double mustBeGreaterThan,
@@ -111,6 +131,13 @@ public class LogFinalizer {
 		if (numberHandler != null)
 			value = numberHandler.apply(value);
 		csv.setCellValue(rowIndex, column, value);
+	}
+
+	private static void conditionalSet(CSV csv, int rowIndex, String column, String fromColumn,
+			Predicate<String> condition, String onCondition) {
+		var target = csv.getCellValue(rowIndex, fromColumn);
+		if (condition.test(target))
+			csv.setCellValue(rowIndex, column, onCondition);
 	}
 
 	@Deprecated
@@ -219,6 +246,19 @@ public class LogFinalizer {
 		return valueA.doubleValue() + valueB.doubleValue();
 	}
 
+	private static Number addNumbers(Number... values) {
+		if (values == null || values.length == 0)
+			return null;
+
+		double sum = 0d;
+		for (var n : values) {
+			if (n == null)
+				return null;
+			sum += n.doubleValue();
+		}
+		return sum;
+	}
+
 	private static Number calculateSubtracteddMean(Number valueA, Number valueB) {
 		if (valueA == null || valueB == null)
 			return null;
@@ -233,17 +273,180 @@ public class LogFinalizer {
 		return Math.sqrt(Math.pow(valueA.doubleValue(), 2) + Math.pow(valueB.doubleValue(), 2));
 	}
 
-	private static void designObjective(CSV mz, Path outputDirectory) throws IOException, ParseException {
+	private static Number calculateNewStdDev(Number valueA, Number... otheValues) {
+		if (valueA == null || otheValues == null)
+			return null;
+
+		double sum = Math.pow(valueA.doubleValue(), 2);
+		for (var n : otheValues)
+			sum += Math.pow(n.doubleValue(), 2);
+		return Math.sqrt(sum);
+	}
+
+	private static void buildTable_MiniZincCompetitionComparison(CSV competition, CSV mz, Path outputDirectory,
+			String outputFile) throws IOException, ParseException {
+
+		CSV csv = new CSV(Util.getDecimalFormat());
+		csv.setColumnNames(new String[] { "Instance", //
+				"Model Objective Mean", "Model Objective StdDev", //
+				"Model Objective Best", "Model Objective 10Min", //
+				"Best Official Objective", //
+				"Solutions Obtained", "Memory Errors", //
+				"Objective R", "Objective Mean", "Objective StdDev"//
+		});
+
+		DecimalFormat format = Util.getDecimalFormat();
+		PairedLookupTable merged = mergePairs(competition, mz, "name");
+
+		for (var instance : merged.allKeys.stream().sorted().toList()) {
+			var rowIndex = csv.addNewRow();
+			csv.setCellValue(rowIndex, "Instance", instance);
+
+			setNumberValue(csv, rowIndex, "Model Objective Best", //
+					merged.right, instance, "bestObjective (min)", zeroInvalid);
+			setNumberValue(csv, rowIndex, "Model Objective 10Min", //
+					merged.right, instance, "bestObjective10m (min)", zeroInvalid);
+			setNumberValue(csv, rowIndex, "Model Objective Mean", //
+					merged.right, instance, "bestObjective (m)", zeroInvalid);
+			setNumberValue(csv, rowIndex, "Model Objective StdDev", //
+					merged.right, instance, "bestObjective (sd)", minusOneInvalid);
+
+			conditionalSet(csv, rowIndex, "Model Objective StdDev", //
+					"Model Objective Mean", //
+					c -> InvalidNumberPlaceholder.equals(c), InvalidNumberPlaceholder);
+
+			setNumberValue(csv, rowIndex, "Best Official Objective", //
+					merged.left, instance, "cost", zeroInvalid);
+
+			setNumberValue(csv, rowIndex, "Solutions Obtained", //
+					merged.right, instance, "foundSolution", minusOneInvalid);
+
+			setNumberValue(csv, rowIndex, "Memory Errors", //
+					merged.right, instance, "solverCrash", minusOneInvalid);
+
+			calculateRatio(format, csv, rowIndex, "Objective R", "Model Objective Best", "Best Official Objective");
+		}
+
+		var finalRow = csv.addNewRow();
+		csv.setCellValue(finalRow, "Instance", "final");
+		calculateMeanAndStdDevOfRatio(format, csv, finalRow, "Objective Mean", "Objective StdDev", "Objective R", true);
+
+		csv.write(outputDirectory.resolve(outputFile));
+	}
+
+	private static void buildTable_MiniZincSize(CSV mz, Path outputDirectory, String outputFile)
+			throws IOException, ParseException {
+
+		CSV csv = new CSV(Util.getDecimalFormat());
+		csv.setColumnNames(new String[] { "Instance", //
+				"MemorySize", "Solutions Obtained", "Memory Errors", //
+				"Constraints Max", "Variables Max", "Coef Max", //
+
+				"Constraints Presolved Mean", "Constraints Presolved StdDev", //
+				"Constraints R", "Constraints Mean", "Constraints StdDev", //
+
+				"Variables Presolved Mean", "Variables Presolved StdDev", //
+				"Variables R", "Variables Mean", "Variables StdDev", //
+
+				"Coef Presolved Mean", "Coef Presolved StdDev", //
+				"Coef R", "Coef Mean", "Coef StdDev" //
+		});
+
+		DecimalFormat format = Util.getDecimalFormat();
+		var lookupTable = buildLookup(mz, "name");
+
+		for (var instance : lookupTable.keySet().stream().sorted().toList()) {
+			var rowIndex = csv.addNewRow();
+			csv.setCellValue(rowIndex, "Instance", instance);
+
+			setNumberValue(csv, rowIndex, "MemorySize", //
+					lookupTable, instance, "memoryMB (m)", minusOneInvalid);
+			setNumberValue(csv, rowIndex, "Memory Errors", //
+					lookupTable, instance, "solverCrash", minusOneInvalid);
+			setNumberValue(csv, rowIndex, "Solutions Obtained", //
+					lookupTable, instance, "foundSolution", minusOneInvalid);
+
+			setNumberValue(csv, rowIndex, "Constraints Max", //
+					lookupTable, instance, "originalConstraints (max)", minusOneInvalid);
+			setNumberValue(csv, rowIndex, "Variables Max", //
+					lookupTable, instance, "originalVariables (max)", minusOneInvalid);
+			setNumberValue(csv, rowIndex, "Coef Max", //
+					lookupTable, instance, "originalCoefficients (max)", minusOneInvalid);
+
+			setNumberValue(csv, rowIndex, "Constraints Presolved Mean", //
+					lookupTable, instance, "presolvedConstraints (m)", minusOneInvalid);
+			setNumberValue(csv, rowIndex, "Constraints Presolved StdDev", //
+					lookupTable, instance, "presolvedConstraints (sd)", minusOneInvalid);
+			calculateRatio(format, csv, rowIndex, "Constraints R", "Constraints Max", "Constraints Presolved Mean");
+
+			setNumberValue(csv, rowIndex, "Variables Presolved Mean", //
+					lookupTable, instance, "presolvedVariables (m)", minusOneInvalid);
+			setNumberValue(csv, rowIndex, "Variables Presolved StdDev", //
+					lookupTable, instance, "presolvedVariables (sd)", minusOneInvalid);
+			calculateRatio(format, csv, rowIndex, "Variables R", "Variables Max", "Variables Presolved Mean");
+
+			setNumberValue(csv, rowIndex, "Coef Presolved Mean", //
+					lookupTable, instance, "presolvedCoefficients (m)", minusOneInvalid);
+			setNumberValue(csv, rowIndex, "Coef Presolved StdDev", //
+					lookupTable, instance, "presolvedCoefficients (sd)", minusOneInvalid);
+			calculateRatio(format, csv, rowIndex, "Coef R", "Coef Max", "Coef Presolved Mean");
+
+		}
+
+		var finalRow = csv.addNewRow();
+		csv.setCellValue(finalRow, "Instance", "final");
+		calculateMeanAndStdDevOfRatio(format, csv, finalRow, "Constraints Mean", "Constraints StdDev", "Constraints R",
+				true);
+		calculateMeanAndStdDevOfRatio(format, csv, finalRow, "Variables Mean", "Variables StdDev", "Variables R", true);
+		calculateMeanAndStdDevOfRatio(format, csv, finalRow, "Coef Mean", "Coef StdDev", "Coef R", true);
+
+		csv.write(outputDirectory.resolve(outputFile));
+	}
+
+	private static void buildTable_MiniZincTime(CSV mz, Path outputDirectory, String outputFile)
+			throws IOException, ParseException {
+
+		CSV csv = new CSV(Util.getDecimalFormat());
+		csv.setColumnNames(new String[] { "Instance", //
+				"Preprocessing Mean", "Preprocessing StdDev", //
+				"Compile Mean", "Compile StdDev" //
+		});
+
+		DecimalFormat format = Util.getDecimalFormat();
+		var lookupTable = buildLookup(mz, "name");
+
+		for (var instance : lookupTable.keySet().stream().sorted().toList()) {
+			var rowIndex = csv.addNewRow();
+			csv.setCellValue(rowIndex, "Instance", instance);
+
+			setNumberValue(csv, rowIndex, "Preprocessing Mean", //
+					lookupTable, instance, "preprocessingTimeS (m)", minusOneInvalid);
+			setNumberValue(csv, rowIndex, "Preprocessing StdDev", //
+					lookupTable, instance, "preprocessingTimeS (sd)", minusOneInvalid);
+
+			setNumberValue(csv, rowIndex, "Compile Mean", //
+					lookupTable, instance, "totalCompileTimeS (m)", minusOneInvalid);
+			setNumberValue(csv, rowIndex, "Compile StdDev", //
+					lookupTable, instance, "totalCompileTimeS (sd)", minusOneInvalid);
+		}
+
+		csv.write(outputDirectory.resolve(outputFile));
+	}
+
+	private static void buildObjectiveDiscrepancy(CSV mz, Path outputDirectory, String outputFile)
+			throws IOException, ParseException {
 		CSV csv = new CSV(Util.getDecimalFormat());
 		csv.setColumnNames(new String[] { "Instance", //
 				"Model Objective Mean", "Model Objective StdDev", //
 				"Validator Objective Mean", "Validator Objective StdDev", //
 				"Objective R", "Objective Mean", "Objective StdDev", //
+				"Solutions Mean", "Solutions StdDev" //
 		});
 
 		DecimalFormat format = Util.getDecimalFormat();
 		var lookupTable = buildLookup(mz, "name");
 		Function<String, String> zeroInvalid = replaceInvalidNumbers(format, 0, InvalidNumberPlaceholder);
+		Function<String, String> minusOneInvalid = replaceInvalidNumbers(format, -1, InvalidNumberPlaceholder);
 
 		for (var instance : lookupTable.keySet().stream().sorted().toList()) {
 			var rowIndex = csv.addNewRow();
@@ -258,13 +461,18 @@ public class LogFinalizer {
 			setNumberValue(csv, rowIndex, "Validator Objective StdDev", //
 					lookupTable, instance, "objectiveByValidator (sd)", zeroInvalid);
 			calculateRatio(format, csv, rowIndex, "Objective R", "Model Objective Mean", "Validator Objective Mean");
+
+			setNumberValue(csv, rowIndex, "Solutions Mean", //
+					lookupTable, instance, "numberOfSolutions (m)", minusOneInvalid);
+			setNumberValue(csv, rowIndex, "Solutions StdDev", //
+					lookupTable, instance, "numberOfSolutions (sd)", minusOneInvalid);
 		}
 
 		var finalRow = csv.addNewRow();
 		csv.setCellValue(finalRow, "Instance", "final");
 		calculateMeanAndStdDevOfRatio(format, csv, finalRow, "Objective Mean", "Objective StdDev", "Objective R", true);
 
-		csv.write(outputDirectory.resolve("design-objective.csv"));
+		csv.write(outputDirectory.resolve(outputFile));
 	}
 
 	private static void compareGipsCompileTime(CSV gips, CSV mz, Path outputDirectory)
@@ -286,29 +494,27 @@ public class LogFinalizer {
 			csv.setCellValue(rowIndex, "Instance", instance);
 
 			setNumberValue(csv, rowIndex, "GIPS Preproc Mean", //
-					merged.gips, instance, "observer runtime preproc mean", InvalidNumberPlaceholder);
+					merged.left, instance, "observer runtime preproc mean", InvalidNumberPlaceholder);
 			setNumberValue(csv, rowIndex, "GIPS Preproc StdDev", //
-					merged.gips, instance, "observer runtime preproc stddev", InvalidNumberPlaceholder);
+					merged.left, instance, "observer runtime preproc stddev", InvalidNumberPlaceholder);
 			setNumberValue(csv, rowIndex, "MZ Preproc Mean", //
-					merged.mz, instance, "preprocessingTimeS (m)", InvalidNumberPlaceholder);
+					merged.right, instance, "preprocessingTimeS (m)", InvalidNumberPlaceholder);
 			setNumberValue(csv, rowIndex, "MZ Preproc StdDev", //
-					merged.mz, instance, "preprocessingTimeS (sd)", InvalidNumberPlaceholder);
+					merged.right, instance, "preprocessingTimeS (sd)", InvalidNumberPlaceholder);
 			calculateRatio(format, csv, rowIndex, "Preproc R", "GIPS Preproc Mean", "MZ Preproc Mean");
 
-			var gipsGipsBuildM = getNumberValue(format, gips, rowIndex, "observer runtime build gips mean");
-			var gipsSolverBuildM = getNumberValue(format, gips, rowIndex, "observer runtime build solver mean");
-			setNumberValue(format, csv, rowIndex, "GIPS Build Mean",
-					calculateCombinedMean(gipsGipsBuildM, gipsSolverBuildM), InvalidNumberPlaceholder);
+			var gipsGipsBuildM = getNumberValue(format, gips, rowIndex, "observer runtime build mean");
+			setNumberValue(format, csv, rowIndex, "GIPS Build Mean", //
+					gipsGipsBuildM, InvalidNumberPlaceholder);
 
-			var gipsGipsBuildSd = getNumberValue(format, gips, rowIndex, "observer runtime build gips stddev");
-			var gipsSolverBuildSd = getNumberValue(format, gips, rowIndex, "observer runtime build solver stddev");
-			setNumberValue(format, csv, rowIndex, "GIPS Build StdDev",
-					calculateNewStdDev(gipsGipsBuildSd, gipsSolverBuildSd), InvalidNumberPlaceholder);
+			var gipsGipsBuildSd = getNumberValue(format, gips, rowIndex, "observer runtime build stddev");
+			setNumberValue(format, csv, rowIndex, "GIPS Build StdDev", //
+					gipsGipsBuildSd, InvalidNumberPlaceholder);
 
 			setNumberValue(csv, rowIndex, "MZ Build Mean", //
-					merged.mz, instance, "totalCompileTimeS (m)", InvalidNumberPlaceholder);
+					merged.right, instance, "totalCompileTimeS (m)", InvalidNumberPlaceholder);
 			setNumberValue(csv, rowIndex, "MZ Build StdDev", //
-					merged.mz, instance, "totalCompileTimeS (sd)", InvalidNumberPlaceholder);
+					merged.right, instance, "totalCompileTimeS (sd)", InvalidNumberPlaceholder);
 			calculateRatio(format, csv, rowIndex, "Build R", "GIPS Build Mean", "MZ Build Mean");
 
 		}
@@ -337,21 +543,21 @@ public class LogFinalizer {
 			var rowIndex = csv.addNewRow();
 			csv.setCellValue(rowIndex, "Instance", instance);
 
-			setNumberValue(csv, rowIndex, "GIPS Constraints", merged.gips, instance, "gurobi model rows mean",
+			setNumberValue(csv, rowIndex, "GIPS Constraints", merged.left, instance, "gurobi model rows mean",
 					InvalidNumberPlaceholder);
-			setNumberValue(csv, rowIndex, "MZ Constraints", merged.mz, instance, "originalConstraints (m)",
+			setNumberValue(csv, rowIndex, "MZ Constraints", merged.right, instance, "originalConstraints (m)",
 					InvalidNumberPlaceholder);
 			calculateRatio(format, csv, rowIndex, "Constraints R", "GIPS Constraints", "MZ Constraints");
 
-			setNumberValue(csv, rowIndex, "GIPS Variables", merged.gips, instance, "gurobi model cols mean",
+			setNumberValue(csv, rowIndex, "GIPS Variables", merged.left, instance, "gurobi model cols mean",
 					InvalidNumberPlaceholder);
-			setNumberValue(csv, rowIndex, "MZ Variables", merged.mz, instance, "originalVariables (m)",
+			setNumberValue(csv, rowIndex, "MZ Variables", merged.right, instance, "originalVariables (m)",
 					InvalidNumberPlaceholder);
 			calculateRatio(format, csv, rowIndex, "Variables R", "GIPS Variables", "MZ Variables");
 
-			setNumberValue(csv, rowIndex, "GIPS Coef", merged.gips, instance, "gurobi model nonzeros mean",
+			setNumberValue(csv, rowIndex, "GIPS Coef", merged.left, instance, "gurobi model nonzeros mean",
 					InvalidNumberPlaceholder);
-			setNumberValue(csv, rowIndex, "MZ Coef", merged.mz, instance, "originalCoefficients (m)",
+			setNumberValue(csv, rowIndex, "MZ Coef", merged.right, instance, "originalCoefficients (m)",
 					InvalidNumberPlaceholder);
 			calculateRatio(format, csv, rowIndex, "Coef R", "GIPS Coef", "MZ Coef");
 
@@ -541,7 +747,7 @@ public class LogFinalizer {
 		return csv;
 	}
 
-	private static void buildTable_MiniZincGipsSizeComparison(CSV mz, CSV gips, Path outputDirectory)
+	private static void buildTable_MiniZincGipsSizeComparison(CSV mz, CSV gips, Path outputDirectory, String outputFile)
 			throws IOException, ParseException {
 
 		CSV csv = new CSV(Util.getDecimalFormat());
@@ -568,46 +774,46 @@ public class LogFinalizer {
 			csv.setCellValue(rowIndex, "Instance", instance);
 
 			setNumberValue(csv, rowIndex, "GIPS Constraints Mean", //
-					merged.gips, instance, "GIPS Preso Constraints Mean", InvalidNumberPlaceholder);
+					merged.left, instance, "GIPS Preso Constraints Mean", InvalidNumberPlaceholder);
 			setNumberValue(csv, rowIndex, "GIPS Constraints StdDev", //
-					merged.gips, instance, "GIPS Preso Constraints StdDev", InvalidNumberPlaceholder);
+					merged.left, instance, "GIPS Preso Constraints StdDev", InvalidNumberPlaceholder);
 			setNumberValue(csv, rowIndex, "MZ Constraints Mean", //
-					merged.mz, instance, "MZ Preso Constraints Mean", InvalidNumberPlaceholder);
+					merged.right, instance, "MZ Preso Constraints Mean", InvalidNumberPlaceholder);
 			setNumberValue(csv, rowIndex, "MZ Constraints StdDev", //
-					merged.mz, instance, "MZ Preso Constraints StdDev", InvalidNumberPlaceholder);
+					merged.right, instance, "MZ Preso Constraints StdDev", InvalidNumberPlaceholder);
 			calculateRatio(format, csv, rowIndex, "Constraints R", //
 					"GIPS Constraints Mean", "MZ Constraints Mean");
 
 			setNumberValue(csv, rowIndex, "GIPS Variables Mean", //
-					merged.gips, instance, "GIPS Preso Variables Mean", InvalidNumberPlaceholder);
+					merged.left, instance, "GIPS Preso Variables Mean", InvalidNumberPlaceholder);
 			setNumberValue(csv, rowIndex, "GIPS Variables StdDev", //
-					merged.gips, instance, "GIPS Preso Variables StdDev", InvalidNumberPlaceholder);
+					merged.left, instance, "GIPS Preso Variables StdDev", InvalidNumberPlaceholder);
 			setNumberValue(csv, rowIndex, "MZ Variables Mean", //
-					merged.mz, instance, "MZ Preso Variables Mean", InvalidNumberPlaceholder);
+					merged.right, instance, "MZ Preso Variables Mean", InvalidNumberPlaceholder);
 			setNumberValue(csv, rowIndex, "MZ Variables StdDev", //
-					merged.mz, instance, "MZ Preso Variables StdDev", InvalidNumberPlaceholder);
+					merged.right, instance, "MZ Preso Variables StdDev", InvalidNumberPlaceholder);
 			calculateRatio(format, csv, rowIndex, "Variables R", //
 					"GIPS Variables Mean", "MZ Variables Mean");
 
 			setNumberValue(csv, rowIndex, "GIPS Coef Mean", //
-					merged.gips, instance, "GIPS Preso Coef Mean", InvalidNumberPlaceholder);
+					merged.left, instance, "GIPS Preso Coef Mean", InvalidNumberPlaceholder);
 			setNumberValue(csv, rowIndex, "GIPS Coef StdDev", //
-					merged.gips, instance, "GIPS Preso Coef StdDev", InvalidNumberPlaceholder);
+					merged.left, instance, "GIPS Preso Coef StdDev", InvalidNumberPlaceholder);
 			setNumberValue(csv, rowIndex, "MZ Coef Mean", //
-					merged.mz, instance, "MZ Preso Coef Mean", InvalidNumberPlaceholder);
+					merged.right, instance, "MZ Preso Coef Mean", InvalidNumberPlaceholder);
 			setNumberValue(csv, rowIndex, "MZ Coef StdDev", //
-					merged.mz, instance, "MZ Preso Coef StdDev", InvalidNumberPlaceholder);
+					merged.right, instance, "MZ Preso Coef StdDev", InvalidNumberPlaceholder);
 			calculateRatio(format, csv, rowIndex, "Coef R", //
 					"GIPS Coef Mean", "MZ Coef Mean");
 
 			setNumberValue(csv, rowIndex, "GIPS Presolve Time Mean", //
-					merged.gips, instance, "GIPS Presolve Time Mean", InvalidNumberPlaceholder);
+					merged.left, instance, "GIPS Presolve Time Mean", InvalidNumberPlaceholder);
 			setNumberValue(csv, rowIndex, "GIPS Presolve Time StdDev", //
-					merged.gips, instance, "GIPS Presolve Time StdDev", InvalidNumberPlaceholder);
+					merged.left, instance, "GIPS Presolve Time StdDev", InvalidNumberPlaceholder);
 			setNumberValue(csv, rowIndex, "MZ Presolve Time Mean", //
-					merged.mz, instance, "MZ Presolve Time Mean", InvalidNumberPlaceholder);
+					merged.right, instance, "MZ Presolve Time Mean", InvalidNumberPlaceholder);
 			setNumberValue(csv, rowIndex, "MZ Presolve Time StdDev", //
-					merged.mz, instance, "MZ Presolve Time StdDev", InvalidNumberPlaceholder);
+					merged.right, instance, "MZ Presolve Time StdDev", InvalidNumberPlaceholder);
 			calculateRatio(format, csv, rowIndex, "Presolve Time R", //
 					"GIPS Presolve Time Mean", "MZ Presolve Time Mean");
 
@@ -624,7 +830,7 @@ public class LogFinalizer {
 		calculateMeanAndStdDevOfRatio(format, csv, finalRow, "Presolve Time Mean", "Presolve Time StdDev", //
 				"Presolve Time R", true);
 
-		csv.write(outputDirectory.resolve("compare-mz-gips-model-size.csv"));
+		csv.write(outputDirectory.resolve(outputFile));
 	}
 
 	private static void compareGipsPresolveSize(CSV gips, CSV mz, Path outputDirectory)
@@ -654,24 +860,24 @@ public class LogFinalizer {
 			csv.setCellValue(rowIndex, "Instance", instance);
 
 			setNumberValue(csv, rowIndex, "GIPS Constraints Mean", //
-					merged.gips, instance, "gurobi presolve removed rows mean", InvalidNumberPlaceholder);
+					merged.left, instance, "gurobi presolve removed rows mean", InvalidNumberPlaceholder);
 			setNumberValue(csv, rowIndex, "GIPS Constraints StdDev", //
-					merged.gips, instance, "gurobi presolve removed rows stddev", InvalidNumberPlaceholder);
+					merged.left, instance, "gurobi presolve removed rows stddev", InvalidNumberPlaceholder);
 			setNumberValue(csv, rowIndex, "MZ Constraints Mean", //
-					merged.mz, instance, "presolvedConstraints (m)", InvalidNumberPlaceholder);
+					merged.right, instance, "presolvedConstraints (m)", InvalidNumberPlaceholder);
 			setNumberValue(csv, rowIndex, "MZ Constraints StdDev", //
-					merged.mz, instance, "presolvedConstraints (sd)", InvalidNumberPlaceholder);
+					merged.right, instance, "presolvedConstraints (sd)", InvalidNumberPlaceholder);
 			calculateRatio(format, csv, rowIndex, "Constraints R", //
 					"GIPS Constraints Mean", "MZ Constraints Mean");
 
 			setNumberValue(csv, rowIndex, "GIPS Variables Mean", //
-					merged.gips, instance, "gurobi presolve removed cols mean", InvalidNumberPlaceholder);
+					merged.left, instance, "gurobi presolve removed cols mean", InvalidNumberPlaceholder);
 			setNumberValue(csv, rowIndex, "GIPS Variables StdDev", //
-					merged.gips, instance, "gurobi presolve removed cols stddev", InvalidNumberPlaceholder);
+					merged.left, instance, "gurobi presolve removed cols stddev", InvalidNumberPlaceholder);
 			setNumberValue(csv, rowIndex, "MZ Variables Mean", //
-					merged.mz, instance, "presolvedVariables (m)", InvalidNumberPlaceholder);
+					merged.right, instance, "presolvedVariables (m)", InvalidNumberPlaceholder);
 			setNumberValue(csv, rowIndex, "MZ Variables StdDev", //
-					merged.mz, instance, "presolvedVariables (sd)", InvalidNumberPlaceholder);
+					merged.right, instance, "presolvedVariables (sd)", InvalidNumberPlaceholder);
 			calculateRatio(format, csv, rowIndex, "Variables R", //
 					"GIPS Variables Mean", "MZ Variables Mean");
 
@@ -682,20 +888,20 @@ public class LogFinalizer {
 //			merged.gips, instance, "gurobi presolve removed nonzeros stddev", InvalidNumberPlaceholder);
 			csv.setCellValue(rowIndex, "GIPS Coef StdDev", "--");
 			setNumberValue(csv, rowIndex, "MZ Coef Mean", //
-					merged.mz, instance, "presolvedCoefficients (m)", InvalidNumberPlaceholder);
+					merged.right, instance, "presolvedCoefficients (m)", InvalidNumberPlaceholder);
 			setNumberValue(csv, rowIndex, "MZ Coef StdDev", //
-					merged.mz, instance, "presolvedCoefficients (sd)", InvalidNumberPlaceholder);
+					merged.right, instance, "presolvedCoefficients (sd)", InvalidNumberPlaceholder);
 			calculateRatio(format, csv, rowIndex, "Coef R", //
 					"GIPS Coef Mean", "MZ Coef Mean");
 
 			setNumberValue(csv, rowIndex, "GIPS Runtime Mean", //
-					merged.gips, instance, "gurobi presolve runtime mean", InvalidNumberPlaceholder);
+					merged.left, instance, "gurobi presolve runtime mean", InvalidNumberPlaceholder);
 			setNumberValue(csv, rowIndex, "GIPS Runtime StdDev", //
-					merged.gips, instance, "gurobi presolve runtime stddev", InvalidNumberPlaceholder);
+					merged.left, instance, "gurobi presolve runtime stddev", InvalidNumberPlaceholder);
 			setNumberValue(csv, rowIndex, "MZ Runtime Mean", //
-					merged.mz, instance, "presolveTimeS (m)", InvalidNumberPlaceholder);
+					merged.right, instance, "presolveTimeS (m)", InvalidNumberPlaceholder);
 			setNumberValue(csv, rowIndex, "MZ Runtime StdDev", //
-					merged.mz, instance, "presolveTimeS (sd)", InvalidNumberPlaceholder);
+					merged.right, instance, "presolveTimeS (sd)", InvalidNumberPlaceholder);
 			calculateRatio(format, csv, rowIndex, "Runtime R", //
 					"GIPS Runtime Mean", "MZ Runtime Mean");
 
@@ -741,35 +947,35 @@ public class LogFinalizer {
 			csv.setCellValue(rowIndex, "Instance", instance);
 
 			setNumberValue(csv, rowIndex, "GIPS Best Objective Mean", //
-					merged.gips, instance, "gurobi best objective mean", zeroInvalid);
+					merged.left, instance, "gurobi best objective mean", zeroInvalid);
 			setNumberValue(csv, rowIndex, "GIPS Best Objective StdDev", //
-					merged.gips, instance, "gurobi best objective stddev", zeroInvalid);
+					merged.left, instance, "gurobi best objective stddev", zeroInvalid);
 			setNumberValue(csv, rowIndex, "MZ Best Objective Mean", //
-					merged.mz, instance, "bestObjective (m)", zeroInvalid);
+					merged.right, instance, "bestObjective (m)", zeroInvalid);
 			setNumberValue(csv, rowIndex, "MZ Best Objective StdDev", //
-					merged.mz, instance, "bestObjective (sd)", zeroInvalid);
+					merged.right, instance, "bestObjective (sd)", zeroInvalid);
 			calculateRatio(format, csv, rowIndex, "Best Objective R", //
 					"GIPS Best Objective Mean", "MZ Best Objective Mean");
 
 			setNumberValue(csv, rowIndex, "GIPS Best Bound Mean", //
-					merged.gips, instance, "gurobi best bound mean", zeroInvalid);
+					merged.left, instance, "gurobi best bound mean", zeroInvalid);
 			setNumberValue(csv, rowIndex, "GIPS Best Bound StdDev", //
-					merged.gips, instance, "gurobi best bound stddev", zeroInvalid);
+					merged.left, instance, "gurobi best bound stddev", zeroInvalid);
 			setNumberValue(csv, rowIndex, "MZ Best Bound Mean", //
-					merged.mz, instance, "bestBound (m)", zeroInvalid);
+					merged.right, instance, "bestBound (m)", zeroInvalid);
 			setNumberValue(csv, rowIndex, "MZ Best Bound StdDev", //
-					merged.mz, instance, "bestBound (sd)", zeroInvalid);
+					merged.right, instance, "bestBound (sd)", zeroInvalid);
 			calculateRatio(format, csv, rowIndex, "Best Bound R", //
 					"GIPS Best Bound Mean", "MZ Best Bound Mean");
 
 			setNumberValue(csv, rowIndex, "GIPS Solutions Mean", //
-					merged.gips, instance, "gurobi solution count mean", minusOneInvalid);
+					merged.left, instance, "gurobi solution count mean", minusOneInvalid);
 			setNumberValue(csv, rowIndex, "GIPS Solutions StdDev", //
-					merged.gips, instance, "gurobi solution count stddev", minusOneInvalid);
+					merged.left, instance, "gurobi solution count stddev", minusOneInvalid);
 			setNumberValue(csv, rowIndex, "MZ Solutions Mean", //
-					merged.mz, instance, "numberOfSolutions (m)", minusOneInvalid);
+					merged.right, instance, "numberOfSolutions (m)", minusOneInvalid);
 			setNumberValue(csv, rowIndex, "MZ Solutions StdDev", //
-					merged.mz, instance, "numberOfSolutions (sd)", minusOneInvalid);
+					merged.right, instance, "numberOfSolutions (sd)", minusOneInvalid);
 			calculateRatio(format, csv, rowIndex, "Solutions R", //
 					"GIPS Solutions Mean", "MZ Solutions Mean");
 
@@ -785,6 +991,77 @@ public class LogFinalizer {
 				"Solutions R", true);
 
 		csv.write(outputDirectory.resolve("compare-gips-mz-objective.csv"));
+	}
+
+	private static void compareOldModel(CSV mzAll, CSV mzAllOld, Path outputDirectory)
+			throws IOException, ParseException {
+		CSV csv = new CSV(Util.getDecimalFormat());
+		csv.setColumnNames(new String[] { "Instance", //
+				"N Constraints", "C Constraints", //
+				"Constraints R", "Constraints Mean", "Constraints StdDev", //
+				"N Variables", "C Variables", //
+				"Variables R", "Variables Mean", "Variables StdDev", //
+				"N Memory", "C Memory", //
+				"Memory R", "Memory Mean", "Memory StdDev", //
+				"N Build Time Mean", "N Build Time StdDev", //
+				"C Build Time Mean", "C Build Time StdDev", //
+				"Build Time R", "Build Time Mean", "Build Time StdDev" //
+		});
+
+		DecimalFormat format = Util.getDecimalFormat();
+		PairedLookupTable merged = mergePairs(mzAllOld, mzAll, "name");
+
+		Function<String, String> minusOneInvalid = replaceInvalidNumbers(format, -1, InvalidNumberPlaceholder);
+
+		for (var instance : merged.allKeys.stream().sorted().toList()) {
+			var rowIndex = csv.addNewRow();
+			csv.setCellValue(rowIndex, "Instance", instance);
+
+			setNumberValue(csv, rowIndex, "N Constraints", //
+					merged.left, instance, "originalConstraints (m)", minusOneInvalid);
+			setNumberValue(csv, rowIndex, "C Constraints", //
+					merged.right, instance, "originalConstraints (m)", minusOneInvalid);
+			calculateRatio(format, csv, rowIndex, "Constraints R", //
+					"N Constraints", "C Constraints");
+
+			setNumberValue(csv, rowIndex, "N Variables", //
+					merged.left, instance, "originalVariables (m)", minusOneInvalid);
+			setNumberValue(csv, rowIndex, "C Variables", //
+					merged.right, instance, "originalVariables (m)", minusOneInvalid);
+			calculateRatio(format, csv, rowIndex, "Variables R", //
+					"N Variables", "C Variables");
+
+			setNumberValue(csv, rowIndex, "N Memory", //
+					merged.left, instance, "memoryMB (m)", minusOneInvalid);
+			setNumberValue(csv, rowIndex, "C Memory", //
+					merged.right, instance, "memoryMB (m)", minusOneInvalid);
+			calculateRatio(format, csv, rowIndex, "Memory R", //
+					"N Memory", "C Memory");
+
+			setNumberValue(csv, rowIndex, "N Build Time Mean", //
+					merged.left, instance, "totalCompileTimeS (m)", minusOneInvalid);
+			setNumberValue(csv, rowIndex, "C Build Time Mean", //
+					merged.right, instance, "totalCompileTimeS (m)", minusOneInvalid);
+			setNumberValue(csv, rowIndex, "N Build Time StdDev", //
+					merged.left, instance, "totalCompileTimeS (sd)", minusOneInvalid);
+			setNumberValue(csv, rowIndex, "C Build Time StdDev", //
+					merged.right, instance, "totalCompileTimeS (sd)", minusOneInvalid);
+			calculateRatio(format, csv, rowIndex, "Build Time R", //
+					"N Build Time Mean", "C Build Time Mean");
+		}
+
+		var finalRow = csv.addNewRow();
+		csv.setCellValue(finalRow, "Instance", "final");
+		calculateMeanAndStdDevOfRatio(format, csv, finalRow, "Constraints Mean", "Constraints StdDev", //
+				"Constraints R", true);
+		calculateMeanAndStdDevOfRatio(format, csv, finalRow, "Variables Mean", "Variables StdDev", //
+				"Variables R", true);
+		calculateMeanAndStdDevOfRatio(format, csv, finalRow, "Memory Mean", "Memory StdDev", //
+				"Memory R", true);
+		calculateMeanAndStdDevOfRatio(format, csv, finalRow, "Build Time Mean", "Build Time StdDev", //
+				"Build Time R", true);
+
+		csv.write(outputDirectory.resolve("mz-model-comparison-naive.csv"));
 	}
 
 }

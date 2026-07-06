@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.tud.minitimetable.eval.extract.BackendParser;
@@ -16,6 +17,9 @@ import org.tud.minitimetable.eval.extract.BackendParser.BackendData;
 import org.tud.minitimetable.eval.extract.MainCSV;
 import org.tud.minitimetable.eval.extract.RunLogParser;
 import org.tud.minitimetable.eval.extract.RunLogParser.RunData;
+import org.tud.minitimetable.eval.extract.SolutionTimestampParser;
+import org.tud.minitimetable.eval.extract.SolutionTimestampParser.EntrySource;
+import org.tud.minitimetable.eval.extract.SolutionTimestampParser.SolutionPlot;
 import org.tud.minitimetable.extern.validator.ValidatorResult;
 import org.tud.minitimetable.extern.validator.ValidatorRunner;
 import org.tud.minitimetable.model.util.SolutionFileReader;
@@ -31,17 +35,17 @@ public class LogExtractor {
 		Path logDirectory = getResourceDirectory().resolve("workstation").resolve("raw");
 		Path outputDirectory = getResourceDirectory().resolve("workstation").resolve("extracted");
 
-		LogExtractor.extractDataFromLog(instanceFilesForValidation, logDirectory, outputDirectory);
+		LogExtractor.extractDataFromLog(instanceFilesForValidation, logDirectory, outputDirectory, "main.csv");
 	}
 
-	public static void extractDataFromLog(Path instanceDirectory, Path inputDirectory, Path outputDirectory)
-			throws IOException, InterruptedException {
+	public static void extractDataFromLog(Path instanceDirectory, Path inputDirectory, Path outputDirectory,
+			String outputFile) throws IOException, InterruptedException {
 
 		if (!Files.exists(outputDirectory))
 			Files.createDirectories(outputDirectory);
 
 		Collection<ModelSelection> selectedRuns = collectRunFolders(inputDirectory).stream() //
-				.filter(m -> 5 <= m.runId) //
+				.filter(m -> 5 <= m.runId && m.runId <= 8) //
 				.sorted() //
 				.toList();
 
@@ -60,6 +64,7 @@ public class LogExtractor {
 			}
 
 			var backendLog = readBackendLog(backendFile);
+			var solTimestamps = readSolutionTimestamps(backendFile);
 
 			var instanceFile = instanceDirectory.resolve(runLog.dataName() + ".json");
 
@@ -77,6 +82,7 @@ public class LogExtractor {
 
 					mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.CompileCrash, //
 							model.original() == null);
+
 					if (model.original() instanceof BackendParser.ElementCount elements) {
 						mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.OriginalConstraints, //
 								elements.columns());
@@ -101,18 +107,16 @@ public class LogExtractor {
 				}
 
 				if (backendLog.compile() instanceof BackendParser.CompileData data) {
-					var firstPass = data.firstPass() != null ? data.firstPass().doubleValue() : -1;
-					var secondPass = data.secondPass() != null ? data.secondPass().doubleValue() : -1;
-					var totalCompileTime = secondPass > 0 ? secondPass : firstPass;
+					var totalCompileTime = data.secondPass() > 0 ? data.secondPass() : data.firstPass();
 
 					mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.CompileTimePassOne, //
-							firstPass);
+							data.firstPass());
 					mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.CompileTimePassTwo, //
-							secondPass);
+							data.secondPass());
 					mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.TotalCompileTime, //
 							totalCompileTime);
 					mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.CompileOptimized, //
-							data.secondPass() != null);
+							data.secondPass() > 0);
 
 				}
 
@@ -135,6 +139,17 @@ public class LogExtractor {
 								!validation.hasAnyViolations());
 						mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.RealObjective, //
 								validation.getTotalCost());
+
+						var tenMinuteMark = findLatestSolutionBefore(solTimestamps.entries(), 600d);
+						mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.BestObjective10Mark, //
+								tenMinuteMark != null ? tenMinuteMark.objective() : -1);
+					} else {
+						mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.IsSolutionValid, //
+								false);
+						mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.RealObjective, //
+								-1);
+						mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.BestObjective10Mark, //
+								-1);
 					}
 
 				}
@@ -145,8 +160,28 @@ public class LogExtractor {
 
 		}
 
-		mainCSV.write(outputDirectory.resolve("main.csv"));
+		mainCSV.write(outputDirectory.resolve(outputFile));
 
+	}
+
+	public static SolutionTimestampParser.LogEntry findLatestSolutionBefore(
+			List<SolutionTimestampParser.LogEntry> entries, double targetTime) {
+		if (entries == null || entries.isEmpty())
+			return null;
+
+		SolutionTimestampParser.LogEntry bestEntry = null;
+
+		for (SolutionTimestampParser.LogEntry entry : entries) {
+			// FILTER: Ignore bound events
+			if (entry.source() == EntrySource.BARRIER || entry.source() == EntrySource.CROSSOVER)
+				continue;
+
+			if (entry.seconds() <= targetTime)
+				bestEntry = entry;
+
+		}
+
+		return bestEntry;
 	}
 
 	public static record ModelSelection(String instance, int runId, Path folder) implements Comparable<ModelSelection> {
@@ -189,6 +224,13 @@ public class LogExtractor {
 	private static BackendData readBackendLog(Path file) throws IOException {
 		try (var reader = Files.newBufferedReader(file)) {
 			var parser = new BackendParser(reader);
+			return parser.parse();
+		}
+	}
+
+	public static SolutionPlot readSolutionTimestamps(Path file) throws IOException {
+		try (var reader = Files.newBufferedReader(file)) {
+			var parser = new SolutionTimestampParser(reader);
 			return parser.parse();
 		}
 	}

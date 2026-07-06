@@ -29,6 +29,7 @@ public class MainCSV extends NamedCSV<MainCSV.Columns> {
 		BestObjective("bestObjective"), //
 		BestBound("bestBound"), //
 		MIPGap("mipGap"), //
+		BestObjective10Mark("bestObjective10m"), //
 		IsSolutionValid("isSolutionValid"), //
 		RealObjective("objectiveByValidator"), //
 		CompileCrash("isCrashedCompile"), //

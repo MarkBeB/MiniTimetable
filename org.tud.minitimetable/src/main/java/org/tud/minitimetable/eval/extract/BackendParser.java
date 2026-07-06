@@ -23,7 +23,7 @@ public class BackendParser extends Parser<BackendParser.BackendData> {
 	 * @param firstPass  duration in seconds or null
 	 * @param secondPass duration in seconds or null
 	 */
-	public static record CompileData(Double firstPass, Double secondPass) {
+	public static record CompileData(double firstPass, double secondPass) {
 	}
 
 	public static record ElementCount(int rows, int columns, int nonzeros) {
@@ -33,10 +33,10 @@ public class BackendParser extends Parser<BackendParser.BackendData> {
 			Double gap) {
 	}
 
-	private Double compileFirstPass;
-	private Double compileSecondPass;
+	private double compileFirstPass = -1d;
+	private double compileSecondPass = -1d;
 
-	private int modelSizeInMB;
+	private int modelSizeInMB = -1;
 
 	private ElementCount start;
 	private ElementCount presolve;
@@ -44,9 +44,9 @@ public class BackendParser extends Parser<BackendParser.BackendData> {
 	private Double presolveTime;
 
 	private int solutionsFound = 0;
-	private BigDecimal bestObjective;
-	private BigDecimal bestBound;
-	private Double mipGap;
+	private BigDecimal bestObjective = new BigDecimal(-1);
+	private BigDecimal bestBound = new BigDecimal(-1);
+	private Double mipGap = -1d;
 
 	private boolean timeLimitReached;
 	private double totalTimeS;
@@ -55,10 +55,6 @@ public class BackendParser extends Parser<BackendParser.BackendData> {
 
 	public BackendParser(BufferedReader reader) {
 		super(reader);
-	}
-
-	public void getResult() {
-
 	}
 
 	@Override
@@ -113,11 +109,13 @@ public class BackendParser extends Parser<BackendParser.BackendData> {
 		if (getCurrentLine().startsWith("Solution count")) {
 			if (getCurrentLine().equals("Solution count 0")) {
 				this.solutionsFound = 0;
+
 			} else {
 				Pattern pattern = Pattern.compile("^Solution count (?<count>\\d+):");
 				var matcher = pattern.matcher(getCurrentLine());
 				if (!matcher.find())
 					throw new IllegalStateException();
+
 				this.solutionsFound = Integer.parseInt(matcher.group("count"));
 			}
 
@@ -132,10 +130,14 @@ public class BackendParser extends Parser<BackendParser.BackendData> {
 			String v2 = data[1].substring(data[1].lastIndexOf(" ")).trim();
 			String v3 = data[2].substring(data[2].lastIndexOf(" ")).replace("%", "").trim();
 
-			this.bestObjective = v1.equals("-") ? null : new BigDecimal(v1);
-			this.bestBound = v2.equals("-") ? null : new BigDecimal(v2);
+			if (!v1.equals("-"))
+				this.bestObjective = new BigDecimal(v1);
+
+			if (!v2.equals("-"))
+				this.bestBound = new BigDecimal(v2);
+
 			this.mipGap = parseToDouble(v3);
-			if (mipGap != null)
+			if (mipGap > 0d)
 				mipGap = mipGap * 0.01d;
 
 			readNextLine();
@@ -262,14 +264,14 @@ public class BackendParser extends Parser<BackendParser.BackendData> {
 	private Long parseToLong(String input) {
 		input = input.trim();
 		if (input == null || input.isBlank() || input.equals("-"))
-			return null;
+			return -1l;
 		return Long.parseLong(input);
 	}
 
 	private Double parseToDouble(String input) {
 		input = input.trim();
 		if (input == null || input.isBlank() || input.equals("-"))
-			return null;
+			return -1d;
 		return Double.parseDouble(input);
 	}
 

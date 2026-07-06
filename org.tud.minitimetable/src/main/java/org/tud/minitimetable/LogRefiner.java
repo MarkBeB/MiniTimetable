@@ -5,11 +5,9 @@ import static org.tud.minitimetable.DefaultLocations.getResourceDirectory;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.tud.minitimetable.eval.extract.MainCSV;
@@ -29,7 +27,7 @@ public class LogRefiner {
 		Path gipsData = getResourceDirectory().resolve("workstation").resolve("gips").resolve("gipsl-data-v4.csv");
 		Path miniZincData = getResourceDirectory().resolve("workstation").resolve("extracted").resolve("main.csv");
 
-		LogRefiner.refineGipsData(gipsData, outputDirectory);
+//		LogRefiner.refineGipsData(gipsData, outputDirectory);
 		LogRefiner.refineMiniZincData(miniZincData, outputDirectory);
 	}
 
@@ -45,21 +43,21 @@ public class LogRefiner {
 		MainCSV mainCSV = new MainCSV();
 		mainCSV.read(inputFile, true);
 
-		var optimized = mainCSV.stream().filter(e -> Util.toBool(e, MainCSV.Columns.CompileOptimized)).toList();
-		var nonOptimized = mainCSV.stream().filter(e -> !Util.toBool(e, MainCSV.Columns.CompileOptimized)).toList();
+//		var optimized = mainCSV.stream().filter(e -> Util.toBool(e, MainCSV.Columns.CompileOptimized)).toList();
+//		var nonOptimized = mainCSV.stream().filter(e -> !Util.toBool(e, MainCSV.Columns.CompileOptimized)).toList();
 
 		var refiner = buildMiniZincRefiner();
 		var outAll = refine(refiner, mainCSV.stream().toList());
-		var outOptimized = refine(refiner, optimized);
-		var outNonOptimized = refine(refiner, nonOptimized);
+//		var outOptimized = refine(refiner, optimized);
+//		var outNonOptimized = refine(refiner, nonOptimized);
 
-		outAll = makeMiniZincPretty(outAll);
-		outOptimized = makeMiniZincPretty(outOptimized);
-		outNonOptimized = makeMiniZincPretty(outNonOptimized);
+//		outAll = makeMiniZincPretty(outAll);
+//		outOptimized = makeMiniZincPretty(outOptimized);
+//		outNonOptimized = makeMiniZincPretty(outNonOptimized);
 
 		outAll.write(outputDirectory.resolve("minizinc-data-all.csv"), StandardCharsets.UTF_8, ";");
-		outOptimized.write(outputDirectory.resolve("minizinc-data-o.csv"), StandardCharsets.UTF_8, ";");
-		outNonOptimized.write(outputDirectory.resolve("minizinc-data-no.csv"), StandardCharsets.UTF_8, ";");
+//		outOptimized.write(outputDirectory.resolve("minizinc-data-o.csv"), StandardCharsets.UTF_8, ";");
+//		outNonOptimized.write(outputDirectory.resolve("minizinc-data-no.csv"), StandardCharsets.UTF_8, ";");
 
 	}
 
@@ -73,21 +71,21 @@ public class LogRefiner {
 
 		PrettyPrinter.Pretty<?>[] columns = new PrettyPrinter.Pretty[csv.getNumberOfColumns()];
 
-		DecimalFormat doubleFormatter = Util.getDecimalFormat();
-		for (var columnName : csv.getColumnNames()) {
-			if (columnName.endsWith("_mean") || columnName.endsWith("_stddev")) {
-				columns[csv.getColIndexWithName(columnName)] = new PrettyPrinter.PrettyNumberFormat(doubleFormatter,
-						doubleFormatter);
-			}
-		}
+//		DecimalFormat doubleFormatter = Util.getDecimalFormat();
+//		for (var columnName : csv.getColumnNames()) {
+//			if (columnName.endsWith("_mean") || columnName.endsWith("_stddev")) {
+//				columns[csv.getColIndexWithName(columnName)] = new PrettyPrinter.PrettyNumberFormat(doubleFormatter,
+//						doubleFormatter);
+//			}
+//		}
 
-		DecimalFormat integerFormatter = Util.getIntegerFormat();
-		columns[csv.getColIndexWithName("gurobi_model_rows_mean")] = new PrettyPrinter.PrettyNumberFormat(
-				integerFormatter, integerFormatter);
-		columns[csv.getColIndexWithName("gurobi_model_cols_mean")] = new PrettyPrinter.PrettyNumberFormat(
-				integerFormatter, integerFormatter);
-		columns[csv.getColIndexWithName("gurobi_model_nonzeros_mean")] = new PrettyPrinter.PrettyNumberFormat(
-				integerFormatter, integerFormatter);
+//		DecimalFormat integerFormatter = Util.getIntegerFormat();
+//		columns[csv.getColIndexWithName("gurobi_model_rows_mean")] = new PrettyPrinter.PrettyNumberFormat(
+//				integerFormatter, integerFormatter);
+//		columns[csv.getColIndexWithName("gurobi_model_cols_mean")] = new PrettyPrinter.PrettyNumberFormat(
+//				integerFormatter, integerFormatter);
+//		columns[csv.getColIndexWithName("gurobi_model_nonzeros_mean")] = new PrettyPrinter.PrettyNumberFormat(
+//				integerFormatter, integerFormatter);
 
 		columns[csv.getColIndexWithName("name")] = (PrettyPrinter.PrettyCell) value -> {
 			int index = value.indexOf(".");
@@ -111,22 +109,22 @@ public class LogRefiner {
 //
 		PrettyPrinter.Pretty<?>[] columns = new PrettyPrinter.Pretty[csv.getNumberOfColumns()];
 
-		DecimalFormat doubleFormatter = Util.getDecimalFormat();
-		for (var columnName : csv.getColumnNames()) {
-			if (columnName.endsWith("(m)") || columnName.endsWith("(sd)"))
-				columns[csv.getColIndexWithName(columnName)] = new PrettyPrinter.PrettyNumberFormat(doubleFormatter,
-						doubleFormatter);
-		}
+//		DecimalFormat doubleFormatter = Util.getDecimalFormat();
+//		for (var columnName : csv.getColumnNames()) {
+//			if (columnName.endsWith("(m)") || columnName.endsWith("(sd)"))
+//				columns[csv.getColIndexWithName(columnName)] = new PrettyPrinter.PrettyNumberFormat(doubleFormatter,
+//						doubleFormatter);
+//		}
 
-		DecimalFormat integerFormatter = Util.getIntegerFormat();
+//		DecimalFormat integerFormatter = Util.getIntegerFormat();
 //		columns[csv.getColIndexWithName("memoryMB")] = new PrettyPrinter.PrettyNumberFormat(integerFormatter,
 //				integerFormatter);
-		columns[csv.getColIndexWithName("originalConstraints (m)")] = new PrettyPrinter.PrettyNumberFormat(
-				integerFormatter, integerFormatter);
-		columns[csv.getColIndexWithName("originalVariables (m)")] = new PrettyPrinter.PrettyNumberFormat(
-				integerFormatter, integerFormatter);
-		columns[csv.getColIndexWithName("originalCoefficients (m)")] = new PrettyPrinter.PrettyNumberFormat(
-				integerFormatter, integerFormatter);
+//		columns[csv.getColIndexWithName("originalConstraints (m)")] = new PrettyPrinter.PrettyNumberFormat(
+//				integerFormatter, integerFormatter);
+//		columns[csv.getColIndexWithName("originalVariables (m)")] = new PrettyPrinter.PrettyNumberFormat(
+//				integerFormatter, integerFormatter);
+//		columns[csv.getColIndexWithName("originalCoefficients (m)")] = new PrettyPrinter.PrettyNumberFormat(
+//				integerFormatter, integerFormatter);
 
 		PrettyPrinter pp = new PrettyPrinter(() -> new CSV(Util.getDecimalFormat()), null, columns);
 		return pp.pretty(csv);
@@ -142,38 +140,88 @@ public class LogRefiner {
 		// refiner.addRefinement(RefineHelper.copy(MainCSV.Columns.MemorySize,
 		// CopyElement.First));
 
-		var toDouble = Util.getDoubleParser(Util.getDecimalFormat());
-		var zeroToNegative = (Function<String, Object>) value -> {
-			var parsed = toDouble.applyAsDouble(value);
-			if (Double.compare(parsed, 0d) == 0) {
-				return "-1";
-			} else {
-				return value;
-			}
-		};
+		var toDouble = Util.getDoubleParser(Util.getDecimalFormat(), -1);
 
 		refiner.addRefinement(RefineHelper.stdDeviation(MainCSV.Columns.MemorySize, toDouble));
+		refiner.addRefinement(RefineHelper.toValue(MainCSV.Columns.MemorySize.getColumnName() + " (max)",
+				Util.findMax(MainCSV.Columns.MemorySize, toDouble, -1)));
+		refiner.addRefinement(RefineHelper.toValue(MainCSV.Columns.MemorySize.getColumnName() + " (min)",
+				Util.findMin(MainCSV.Columns.MemorySize, toDouble, -1)));
 
 		refiner.addRefinement(RefineHelper.stdDeviation(MainCSV.Columns.PreprocessingTime, toDouble));
+
 		refiner.addRefinement(RefineHelper.stdDeviation(MainCSV.Columns.TotalCompileTime, toDouble));
+
 		refiner.addRefinement(RefineHelper.stdDeviation(MainCSV.Columns.PresolveTime, toDouble));
 
-		refiner.addRefinement(RefineHelper.stdDeviation(MainCSV.Columns.OriginalConstraints, toDouble));
-		refiner.addRefinement(RefineHelper.stdDeviation(MainCSV.Columns.OriginalVariables, toDouble));
-		refiner.addRefinement(RefineHelper.stdDeviation(MainCSV.Columns.OriginalCoefficients, toDouble));
+		refiner.addRefinement(
+				RefineHelper.filter(RefineHelper.stdDeviation(MainCSV.Columns.OriginalConstraints, toDouble),
+						Util.filterData(MainCSV.Columns.OriginalConstraints, v -> toDouble.applyAsDouble(v) > 0)));
+		refiner.addRefinement(RefineHelper.toValue(MainCSV.Columns.OriginalConstraints.getColumnName() + " (max)",
+				Util.findMax(MainCSV.Columns.OriginalConstraints, toDouble, -1)));
 
-		refiner.addRefinement(RefineHelper.stdDeviation(MainCSV.Columns.PresolvedConstraints, toDouble));
-		refiner.addRefinement(RefineHelper.stdDeviation(MainCSV.Columns.PresolvedVariables, toDouble));
-		refiner.addRefinement(RefineHelper.stdDeviation(MainCSV.Columns.PresolvedCoefficients, toDouble));
+		refiner.addRefinement(
+				RefineHelper.filter(RefineHelper.stdDeviation(MainCSV.Columns.OriginalVariables, toDouble),
+						Util.filterData(MainCSV.Columns.OriginalVariables, v -> toDouble.applyAsDouble(v) > 0)));
+		refiner.addRefinement(RefineHelper.toValue(MainCSV.Columns.OriginalVariables.getColumnName() + " (max)",
+				Util.findMax(MainCSV.Columns.OriginalVariables, toDouble, -1)));
 
-		refiner.addRefinement(RefineHelper.stdDeviation(MainCSV.Columns.NumberOfSolutions, toDouble));
-		refiner.addRefinement(RefineHelper.stdDeviation(MainCSV.Columns.BestObjective, toDouble));
-		refiner.addRefinement(RefineHelper.stdDeviation(MainCSV.Columns.BestBound, toDouble));
-		refiner.addRefinement(RefineHelper.stdDeviation(MainCSV.Columns.MIPGap, toDouble));
-		refiner.addRefinement(RefineHelper.stdDeviation(MainCSV.Columns.RealObjective, toDouble));
+		refiner.addRefinement(
+				RefineHelper.filter(RefineHelper.stdDeviation(MainCSV.Columns.OriginalCoefficients, toDouble),
+						Util.filterData(MainCSV.Columns.OriginalCoefficients, v -> toDouble.applyAsDouble(v) > 0)));
+		refiner.addRefinement(RefineHelper.toValue(MainCSV.Columns.OriginalCoefficients.getColumnName() + " (max)",
+				Util.findMax(MainCSV.Columns.OriginalCoefficients, toDouble, -1)));
 
-		refiner.addRefinement(RefineHelper.toValue("solverCrash",
+		refiner.addRefinement(
+				RefineHelper.filter(RefineHelper.stdDeviation(MainCSV.Columns.PresolvedConstraints, toDouble),
+						Util.filterData(MainCSV.Columns.PresolvedConstraints, v -> toDouble.applyAsDouble(v) > 0)));
+
+		refiner.addRefinement(
+				RefineHelper.filter(RefineHelper.stdDeviation(MainCSV.Columns.PresolvedVariables, toDouble),
+						Util.filterData(MainCSV.Columns.PresolvedVariables, v -> toDouble.applyAsDouble(v) > 0)));
+
+		refiner.addRefinement(
+				RefineHelper.filter(RefineHelper.stdDeviation(MainCSV.Columns.PresolvedCoefficients, toDouble),
+						Util.filterData(MainCSV.Columns.PresolvedCoefficients, v -> toDouble.applyAsDouble(v) > 0)));
+
+		refiner.addRefinement(
+				RefineHelper.filter(RefineHelper.stdDeviation(MainCSV.Columns.NumberOfSolutions, toDouble),
+						Util.filterData(MainCSV.Columns.NumberOfSolutions, v -> toDouble.applyAsDouble(v) > 0)));
+
+		refiner.addRefinement(RefineHelper.filter(RefineHelper.stdDeviation(MainCSV.Columns.BestObjective, toDouble),
+				Util.filterData(MainCSV.Columns.BestObjective, v -> toDouble.applyAsDouble(v) > 0)));
+		refiner.addRefinement(RefineHelper.filter(
+				RefineHelper.toValue(MainCSV.Columns.BestObjective.getColumnName() + " (min)",
+						Util.findMin(MainCSV.Columns.BestObjective, toDouble, -1)),
+				Util.filterData(MainCSV.Columns.BestObjective, v -> toDouble.applyAsDouble(v) > 0)));
+
+		refiner.addRefinement(
+				RefineHelper.filter(RefineHelper.stdDeviation(MainCSV.Columns.BestObjective10Mark, toDouble),
+						Util.filterData(MainCSV.Columns.BestObjective10Mark, v -> toDouble.applyAsDouble(v) > 0)));
+		refiner.addRefinement(RefineHelper.filter(
+				RefineHelper.toValue(MainCSV.Columns.BestObjective10Mark.getColumnName() + " (min)",
+						Util.findMin(MainCSV.Columns.BestObjective10Mark, toDouble, -1)),
+				Util.filterData(MainCSV.Columns.BestObjective10Mark, v -> toDouble.applyAsDouble(v) > 0)));
+
+		refiner.addRefinement(RefineHelper.filter(RefineHelper.stdDeviation(MainCSV.Columns.BestBound, toDouble),
+				Util.filterData(MainCSV.Columns.BestBound, v -> toDouble.applyAsDouble(v) > 0)));
+
+		refiner.addRefinement(RefineHelper.filter(RefineHelper.stdDeviation(MainCSV.Columns.MIPGap, toDouble),
+				Util.filterData(MainCSV.Columns.MIPGap, v -> toDouble.applyAsDouble(v) > 0)));
+
+		refiner.addRefinement(RefineHelper.filter(RefineHelper.stdDeviation(MainCSV.Columns.RealObjective, toDouble),
+				Util.filterData(MainCSV.Columns.RealObjective, v -> toDouble.applyAsDouble(v) > 0)));
+
+		refiner.addRefinement(RefineHelper.toValue("foundSolution", // count number of successful runs
+				data -> data.stream().filter(e -> Util.toBool(e, MainCSV.Columns.IsSolutionValid.getColumnName()))
+						.count()));
+
+		refiner.addRefinement(RefineHelper.toValue("solverCrash", // count number of solver related crashes
 				data -> data.stream().filter(e -> Util.toBool(e, MainCSV.Columns.SolveCrash.getColumnName())).count()));
+
+		refiner.addRefinement(RefineHelper.toValue("compileCrash", // count number of solver related crashes
+				data -> data.stream().filter(e -> Util.toBool(e, MainCSV.Columns.CompileCrash.getColumnName()))
+						.count()));
 
 		return refiner;
 	}

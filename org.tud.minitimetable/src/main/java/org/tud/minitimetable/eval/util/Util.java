@@ -5,6 +5,10 @@ import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 import java.util.regex.Pattern;
 
@@ -51,9 +55,9 @@ public class Util {
 		DecimalFormatSymbols decimalFormatSymbol = new DecimalFormatSymbols();
 		decimalFormatSymbol.setDecimalSeparator('.');
 		decimalFormatSymbol.setGroupingSeparator(',');
-		DecimalFormat doubleFormatter = new DecimalFormat("#,###.##", decimalFormatSymbol);
-		doubleFormatter.setGroupingUsed(true);
-		doubleFormatter.setMaximumFractionDigits(2);
+		DecimalFormat doubleFormatter = new DecimalFormat("#,###.####", decimalFormatSymbol);
+		doubleFormatter.setGroupingUsed(false);
+		doubleFormatter.setMaximumFractionDigits(4);
 		doubleFormatter.setMinimumFractionDigits(2);
 		return doubleFormatter;
 	}
@@ -63,7 +67,7 @@ public class Util {
 		decimalFormatSymbol.setDecimalSeparator('.');
 		decimalFormatSymbol.setGroupingSeparator(',');
 		DecimalFormat doubleFormatter = new DecimalFormat("#,###", decimalFormatSymbol);
-		doubleFormatter.setGroupingUsed(true);
+		doubleFormatter.setGroupingUsed(false);
 		doubleFormatter.setMaximumFractionDigits(0);
 		return doubleFormatter;
 	}
@@ -75,6 +79,45 @@ public class Util {
 	public static String getFileNameTimeStamp(LocalDateTime date) {
 		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm");
 		return date.format(dateTimeFormatter);
+	}
+
+	public static Predicate<CSV.CSVRecord> filterData(String column, Predicate<String> pass) {
+		return (Predicate<CSV.CSVRecord>) row -> {
+			String data = row.getCell(column);
+			return pass.test(data);
+		};
+	}
+
+	public static Predicate<CSV.CSVRecord> filterData(NamedCSV.CSVHeader column, Predicate<String> pass) {
+		return filterData(column.getColumnName(), pass);
+	}
+
+	public static Function<List<CSV.CSVRecord>, Object> findMax(String column, ToDoubleFunction<String> converter,
+			double fallback) {
+		return (Function<List<CSV.CSVRecord>, Object>) data -> data.stream() //
+				.map(r -> r.getCell(column)) //
+				.map(c -> converter.applyAsDouble(c)) //
+				.sorted(Comparator.reverseOrder()) //
+				.findFirst().orElse(-1d);
+	}
+
+	public static Function<List<CSV.CSVRecord>, Object> findMin(String column, ToDoubleFunction<String> converter,
+			double fallback) {
+		return (Function<List<CSV.CSVRecord>, Object>) data -> data.stream() //
+				.map(r -> r.getCell(column)) //
+				.map(c -> converter.applyAsDouble(c)) //
+				.sorted() //
+				.findFirst().orElse(-1d);
+	}
+
+	public static Function<List<CSV.CSVRecord>, Object> findMax(NamedCSV.CSVHeader column,
+			ToDoubleFunction<String> converter, double fallback) {
+		return findMax(column.getColumnName(), converter, fallback);
+	}
+
+	public static Function<List<CSV.CSVRecord>, Object> findMin(NamedCSV.CSVHeader column,
+			ToDoubleFunction<String> converter, double fallback) {
+		return findMin(column.getColumnName(), converter, fallback);
 	}
 
 	public static <H> double toDouble(NamedCSV.NamedRecord<H> record, H column) {
@@ -93,17 +136,17 @@ public class Util {
 		return Boolean.parseBoolean(record.getCell(column));
 	}
 
-	public static ToDoubleFunction<String> getDoubleParser(DecimalFormat format) {
+	public static ToDoubleFunction<String> getDoubleParser(DecimalFormat format, double fallback) {
 		return (ToDoubleFunction<String>) value -> {
 			if (value == null || value.trim().equals("-") || value.isBlank())
-				return 0;
+				return fallback;
 
 			try {
 				var number = format.parse(value);
 				return number.doubleValue();
 			} catch (ParseException e) {
 				e.printStackTrace();
-				return 0;
+				return fallback;
 			}
 		};
 	}

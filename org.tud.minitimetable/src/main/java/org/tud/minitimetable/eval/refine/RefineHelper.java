@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 
 import org.tud.minitimetable.eval.refine.CSVRefiner.Refinement;
@@ -15,6 +16,27 @@ import org.tud.minitimetable.eval.util.NamedCSV;
 import org.tud.minitimetable.eval.util.StatisticsHelper;
 
 public class RefineHelper {
+
+	public static class FilterRefinement implements Refinement {
+		private final Refinement wrapped;
+		private final Predicate<CSV.CSVRecord> filterDataPoints;
+
+		public FilterRefinement(Refinement wrapped, Predicate<CSV.CSVRecord> filterDataPoints) {
+			this.wrapped = Objects.requireNonNull(wrapped, "wrapped");
+			this.filterDataPoints = Objects.requireNonNull(filterDataPoints, "filterDataPoints");
+		}
+
+		@Override
+		public Collection<String> headers() {
+			return wrapped.headers();
+		}
+
+		@Override
+		public void refine(CSV output, String groupName, int rowIndex, List<CSVRecord> datapoints) {
+			var filteredDataPoints = datapoints.stream().filter(filterDataPoints).toList();
+			wrapped.refine(output, groupName, rowIndex, filteredDataPoints);
+		}
+	}
 
 	public static class StdDevRefinement implements Refinement {
 
@@ -40,6 +62,7 @@ public class RefineHelper {
 		public void refine(CSV output, String groupName, int rowIndex, List<CSV.CSVRecord> datapoints) {
 			ToDoubleFunction<CSV.CSVRecord> converter = record -> StdDevRefinement.this.convertToDouble
 					.applyAsDouble(record.getCell(columnName));
+
 			var point = StatisticsHelper.calculateMeanAndVariance(datapoints, converter, false);
 			output.setCellValue(rowIndex, columnNameMean, point.mean());
 			output.setCellValue(rowIndex, columnNameStdDev, point.standardDeviation());
@@ -222,6 +245,10 @@ public class RefineHelper {
 
 	public static Refinement toValue(NamedCSV.CSVHeader column, Function<List<CSV.CSVRecord>, Object> fun) {
 		return toValue(column.getColumnName(), fun);
+	}
+
+	public static Refinement filter(Refinement wrapped, Predicate<CSV.CSVRecord> filter) {
+		return new FilterRefinement(wrapped, filter);
 	}
 
 	public static Refinement groupName(String column) {
