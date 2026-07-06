@@ -27,11 +27,14 @@ function RoomIds: occupantRoom(OccupantIds: o) =
 function AgeGroups: occupantAgeGroup(OccupantIds: o) =
   occupants[o].ageGroup;
   
-function bool: isOccupantAgeGroup(OccupantIds: o, AgeGroups: g) =
-  g == occupantAgeGroup(o);
+function bool: isOccupantAgeGroup(OccupantIds: o, AgeGroups: a) =
+  a == occupantAgeGroup(o);
 
 function Genders: occupantGender(OccupantIds: o) =
   occupants[o].gender;
+
+function bool: isOccupantGender(OccupantIds: o, Genders: g) =
+  g == occupantGender(o);
 
 function int: occupantLengthOfStay(OccupantIds: o) =
   occupants[o].lengthOfStay;
@@ -66,6 +69,9 @@ function bool: isPatientAgeGroup(PatientIds: p, AgeGroups: g) =
 
 function Genders: patientGender(PatientIds: p) =
   patients[p].gender;
+  
+function bool: isPatientGender(PatientIds: p, Genders: g) =
+  g == patientGender(p);
 
 function int: patientWorkload(PatientIds: p, int: currentDay, ShiftTypes: s, int: admissionDay) =
   let {
