@@ -1,4 +1,4 @@
-include "../IHTP-model.mzn";
+include "../IHTP-Model.mzn";
 
 % NRA
 % S4 Maximum workload: For each shift, the total workload induced by patients staying in rooms assigned to a nurse

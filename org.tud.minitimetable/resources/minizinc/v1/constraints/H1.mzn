@@ -1,4 +1,4 @@
-include "../IHTP-model.mzn";
+include "../IHTP-Model.mzn";
 
 % PAS
 % H1 No gender mix: Patients of different genders may not share a room on any day.

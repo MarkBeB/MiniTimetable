@@ -1,4 +1,4 @@
-include "data/IHTC_model.mzn" ;
+include "data/IHTC_Model.mzn" ;
 
 %array[int] of var opt int: test2 = [0,1,2,<>,4,5];
 %var int: test3 = sum(x in test2)(max(0, -2 + x));

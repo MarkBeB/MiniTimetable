@@ -1,4 +1,4 @@
-include "../IHTP-model.mzn";
+include "../IHTP-Model.mzn";
 
 % PAS
 % H7 Room capacity: The number of patients that occupy a room per day cannot exceed the capacity of the room.

@@ -1,4 +1,4 @@
-include "../IHTP-model.mzn";
+include "../IHTP-Model.mzn";
 
 %
 % Performance constraints (Reduces search time to ~14seconds (before: 6+ minutes))

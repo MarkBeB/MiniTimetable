@@ -1,4 +1,4 @@
-include "IHTP-model.mzn";
+include "IHTP-Model.mzn";
 include "Utility.mzn";
 
 include "constraints/Performance.mzn";

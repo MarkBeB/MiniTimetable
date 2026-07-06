@@ -1,4 +1,4 @@
-include "../IHTP-model.mzn";
+include "../IHTP-Model.mzn";
 
 % NRA
 % S2 Minimum skill level: The minimum skill level a nurse must have to provide the required care for a patient during each shift of their stay should be met.
