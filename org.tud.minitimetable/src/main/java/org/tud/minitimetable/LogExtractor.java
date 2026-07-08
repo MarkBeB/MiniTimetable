@@ -32,10 +32,10 @@ public class LogExtractor {
 
 	public static void main(String[] args) throws IOException, InterruptedException {
 		Path instanceFilesForValidation = getDataDirectory();
-		Path logDirectory = getResourceDirectory().resolve("workstation").resolve("raw");
+		Path logDirectory = getResourceDirectory().resolve("workstation").resolve("raw2");
 		Path outputDirectory = getResourceDirectory().resolve("workstation").resolve("extracted");
 
-		LogExtractor.extractDataFromLog(instanceFilesForValidation, logDirectory, outputDirectory, "main.csv");
+		LogExtractor.extractDataFromLog(instanceFilesForValidation, logDirectory, outputDirectory, "main.v1.csv");
 	}
 
 	public static void extractDataFromLog(Path instanceDirectory, Path inputDirectory, Path outputDirectory,
@@ -45,8 +45,9 @@ public class LogExtractor {
 			Files.createDirectories(outputDirectory);
 
 		Collection<ModelSelection> selectedRuns = collectRunFolders(inputDirectory).stream() //
-				.filter(m -> 5 <= m.runId && m.runId <= 8) //
+//				.filter(m -> 5 <= m.runId && m.runId <= 8) //
 //				.filter(m -> 1 == m.runId) //
+				.filter(m -> 20 == m.runId) //
 				.sorted() //
 				.toList();
 
@@ -131,7 +132,7 @@ public class LogExtractor {
 					mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.BestObjective, //
 							data.bestObjective());
 					mainCSV.setCellValue(csvRowIndex, MainCSV.Columns.MIPGap, //
-							data.gap());
+							data.gap() >= 0d ? data.gap() * 100d : -1);
 
 					if (hasSolutions) {
 						var validation = getValidation(solutionFile, instanceFile);
