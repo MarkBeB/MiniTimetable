@@ -26,7 +26,7 @@ output :: "json"
 [ "  \("occupants"): [\n" ] ++
 [ "    {\("id"): \("\(o)"), "  ++
       "\("no_nurses"): \(count(n in NurseIds)(occupantCaredByNurse[o, n])), " ++ 
-      "\("room"): \(format(occupantData[o].assignedRoom))},\n" | o in OccupantIds ] ++
+      "\("room"): \(format(occupants[o].assignedRoom))},\n" | o in OccupantIds ] ++
 [ "  ],\n" ] ++
 
 [ " \("postponedPatients"): [" ] ++

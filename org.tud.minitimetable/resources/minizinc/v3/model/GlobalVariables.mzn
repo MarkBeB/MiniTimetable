@@ -1,5 +1,5 @@
-%include "Parameters.mzn";
-%include "Functions.mzn";
+include "Parameters.mzn";
+include "Functions.mzn";
 
 array[NurseIds, Days, ShiftTypes, RoomIds] of var bool: isNurseInRoom;
 

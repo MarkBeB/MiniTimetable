@@ -6,12 +6,22 @@ include "../IHTP-Model.mzn";
 
 array[RoomIds, Days, Genders] of var bool: hasGender;
 
+%constraint forall(r in RoomIds, d in Days, g in Genders)(
+%  totalIndividuals * hasGender[r,d,g] >= 
+%      sum(o in OccupantIds where isOccupantInRoom(o,d,r))(occupantGender(o) == g)
+%    + sum(p in PatientIds where isPatientPresentInRoom[p,r,d])(patientGender(p) == g)
+%  :: "CON_H1_A \(r) \(d) \(g)"
+%);
+
 constraint forall(r in RoomIds, d in Days, g in Genders)(
-  totalIndividuals * hasGender[r,d,g] >= 
-      sum(o in OccupantIds where isOccupantInRoom(o,d,r))(occupantGender(o) == g)
-    + sum(p in PatientIds where isPatientPresentInRoom[p,r,d])(patientGender(p) == g)
-  :: "CON_H1_A \(r) \(d) \(g)"
+  if exists(o in OccupantIds)(isOccupantInRoom(o,d,r) /\ isOccupantGender(o,g)) then
+    hasGender[r,d,g] = 1
+  else
+    totalIndividuals * hasGender[r,d,g] >= sum(p in PatientIds where isPatientGender(p,g) /\ canPatientBePresent(p,d,r))(isPatientPresentInRoom[p,r,d])
+  endif
 );
+
+
 
 constraint forall(r in RoomIds, d in Days) (
   (sum(g in Genders)(hasGender[r,d,g]) == 1)

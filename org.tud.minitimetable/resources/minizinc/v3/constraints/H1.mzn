@@ -10,10 +10,6 @@ constraint forall(r in RoomIds, o in OccupantIds, d in Days where isOccupantInRo
   roomGender[r,d] = occupantGender(o) :: "CON_H1_A \(r) \(d) \(o)"
 );
 
-constraint forall(r in RoomIds)(
-  forall(p in PatientIds)(
-    forall(d in Days where patientRoom[p,d] == r)(
-      roomGender[r,d] == patientGender(p) :: "CON_H1_B \(r) \(d) \(p)"
-    )
-  )
+constraint forall(r in RoomIds, p in PatientIds, d in Days)(
+  patientRoom[p,d] == r -> roomGender[r,d] == patientGender(p) :: "CON_H1_B \(r) \(d) \(p)"
 );
