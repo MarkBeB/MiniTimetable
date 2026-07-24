@@ -23,7 +23,7 @@ lastDay = 13;
 maxDay = 23;
 maxSkillLevel = 2;
 
-nurseData = [
+nurses = [
 	(
 		id: n00,
 		skillLevel: 1,
@@ -286,11 +286,11 @@ nurseData = [
 	)
 ];
 
-surgeonData = [
+surgeons = [
 	(id: s0, maxSurgeryTime: [0:0, 480, 360, 480, 480, 0, 0, 360, 0, 0, 480, 600, 0, 480])
 ];
 
-patientData = [
+patients = [
 	(
 		id: p00, 
 		gender: A, 
@@ -303,7 +303,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 120, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [],
+		incompatibleRooms: {},
 	),
 	(
 		id: p01, 
@@ -317,7 +317,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 90, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [],
+		incompatibleRooms: {},
 	),
 	(
 		id: p02, 
@@ -331,7 +331,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 90, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [r4],
+		incompatibleRooms: {r4},
 	),
 	(
 		id: p03, 
@@ -345,7 +345,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 90, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [],
+		incompatibleRooms: {},
 	),
 	(
 		id: p04, 
@@ -359,7 +359,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 120, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [],
+		incompatibleRooms: {},
 	),
 	(
 		id: p05, 
@@ -373,7 +373,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 60, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [r4],
+		incompatibleRooms: {r4},
 	),
 	(
 		id: p06, 
@@ -387,7 +387,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 120, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [r3],
+		incompatibleRooms: {r3},
 	),
 	(
 		id: p07, 
@@ -401,7 +401,7 @@ patientData = [
 		latestPossibleAdmission: 4, 
 		surgeryDuration: 60, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [r1],
+		incompatibleRooms: {r1},
 	),
 	(
 		id: p08, 
@@ -415,7 +415,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 60, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [],
+		incompatibleRooms: {},
 	),
 	(
 		id: p09, 
@@ -429,7 +429,7 @@ patientData = [
 		latestPossibleAdmission: 3, 
 		surgeryDuration: 120, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [r1, r4],
+		incompatibleRooms: {r1, r4},
 	),
 	(
 		id: p10, 
@@ -443,7 +443,7 @@ patientData = [
 		latestPossibleAdmission: 3, 
 		surgeryDuration: 60, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [r3, r4],
+		incompatibleRooms: {r3, r4},
 	),
 	(
 		id: p11, 
@@ -457,7 +457,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 90, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [r4],
+		incompatibleRooms: {r4},
 	),
 	(
 		id: p12, 
@@ -471,7 +471,7 @@ patientData = [
 		latestPossibleAdmission: 10, 
 		surgeryDuration: 120, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [],
+		incompatibleRooms: {},
 	),
 	(
 		id: p13, 
@@ -485,7 +485,7 @@ patientData = [
 		latestPossibleAdmission: 11, 
 		surgeryDuration: 90, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [r2],
+		incompatibleRooms: {r2},
 	),
 	(
 		id: p14, 
@@ -499,7 +499,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 60, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [],
+		incompatibleRooms: {},
 	),
 	(
 		id: p15, 
@@ -513,7 +513,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 60, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [],
+		incompatibleRooms: {},
 	),
 	(
 		id: p16, 
@@ -527,7 +527,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 90, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [],
+		incompatibleRooms: {},
 	),
 	(
 		id: p17, 
@@ -541,7 +541,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 60, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [],
+		incompatibleRooms: {},
 	),
 	(
 		id: p18, 
@@ -555,7 +555,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 60, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [r4],
+		incompatibleRooms: {r4},
 	),
 	(
 		id: p19, 
@@ -569,7 +569,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 90, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [r0, r1],
+		incompatibleRooms: {r0, r1},
 	),
 	(
 		id: p20, 
@@ -583,7 +583,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 90, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [r2],
+		incompatibleRooms: {r2},
 	),
 	(
 		id: p21, 
@@ -597,7 +597,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 60, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [],
+		incompatibleRooms: {},
 	),
 	(
 		id: p22, 
@@ -611,7 +611,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 60, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [],
+		incompatibleRooms: {},
 	),
 	(
 		id: p23, 
@@ -625,7 +625,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 60, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [],
+		incompatibleRooms: {},
 	),
 	(
 		id: p24, 
@@ -639,7 +639,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 180, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [],
+		incompatibleRooms: {},
 	),
 	(
 		id: p25, 
@@ -653,7 +653,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 60, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [],
+		incompatibleRooms: {},
 	),
 	(
 		id: p26, 
@@ -667,7 +667,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 90, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [r0],
+		incompatibleRooms: {r0},
 	),
 	(
 		id: p27, 
@@ -681,7 +681,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 120, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [r0, r3],
+		incompatibleRooms: {r0, r3},
 	),
 	(
 		id: p28, 
@@ -695,7 +695,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 60, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [r1],
+		incompatibleRooms: {r1},
 	),
 	(
 		id: p29, 
@@ -709,7 +709,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 60, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [r3],
+		incompatibleRooms: {r3},
 	),
 	(
 		id: p30, 
@@ -723,7 +723,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 90, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [r3],
+		incompatibleRooms: {r3},
 	),
 	(
 		id: p31, 
@@ -737,7 +737,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 60, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [],
+		incompatibleRooms: {},
 	),
 	(
 		id: p32, 
@@ -751,7 +751,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 60, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [],
+		incompatibleRooms: {},
 	),
 	(
 		id: p33, 
@@ -765,7 +765,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 120, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [],
+		incompatibleRooms: {},
 	),
 	(
 		id: p34, 
@@ -779,7 +779,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 180, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [],
+		incompatibleRooms: {},
 	),
 	(
 		id: p35, 
@@ -793,7 +793,7 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 120, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [],
+		incompatibleRooms: {},
 	),
 	(
 		id: p36, 
@@ -807,11 +807,11 @@ patientData = [
 		latestPossibleAdmission: 13, 
 		surgeryDuration: 90, 
 		assignedSurgeon: s0, 
-		incompatibleRooms: [r0, r1],
+		incompatibleRooms: {r0, r1},
 	)
 ];
 
-occupantData = [
+occupants = [
 	(
 		id: a0, 
 		gender: A, 
@@ -886,7 +886,7 @@ occupantData = [
 	)
 ];
 
-operatingTheaterData = [
+operatingTheaters = [
 	(
 		id: t0, 
 		availability: [0:480, 720, 720, 720, 600, 600, 720, 720, 720, 720, 720, 600, 600, 720],
@@ -897,7 +897,7 @@ operatingTheaterData = [
 	)
 ];
 
-roomData = [
+rooms = [
 	(id: r0, capacity: 3, ),
 	(id: r1, capacity: 2, ),
 	(id: r2, capacity: 4, ),
