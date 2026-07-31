@@ -1,4 +1,4 @@
-%include "Parameters.mzn";
+include "Parameters.mzn";
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -33,7 +33,7 @@ function bool: isOccupantAgeGroup(OccupantIds: o, AgeGroups: g) =
 function Genders: occupantGender(OccupantIds: o) =
   occupantData[o].gender;
 
-function bool: isOccupantGender(OccupantIds: o, Gender: g) =
+function bool: isOccupantGender(OccupantIds: o, Genders: g) =
  occupantGender(o) == g;
 
 function int: occupantLengthOfStay(OccupantIds: o) =
