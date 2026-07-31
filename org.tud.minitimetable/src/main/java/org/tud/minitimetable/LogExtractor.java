@@ -32,10 +32,10 @@ public class LogExtractor {
 
 	public static void main(String[] args) throws IOException, InterruptedException {
 		Path instanceFilesForValidation = getDataDirectory();
-		Path logDirectory = getResourceDirectory().resolve("workstation").resolve("raw2");
+		Path logDirectory = getResourceDirectory().resolve("workstation").resolve("raw");
 		Path outputDirectory = getResourceDirectory().resolve("workstation").resolve("extracted");
 
-		LogExtractor.extractDataFromLog(instanceFilesForValidation, logDirectory, outputDirectory, "main.v1.csv");
+		LogExtractor.extractDataFromLog(instanceFilesForValidation, logDirectory, outputDirectory, "main.csv");
 	}
 
 	public static void extractDataFromLog(Path instanceDirectory, Path inputDirectory, Path outputDirectory,
@@ -45,9 +45,9 @@ public class LogExtractor {
 			Files.createDirectories(outputDirectory);
 
 		Collection<ModelSelection> selectedRuns = collectRunFolders(inputDirectory).stream() //
-//				.filter(m -> 5 <= m.runId && m.runId <= 8) //
+				.filter(m -> 5 <= m.runId && m.runId <= 8) //
 //				.filter(m -> 1 == m.runId) //
-				.filter(m -> 20 == m.runId) //
+//				.filter(m -> 20 == m.runId) //
 				.sorted() //
 				.toList();
 
