@@ -11,8 +11,13 @@ constraint forall(p in PatientIds where isPatientMandatory(p))(
   :: "Con_S7_A \(p)"
 );
 
+%constraint forall(p in PatientIds where isPatientOptional(p))(
+%  patientAdmissionDelay[p] >= (patientAdmissionDay[p] - earliestAdmissionDay(p)) - (1-isPatientAdmitted[p]) * maxDay
+%  :: "Con_S7_B \(p)"
+%);
+
 constraint forall(p in PatientIds where isPatientOptional(p))(
-  patientAdmissionDelay[p] >= (patientAdmissionDay[p] - earliestAdmissionDay(p)) - (1-isPatientAdmitted[p]) * maxDay
+  patientAdmissionDelay[p] = (patientAdmissionDay[p] - earliestAdmissionDay(p)) * isPatientAdmitted[p]
   :: "Con_S7_B \(p)"
 );
 
