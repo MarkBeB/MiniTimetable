@@ -1,1 +1,0 @@
-include "IHTP-Model.mzn";

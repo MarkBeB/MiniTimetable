@@ -1,2 +1,0 @@
-{"type": "status", "status": "UNKNOWN", "time": 3703130}
-{"type": "error", "what": "error", "message": "  MIPGurobiWrapper runtime error:  Out of memory\nMessage from caller: Failed to optimize MIP."}
