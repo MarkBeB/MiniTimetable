@@ -44,9 +44,6 @@ public class Ihtc2DznModelWriter {
 		return sb.toString();
 	}
 
-	private int lastDay;
-	private int maxDay;
-
 	public synchronized void write(IhtcModel model, Writer writer) throws IOException {
 
 		{
@@ -104,17 +101,10 @@ public class Ihtc2DznModelWriter {
 					writer.write(value.id).write(", ", hasMore);
 				}).write("};").newLine();
 
-		lastDay = model.getLastDay();
-		maxDay = model.getMaxDay();
-
 		writer.newLine();
-//		writer.indentation().write("days").write(" = ").write(model.days).write(";").newLine();
-//		writer.indentation().write("firstDay").write(" = ").write(firstDay).write(";").newLine();
-		writer.indentation().write("lastDay").write(" = ").write(lastDay).write(";").newLine();
-		writer.indentation().write("maxDay").write(" = ").write(maxDay).write(";").newLine();
+		writer.indentation().write("lastDay").write(" = ").write(model.getLastDay()).write(";").newLine();
+		writer.indentation().write("maxDay").write(" = ").write(model.getMaxDay()).write(";").newLine();
 		writer.indentation().write("maxSkillLevel").write(" = ").write(model.skillLevels - 1).write(";").newLine();
-//		writer.indentation().write("SkillLevels").write(" = ") //
-//				.write("0.." + (model.skillLevels - 1)).write(";").newLine();
 		writer.newLine();
 
 		writer.write("nurses").write(" = ").write("[").newLine().increaseIndentation()
@@ -185,7 +175,7 @@ public class Ihtc2DznModelWriter {
 		writer.indentation().write("earliestPossibleAdmission").write(": ") //
 				.write(obj.surgeryReleaseDay).write(", ").newLine();
 		writer.indentation().write("latestPossibleAdmission").write(": ") //
-				.write(obj.surgeryDueDay == 0 ? lastDay : obj.surgeryDueDay).write(", ").newLine();
+				.write(obj.surgeryDueDay == 0 ? obj.root.getLastDay() : obj.surgeryDueDay).write(", ").newLine();
 		writer.indentation().write("surgeryDuration").write(": ").write(obj.surgeryDuration).write(", ").newLine();
 		writer.indentation().write("assignedSurgeon").write(": ").write(obj.surgeonId).write(", ").newLine();
 		writer.indentation().write("incompatibleRooms").write(": ") //
@@ -224,37 +214,14 @@ public class Ihtc2DznModelWriter {
 				.write(obj.availability, (value, hasMore) -> {
 					writer.write(value).write(", ", hasMore);
 				}).write("]").write(",").newLine();
-//		writer.indentation().write("isAvailable").write(": ")//
-//				.write("[").write("0:", notEmpty(obj.availability)) //
-//				.write(obj.availability, (value, hasMore) -> {
-//					writer.write(value > 0).write(", ", hasMore);
-//				}).write("]").write(",").newLine();
 		writer.decreaseIndentation().indentation().write(")");
 	}
 
 	private void write(Room obj, Writer writer) throws IOException {
-//		var availableCapacity = obj.getAvailableCapacity();
-//		var genderAssignment = obj.getGenderAssignment();
-//		var occupantsPerDay = obj.getOccupantsPerDay();
-//
+
 		writer.indentation().write("(") //
 				.write("id").write(": ").write(obj.id).write(", ") //
 				.write("capacity").write(": ").write(obj.capacity).write(", ") //
-//				.write("availableCapacity").write(": ") //
-//				.write("[").write("0:", notEmpty(availableCapacity)) //
-//				.write(availableCapacity, (value, hasMore) -> {
-//					writer.write(value).write(", ", hasMore);
-//				}).write("]").write(", ") //
-//				.write("assignedOccupants").write(": ") //
-//				.write("[").write("0:", notEmpty(occupantsPerDay)) //
-//				.write(occupantsPerDay, (value, hasMore) -> {
-//					writer.write(value).write(", ", hasMore);
-//				}).write("]").write(", ") //
-//				.write("predefinedGenderAssignment").write(": ") //
-//				.write("[").write("0:", notEmpty(genderAssignment)) //
-//				.write(genderAssignment, (value, hasMore) -> {
-//					writer.write(nullable(value)).write(", ", hasMore);
-//				}).write("]") //
 				.write(")");
 	}
 
@@ -264,12 +231,6 @@ public class Ihtc2DznModelWriter {
 		writer.indentation().write("(").newLine().increaseIndentation();
 		writer.indentation().write("id").write(": ").write(obj.id).write(",").newLine();
 		writer.indentation().write("skillLevel").write(": ").write(obj.skillLevel).write(",").newLine();
-
-//		writer.indentation().write("workingShifts").write(": ").write("[").newLine().increaseIndentation()
-//				.write(obj.workingShifts, (value, hasMore) -> {
-//					write(value, writer);
-//					writer.write(", ", hasMore).newLine();
-//				}).decreaseIndentation().indentation().write("]").write(",").newLine();
 
 		writer.indentation().write("maxWorkloadPerShift").write(": ") //
 				.write("array2d(Days, ShiftTypes, [").newLine().increaseIndentation() //

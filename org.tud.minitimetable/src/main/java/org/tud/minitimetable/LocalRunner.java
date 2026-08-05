@@ -12,16 +12,17 @@ import org.tud.minitimetable.extern.validator.ValidatorRunner;
 import org.tud.minitimetable.model.util.SolutionFileReader;
 import org.tud.minitimetable.util.PathUtils;
 
+// Used to test something 'fast'
 public class LocalRunner {
 
 	private static final Path resourceDirectory = Path.of("./", "resources").toAbsolutePath();
 
 	public static void main(String[] args) throws IOException, InterruptedException {
-		Path modelFile = resourceDirectory.resolve("minizinc").resolve("v1").resolve("AllConstraints.mzn");
+//		Path modelFile = resourceDirectory.resolve("minizinc").resolve("v1").resolve("AllConstraints.mzn");
 //		Path modelFile = resourceDirectory.resolve("minizinc").resolve("v2").resolve("AllConstraints.mzn");
 //		Path modelFile = resourceDirectory.resolve("minizinc").resolve("v4").resolve("AllConstraints.mzn");
-//		Path modelFile = resourceDirectory.resolve("minizinc").resolve("v4.5").resolve("AllConstraints.mzn");
-		Path dataFile = resourceDirectory.resolve("input").resolve("ihtc").resolve("i04.json");
+		Path modelFile = resourceDirectory.resolve("minizinc").resolve("gips").resolve("AllConstraints.mzn");
+		Path dataFile = resourceDirectory.resolve("input").resolve("ihtc").resolve("i02.json");
 //		Path dataFile = resourceDirectory.resolve("minizinc").resolve("data").resolve("i03.json");
 
 		String fileName = PathUtils.getFileNameWithoutExtension(dataFile);
@@ -38,6 +39,7 @@ public class LocalRunner {
 		minizinc.getConfig().solverTimeLimitMS = 5 * 60 * 1000L;
 		minizinc.getConfig().gurobiParameterFile = resourceDirectory.resolve("minizinc").resolve("Gurobi.prm");
 		minizinc.getConfig().optimizeLevel = 1;
+		minizinc.getConfig().threads = 8;
 
 		minizinc.run(modelFile, dataFile, outputFolder).join();
 		((FileCodeLogger) minizinc.getConfig().logger).close();
@@ -82,6 +84,26 @@ public class LocalRunner {
 				}
 			} else {
 				System.out.println("All good!");
+
+				int maxNameLength = 0;
+				int maxCountLength = 0;
+				int maxWeightLength = 0;
+				int maxTotalLength = 0;
+
+				for (var cost : result.costs) {
+					maxNameLength = Math.max(maxNameLength, cost.name.length());
+					maxCountLength = Math.max(cost.occurences == 0 ? 0 : (int) (Math.log10(cost.occurences) + 1),
+							maxCountLength);
+					maxWeightLength = Math.max(cost.weight == 0 ? 0 : (int) (Math.log10(cost.weight) + 1),
+							maxWeightLength);
+					maxTotalLength = Math.max(cost.total == 0 ? 0 : (int) (Math.log10(cost.total) + 1), maxTotalLength);
+				}
+
+				String format = "%-" + maxNameLength + "s [%" + maxCountLength + "d x %" + maxWeightLength + "d] %"
+						+ maxTotalLength + "d";
+
+				for (var cost : result.costs)
+					System.out.println(String.format(format, cost.name, cost.occurences, cost.weight, cost.total));
 			}
 		}
 
