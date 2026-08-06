@@ -12,7 +12,9 @@ import org.tud.minitimetable.extern.validator.ValidatorRunner;
 import org.tud.minitimetable.model.util.SolutionFileReader;
 import org.tud.minitimetable.util.PathUtils;
 
-// Used to test something 'fast'
+/**
+ * Used to test something 'fast', the CLI can be found here {@link Main}
+ */
 public class LocalRunner {
 
 	private static final Path resourceDirectory = Path.of("./", "resources").toAbsolutePath();
@@ -46,20 +48,10 @@ public class LocalRunner {
 
 		var solutionOutputFile = ((DefaultFileLog) minizinc.getConfig().solverOutput).getPath();
 		if (Files.exists(solutionOutputFile))
-			processSoltions(solutionOutputFile, dataFile);
+			processSolution(solutionOutputFile, dataFile);
 	}
 
-	public static void main2(String[] args) throws IOException, InterruptedException {
-		Path dataFile = resourceDirectory.resolve("input").resolve("ihtc").resolve("i01.json");
-		String fileName = PathUtils.getFileNameWithoutExtension(dataFile);
-		Path outputFolder = resourceDirectory.resolve("out").resolve("workstation").resolve("out")
-				.resolve(fileName + "-05");
-		Path solutionFile = outputFolder.resolve("solution.json");
-
-		processSoltions(solutionFile, dataFile);
-	}
-
-	private static void processSoltions(Path solutionFile, Path dataFile) throws IOException, InterruptedException {
+	private static void processSolution(Path solutionFile, Path dataFile) throws IOException, InterruptedException {
 		var reader = new SolutionFileReader();
 		var solutions = reader.parseSolutionFile(solutionFile);
 
@@ -83,7 +75,7 @@ public class LocalRunner {
 								String.format("%d violations of type %s", violation.violations, violation.type));
 				}
 			} else {
-				System.out.println("All good!");
+				System.out.println("No violations found");
 
 				int maxNameLength = 0;
 				int maxCountLength = 0;

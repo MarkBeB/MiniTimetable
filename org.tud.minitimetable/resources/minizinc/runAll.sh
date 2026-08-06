@@ -21,14 +21,16 @@ if [[ ! "$CONFIRM" =~ ^[yY]$ ]]; then
     exit 0
 fi
 
-
+# Which model to use
 modelFile="./model/v4/AllConstraints.mzn"
+# Gurobi parameter file. MiniZinc does not support all gurobi parameter, like the NoRelHeur
 gurobiParam="./model/Gurobi.prm"
+# Minizinc folder or binary: please note that the app will search the entire directory tree to locate the binary.
 miniZincDir="/opt/minizinc/MiniZincIDE-2.9.5-bundle-linux-x86_64"
 
 TOTAL_START=$SECONDS
 
-for i in {01..02};do
+for i in {01..02};do # used to build the folder name with the data: i01, i02, ...
 	dataFile="./data/i${i}.json"
 	outDir="./out/i${i}-${RUN_ID}/"
 
@@ -45,6 +47,7 @@ for i in {01..02};do
 	echo ">>> Processing: $dataFile (Run: $RUN_ID)"
 	START=$SECONDS
 
+	# O1 is the optimization level
 	java -jar ./MiniZincRunner.jar "${ARGS[@]}" -O1 -p 4 -tm 60 -stm 60 &> "$outDir/run.log" || {
 		echo "ERROR after $((DURATION/3600))h $(( (DURATION%3600)/60 ))m $((DURATION%60))s at $dataFile!"
 		exit 1

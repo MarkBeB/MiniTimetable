@@ -12,23 +12,72 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.help.HelpFormatter;
 import org.tud.minitimetable.extern.solver.MiniZinc;
 
+/**
+ * Command line tool. <br>
+ * The default settings for any flags can be found in {@link DefaultSettings}.
+ * To display the help text, use the {@code '-h'} or {@code '--help'} option. If
+ * used, the app <b>will close immediately</b> afterwards.
+ */
 public class Main {
 
+	/**
+	 * help option
+	 */
 	private static final String OPTION_SHORT_HELP = "h";
+	/**
+	 * Logs and solutions will be written to this folder (optional, but highly
+	 * recommended)
+	 */
 	private static final String OPTION_SHORT_OUTPUT_FOLDER = "o";
+	/**
+	 * MiniZinc model file
+	 */
 	private static final String OPTION_SHORT_MODEL_FILE = "m";
+	/**
+	 * MiniZinc data file
+	 */
 	private static final String OPTION_SHORT_DATA_FILE = "d";
+	/**
+	 * The Gurobi parameter file should be used to set any advanced options.
+	 * (optional)
+	 */
 	private static final String OPTION_SHORT_GUROBI_PARAM_FILE = "gP";
+	/**
+	 * MiniZinc binary (file or directory, will be searched)
+	 */
 	private static final String OPTION_SHORT_MINIZINC_FILE = "e";
+	/**
+	 * Overall time limit (build + solve) in seconds
+	 */
 	private static final String OPTION_SHORT_TIMELIMIT_S = "ts";
+	/**
+	 * Overall time limit (build + solve) in minutes
+	 */
 	private static final String OPTION_SHORT_TIMELIMIT_M = "tm";
+	/**
+	 * Solve time limit in seconds
+	 */
 	private static final String OPTION_SHORT_SOLVER_TIMELIMIT_S = "sts";
+	/**
+	 * Solve time limit in minutes
+	 */
 	private static final String OPTION_SHORT_SOLVER_TIMELIMIT_M = "stm";
+	/**
+	 * Maximum number of threads
+	 */
 	private static final String OPTION_SHORT_THREADS = "p";
 	private static final String OPTION_SHORT_OPTIMIZE_FLAG_1 = "O0";
 	private static final String OPTION_SHORT_OPTIMIZE_FLAG_2 = "O1";
 	private static final String OPTION_SHORT_OPTIMIZE_FLAG_3 = "O2";
-	private static final String OPTION_SHORT_SPECIAL_FLAG = "ptf";
+
+	/**
+	 *
+	 */
+//	private static final String OPTION_SHORT_SPECIAL_FLAG = "ptf";
+
+	/**
+	 * Which solver to use ( defaults to Gurobi, untested for anything else :D )
+	 */
 	private static final String OPTION_SHORT_SOLVER_FLAG = "s";
 
 	public static void main(String[] args) throws IOException {
@@ -119,9 +168,9 @@ public class Main {
 		Option optimize3 = Option.builder(OPTION_SHORT_OPTIMIZE_FLAG_3) //
 				.desc("Double Pass Flatzinc Optimization").get();
 
-		Option passthroughFlag = Option.builder(OPTION_SHORT_SPECIAL_FLAG).longOpt("passthrough").hasArg()
-				.numberOfArgs(1) //
-				.desc("Flags directly passed to the backend").get();
+//		Option passthroughFlag = Option.builder(OPTION_SHORT_SPECIAL_FLAG).longOpt("passthrough").hasArg()
+//				.numberOfArgs(1) //
+//				.desc("Flags directly passed to the backend").get();
 
 		Option solverFlag = Option.builder(OPTION_SHORT_SOLVER_FLAG).longOpt("solver").hasArg().numberOfArgs(1) //
 				.desc("Set the used solver").get();
@@ -141,7 +190,7 @@ public class Main {
 		options.addOption(optimize1);
 		options.addOption(optimize2);
 		options.addOption(optimize3);
-		options.addOption(passthroughFlag);
+//		options.addOption(passthroughFlag);
 		options.addOption(solverFlag);
 
 		CommandLine commandLine;
@@ -153,7 +202,7 @@ public class Main {
 				String footer = "";
 
 				HelpFormatter formatter = HelpFormatter.builder().get();
-				formatter.printHelp("test", header, options, footer, true);
+				formatter.printHelp("-jar ./MiniZincRunner.jar", header, options, footer, true);
 
 				return null;
 			}
@@ -212,9 +261,10 @@ public class Main {
 			minizinc.getArguments().solver = solver;
 		}
 
-		if (commandLine.hasOption(OPTION_SHORT_SPECIAL_FLAG)) {
-			var additionalFlags = commandLine.getOptionValue(OPTION_SHORT_SPECIAL_FLAG);
-		}
+//		if (commandLine.hasOption(OPTION_SHORT_SPECIAL_FLAG)) {
+//			var additionalFlags = commandLine.getOptionValue(OPTION_SHORT_SPECIAL_FLAG);
+//			minizinc.getArguments().additionalFlags.
+//		}
 	}
 
 	private static int parseInteger(CommandLine commandLine, String optionKey, String errorMessage) {

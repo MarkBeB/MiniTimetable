@@ -8,10 +8,8 @@ public class DefaultSettings {
 	/**
 	 * 10 Minutes
 	 */
-	public static final Long DEFAULT_TIME_LIMIT_IN_MS = 10l * 60l * 1000l;
-
+//	public static final Long DEFAULT_TIME_LIMIT_IN_MS = 10l * 60l * 1000l;
 //	public static final Integer DEFAULT_NUMBER_OF_THREADS = 32;
-
 	public static final Integer DEFAULT_OPTIMIZE_LEVEL = 1;
 
 	public static void applyDefaultMiniZincConfiguration(MiniZinc minizinc) {
@@ -19,7 +17,7 @@ public class DefaultSettings {
 		minizinc.getConfig().solverOutput = new DefaultFileLog("solution");
 //		minizinc.getConfig().solverModelLog = new DefaultFileLog("%s-lp.lp", true);
 
-		minizinc.getConfig().timeLimitMS = DefaultSettings.DEFAULT_TIME_LIMIT_IN_MS;
+//		minizinc.getConfig().timeLimitMS = DefaultSettings.DEFAULT_TIME_LIMIT_IN_MS;
 //		minizinc.getConfig().threads = DefaultSettings.DEFAULT_NUMBER_OF_THREADS;
 		minizinc.getConfig().optimizeLevel = DefaultSettings.DEFAULT_OPTIMIZE_LEVEL;
 
